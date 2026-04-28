@@ -40,14 +40,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (mobile: string, otp: string) => {
-    const res = await authAPI.verifyOTP(mobile, otp);
-    if (res.data.success && res.data.user) {
-      // res.data.user contains role, etc.
-      // After verification, backend sets auth_token cookie.
-      // We set user_role for middleware.
-      document.cookie = `user_role=${res.data.user.role}; path=/; max-age=604800`;
-      await refreshUser();
-      window.location.href = `/${res.data.user.role}`;
+    try {
+      const res = await authAPI.verifyOTP(mobile, otp);
+      if (res.data.success) {
+        if (res.data.user) {
+          document.cookie = `user_role=${res.data.user.role}; path=/; max-age=604800`;
+          await refreshUser();
+          window.location.href = `/${res.data.user.role}`;
+        } else if (res.data.registered === false) {
+          throw new Error('This mobile number is not registered in our database.');
+        }
+      }
+    } catch (error: any) {
+      console.error('Login Error:', error);
+      throw error;
     }
   };
 

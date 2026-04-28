@@ -68,11 +68,14 @@ export default function LoginPage() {
 
       <div className="w-full max-w-[400px] relative z-10">
         {/* Branding */}
-        <div className="text-center mb-10">
-          <div className="font-display text-4xl font-extrabold text-white tracking-tighter mb-2">
-            Cure<span className="text-hcc">Bharat</span>
+        <div className="flex flex-col items-center mb-10">
+          <div className="w-40 h-40 p-2 mb-6 transform hover:rotate-6 transition-transform cursor-pointer">
+             <img src="/image.png" alt="CureBharat" className="w-full h-full object-contain" />
           </div>
-          <div className="text-xs text-muted font-bold uppercase tracking-[0.3em] opacity-60">
+          <div className="font-display text-2xl font-black text-white tracking-[0.2em] uppercase leading-none mb-1">
+            CUREBHARAT
+          </div>
+          <div className="text-[9px] font-black text-white/30 tracking-[0.4em] uppercase">
             Wellness Partner Portal
           </div>
         </div>

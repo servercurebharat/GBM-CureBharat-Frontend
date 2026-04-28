@@ -16,7 +16,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['var(--font-questrial)', 'sans-serif'],
+        display: ['var(--font-questrial)', 'sans-serif'],
       },
     },
   },

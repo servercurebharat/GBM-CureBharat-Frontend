@@ -13,16 +13,21 @@ const config: Config = {
         display: ['var(--font-syne)', 'sans-serif'],
       },
       colors: {
-        bg: '#ffffff',
-        surface: '#131241',
-        surface2: '#131131',
-        admin: '#7c3aed',
-        sh: '#7c3aed',
+        bg: '#FFFFFF', // Main page background is white in Figma
+        surface: '#131241', // Card backgrounds are dark blue
+        surface2: '#1E293B',
+        admin: '#6029F1', // Purple from Figma highlight
+        sh: '#34d399',
         hba: '#fbbf24',
         hcm: '#f87171',
         hcc: '#60a5fa',
-        muted: '#B5B8BD',
-        slate: '#1E293B',
+        muted: '#B5B8BD', // Gray from Figma
+        borderLight: '#E1E2EC', // Light gray borders
+        textDark: '#000000',
+        textLight: '#FFFFFF',
+        slate: '#64748B',
+        sidebarBg: '#131241', // Dark sidebar
+        topbarBg: '#131241',
       },
       borderColor: {
         DEFAULT: 'rgba(0,0,0,0.05)',

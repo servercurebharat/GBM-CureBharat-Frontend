@@ -1,19 +1,14 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Syne } from 'next/font/google';
+import { Questrial } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { ToastProvider } from '@/components/ui/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-const dmSans = DM_Sans({ 
+const questrial = Questrial({ 
   subsets: ['latin'],
-  variable: '--font-dm-sans',
-});
-
-const syne = Syne({ 
-  subsets: ['latin'],
-  variable: '--font-syne',
-  weight: ['600', '700', '800'],
+  variable: '--font-questrial',
+  weight: '400',
 });
 
 export const metadata: Metadata = {
@@ -27,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${syne.variable}`}>
+    <html lang="en" className={questrial.variable}>
       <body className="bg-[#0d0f14] text-[#e8eaf0] font-sans antialiased overflow-x-hidden">
         <ErrorBoundary>
           <AuthProvider>

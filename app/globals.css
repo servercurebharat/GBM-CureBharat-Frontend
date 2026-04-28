@@ -3,17 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --font-dm-sans: 'DM Sans', sans-serif;
-  --font-syne: 'Syne', sans-serif;
-  --bg: #f1f5f9;
-  --surface: #131131;
-  --surface2: #131131;
-  --border: rgba(0,0,0,0.05);
-  --border2: rgba(255,255,255,0.05);
-  --text: #0f172a;
-  --muted: #64748b;
-  --admin: #7c3aed;
-  --sh: #7c3aed;
+  --font-questrial: 'Questrial', sans-serif;
+  --bg: #0d0f14;
+  --surface: #151820;
+  --surface2: #1c2030;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --admin: #8b7cf8;
+  --sh: #34d399;
   --hba: #fbbf24;
   --hcm: #f87171;
   --hcc: #60a5fa;
@@ -28,6 +27,7 @@ html, body {
   overflow-x: hidden;
   background-color: var(--bg);
   color: var(--text);
+  font-family: var(--font-questrial);
 }
 
 ::-webkit-scrollbar {
@@ -48,8 +48,13 @@ html, body {
   background: rgba(0,0,0,0.2);
 }
 
+::selection {
+  background-color: #60a5fa;
+  color: #0d0f14;
+}
+
 .font-display {
-  font-family: var(--font-syne);
+  font-family: var(--font-questrial);
 }
 
 @layer utilities {
