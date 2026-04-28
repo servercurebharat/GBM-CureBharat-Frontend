@@ -25,10 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     try {
       const res = await authAPI.getMe();
-      if (res.data.success && res.data.user) {
-        setUser(res.data.user);
+      if (res.data.success && res.data.data) {
+        setUser(res.data.data);
         // Set role cookie for middleware
-        document.cookie = `user_role=${res.data.user.role}; path=/; max-age=604800`;
+        document.cookie = `user_role=${res.data.data.role}; path=/; max-age=604800`;
       } else {
         setUser(null);
       }
@@ -77,3 +77,6 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 };
+
+export const getDashboardRoute = (role: string) => `/${role.toLowerCase()}`;
+

@@ -13,7 +13,7 @@ export default function WithdrawalPage() {
 
   useEffect(() => {
     authAPI.getMe().then((r) => {
-      setUser(r.data.data);
+      setUser(r.data.data || {});
       walletAPI.getMyWallet().then((wr) => setWallet(wr.data.data || {}));
     });
   }, []);

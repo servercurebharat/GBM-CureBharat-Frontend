@@ -108,7 +108,7 @@ export default function AdminKYC() {
                                       </div>
                                    </div>
                                 </td>
-                                <td className="px-4 py-6 text-xs font-bold text-white/40 uppercase">{new Date(u.joiningDate).toLocaleDateString()}</td>
+                                <td className="px-4 py-6 text-xs font-bold text-white/40 uppercase">{new Date(u.createdAt).toLocaleDateString()}</td>
                                 <td className="px-4 py-6 text-center">
                                    <button 
                                       onClick={() => setSelectedUser(u)}

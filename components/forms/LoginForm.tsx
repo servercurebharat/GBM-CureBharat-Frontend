@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authApi } from '../../lib/api';
-import { getDashboardRoute, setAuth } from '../../lib/auth';
+import { authAPI } from '@/lib/api';
+import { getDashboardRoute } from '@/lib/auth';
 
 type Step = 'mobile' | 'otp';
 
@@ -20,7 +20,7 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
     try {
-      await authApi.sendOtp(mobile);
+      await authAPI.sendOTP(mobile);
       setStep('otp');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to send OTP');
@@ -34,10 +34,10 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
     try {
-      const res = await authApi.verifyOtp(mobile, otp);
+      const res = await authAPI.verifyOTP(mobile, otp);
       const data = res.data;
-      if (data.registered && data.user) {
-        setAuth('', data.user);
+      if (data.success && data.user) {
+        document.cookie = `user_role=${data.user.role}; path=/; max-age=604800`;
         router.push(getDashboardRoute(data.user.role));
       } else {
         router.push(`/register?mobile=${mobile}`);

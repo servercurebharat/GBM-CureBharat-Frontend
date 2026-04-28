@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { authApi } from '../../lib/api';
+import { authAPI } from '@/lib/api';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function RegisterForm() {
     setError('');
     setLoading(true);
     try {
-      await authApi.register(form);
+      await authAPI.register(form);
       router.push('/hcc');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed');

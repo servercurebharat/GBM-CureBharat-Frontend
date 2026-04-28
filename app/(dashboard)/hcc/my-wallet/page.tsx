@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import WalletCard from '../../../../components/ui/WalletCard';
-import { authApi, walletApi } from '../../../../lib/api';
-import { IUser, IWallet, ILedgerEntry } from '../../../../types';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import WalletCard from '@/components/ui/WalletCard';
+import { authAPI, walletAPI } from '@/lib/api';
+import { IUser, IWallet, ILedgerEntry } from '@/types';
 
 const TYPE_LABELS: Record<string, string> = {
   direct: '🟢 Direct Commission',
@@ -21,18 +21,20 @@ export default function HccWalletPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authApi.me().then((r) => {
-      const u = r.data.user;
-      setUser(u);
-      walletApi.get(u.id).then((wr) => {
-        setWallet(wr.data.data || {});
-        setLedger(wr.data.data?.ledger || []);
-      }).finally(() => setLoading(false));
-    });
+    authAPI.getMe().then((r) => {
+      const u = r.data.data; // Note: api.ts returns ApiResponse<IUser> where data is IUser
+      if (u) {
+        setUser(u);
+        walletAPI.getMyWallet().then((wr) => {
+          setWallet(wr.data.data || {});
+          setLedger(wr.data.data?.ledger || []);
+        }).finally(() => setLoading(false));
+      }
+    }).catch(() => setLoading(false));
   }, []);
 
   return (
-    <DashboardLayout user={user} role="hcc">
+    <DashboardLayout pageTitle="My Wallet">
       <div className="space-y-6">
         <div>
           <h1 className="text-white text-2xl font-bold">My Wallet</h1>
@@ -45,6 +47,7 @@ export default function HccWalletPage() {
             finalBalance={wallet.finalBalance || 0}
             totalEarned={wallet.totalEarned || 0}
             totalWithdrawn={wallet.totalWithdrawn || 0}
+            color="#60a5fa"
             onWithdraw={() => window.location.href = '/hcc/withdrawal'}
           />
         </div>

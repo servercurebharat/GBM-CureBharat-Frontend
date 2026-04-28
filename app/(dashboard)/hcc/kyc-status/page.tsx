@@ -1,20 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import KycForm from '../../../../components/forms/KycForm';
-import { authApi } from '../../../../lib/api';
-import { IUser } from '../../../../types';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import KycForm from '@/components/forms/KycForm';
+import { authAPI } from '@/lib/api';
+import { IUser } from '@/types';
 
 export default function KycStatusPage() {
   const [user, setUser] = useState<Partial<IUser>>({});
 
   useEffect(() => {
-    authApi.me().then((r) => setUser(r.data.user));
+    authAPI.getMe().then((r) => setUser(r.data.data || {}));
   }, []);
 
   return (
-    <DashboardLayout user={user} role="hcc">
+    <DashboardLayout pageTitle="KYC Status">
       <div className="space-y-6 max-w-2xl">
         <div>
           <h1 className="text-white text-2xl font-bold">KYC Documents</h1>

@@ -47,7 +47,7 @@ export default function HCCWallet() {
         setWithdrawAmount('');
         // Refresh wallet
         const res2 = await walletAPI.getMyWallet();
-        if (res2.data.success) setWallet(res2.data.data);
+        if (res2.data.success) setWallet(res2.data.data || null);
       }
     } catch (err: any) {
       addToast({ message: err.response?.data?.message || 'Withdrawal failed', type: 'error' });

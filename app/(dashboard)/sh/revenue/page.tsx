@@ -14,7 +14,7 @@ export default function ShRevenuePage() {
       try {
         const res = await walletAPI.getMyWallet();
         if (res.data.success) {
-          setLedger(res.data.data.ledger || []);
+          setLedger(res.data.data?.ledger || []);
         }
       } catch (err) {
         console.error('Failed to fetch ledger', err);

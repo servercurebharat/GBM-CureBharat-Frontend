@@ -2,8 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { authApi } from '../../../lib/api';
-import { getDashboardRoute, setAuth } from '../../../lib/auth';
+import { authAPI } from '@/lib/api';
+import { getDashboardRoute } from '@/lib/auth';
 
 function OtpVerifyContent() {
   const router = useRouter();
@@ -25,12 +25,11 @@ function OtpVerifyContent() {
     setError('');
     setLoading(true);
     try {
-      const res = await authApi.verifyOtp(mobile, otp);
+      const res = await authAPI.verifyOTP(mobile, otp);
       const data = res.data;
-      if (data.registered && data.user) {
-        // In a real app, the backend would set an httpOnly cookie. 
-        // We'll also store the user in localStorage for the UI.
-        setAuth('', data.user); 
+      if (data.success && data.user) {
+        // In the new system, we set cookies and redirect
+        document.cookie = `user_role=${data.user.role}; path=/; max-age=604800`;
         router.push(getDashboardRoute(data.user.role));
       } else {
         router.push(`/register?mobile=${mobile}`);
@@ -45,7 +44,7 @@ function OtpVerifyContent() {
   async function handleResend() {
     setLoading(true);
     try {
-      await authApi.sendOtp(mobile);
+      await authAPI.sendOTP(mobile);
       alert('OTP Resent');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to resend OTP');

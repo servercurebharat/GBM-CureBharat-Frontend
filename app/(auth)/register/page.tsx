@@ -175,9 +175,9 @@ export default function RegisterPage() {
                     </div>
                   ) : 'Register Membership'}
                 </button>
-              </>
-            )}
-          </form>
+              </form>
+            </>
+          )}
         </div>
 
         <div className="mt-8 text-center">

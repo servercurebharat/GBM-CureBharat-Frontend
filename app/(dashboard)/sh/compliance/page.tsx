@@ -1,13 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { authApi } from '../../../../lib/api';
-import { IUser } from '../../../../types';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { authAPI } from '@/lib/api';
+import { IUser } from '@/types';
 export default function ShCompliancePage() {
   const [user, setUser] = useState<Partial<IUser>>({});
-  useEffect(() => { authApi.me().then((r) => setUser(r.data.user)); }, []);
+  useEffect(() => { authAPI.getMe().then((r) => setUser(r.data.data || {})); }, []);
   return (
-    <DashboardLayout user={user} role="sh">
+    <DashboardLayout pageTitle="Compliance Reports">
       <div className="space-y-6">
         <h1 className="text-white text-2xl font-bold">Compliance Reports</h1>
         <p className="text-slate-400 text-sm">Tax, GST, and member compliance summaries</p>

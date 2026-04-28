@@ -9,7 +9,7 @@ interface TreeViewProps {
 }
 
 function TreeNodeCard({ node, depth }: { node: ITreeNode; depth: number }) {
-  const color = ROLE_COLORS[node.rank.toLowerCase() as any] || '#ffffff';
+  const color = (ROLE_COLORS as any)[node.rank.toLowerCase()] || '#ffffff';
 
   return (
     <div className="flex flex-col items-center relative">

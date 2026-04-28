@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { salesApi } from '../../lib/api';
+import { salesAPI } from '../../lib/api';
 import { IPlan } from '../../types';
 
 export default function NewSaleForm() {
@@ -21,8 +21,8 @@ export default function NewSaleForm() {
     // In a real app, fetch from backend:
     // salesApi.getPlans().then(res => setPlans(res.data.data));
     setPlans([
-      { _id: '1', name: 'Basic Health Cover', price: 5000, businessVolume: 5000, isCommissionable: true, gstPercent: 18, description: '', isActive: true, createdAt: '', updatedAt: '' },
-      { _id: '2', name: 'Premium Life Plan', price: 10000, businessVolume: 10000, isCommissionable: true, gstPercent: 18, description: '', isActive: true, createdAt: '', updatedAt: '' },
+      { _id: '1', name: 'Basic Health Cover', price: 5000, businessVolume: 5000, isCommissionable: true, gstPercent: 18, description: '', isActive: true },
+      { _id: '2', name: 'Premium Life Plan', price: 10000, businessVolume: 10000, isCommissionable: true, gstPercent: 18, description: '', isActive: true },
     ]);
   }, []);
 
@@ -32,8 +32,8 @@ export default function NewSaleForm() {
     setError('');
     setSuccess('');
     try {
-      const r = await salesApi.create(form);
-      setSuccess(`✅ Sale recorded! Policy ID: ${r.data.data.policyId}`);
+      const r = await salesAPI.create(form);
+      setSuccess(`✅ Sale recorded! Policy ID: ${r.data.data?.policyId}`);
       setForm({ customerName: '', customerMobile: '', planId: '', ePinCode: '' });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to record sale');

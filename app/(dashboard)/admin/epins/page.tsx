@@ -18,7 +18,7 @@ export default function AdminEpinsPage() {
   ];
 
   useEffect(() => { 
-    authAPI.getMe().then((r) => setUser(r.data.user || {})); 
+    authAPI.getMe().then((r) => setUser(r.data.data || {})); 
   }, []);
 
   async function handleGenerate(e: React.FormEvent) {

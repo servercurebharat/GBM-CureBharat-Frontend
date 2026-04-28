@@ -9,6 +9,18 @@ import { useToast } from '@/components/ui/Toast';
 
 type Step = 1 | 2 | 3;
 
+interface SaleFormData {
+  customerName: string;
+  customerMobile: string;
+  customerEmail: string;
+  customerState: string;
+  nomineeName: string;
+  nomineeRelation: string;
+  planId: string;
+  ePinCode: string;
+  paymentMethod: 'epin' | 'online';
+}
+
 export default function NewSaleWizard() {
   const router = useRouter();
   const { addToast } = useToast();
@@ -21,7 +33,7 @@ export default function NewSaleWizard() {
   const [unusedPins, setUnusedPins] = useState<IEPin[]>([]);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [saleForm, setSaleForm] = useState<SaleFormData>({
     customerName: '',
     customerMobile: '',
     customerEmail: '',
@@ -30,7 +42,7 @@ export default function NewSaleWizard() {
     nomineeRelation: '',
     planId: '',
     ePinCode: '',
-    paymentMethod: 'epin' as 'epin' | 'online'
+    paymentMethod: 'epin'
   });
 
   const [selectedPlan, setSelectedPlan] = useState<IPlan | null>(null);
@@ -55,17 +67,17 @@ export default function NewSaleWizard() {
 
   const handleNext = () => {
     if (step === 1) {
-      if (!formData.customerName || !formData.customerMobile || !formData.nomineeName) {
+      if (!saleForm.customerName || !saleForm.customerMobile || !saleForm.nomineeName) {
         addToast({ message: 'Please fill in all required customer details', type: 'warning' });
         return;
       }
       setStep(2);
     } else if (step === 2) {
-      if (!formData.planId) {
+      if (!saleForm.planId) {
         addToast({ message: 'Please select a wellness plan', type: 'warning' });
         return;
       }
-      if (formData.paymentMethod === 'epin' && !formData.ePinCode) {
+      if (saleForm.paymentMethod === 'epin' && !saleForm.ePinCode) {
         addToast({ message: 'Please select an E-Pin for payment', type: 'warning' });
         return;
       }
@@ -77,10 +89,10 @@ export default function NewSaleWizard() {
     setSubmitting(true);
     try {
       const res = await salesAPI.create({
-        customerName: formData.customerName,
-        customerMobile: formData.customerMobile,
-        planId: formData.planId,
-        ePinCode: formData.ePinCode
+        customerName: saleForm.customerName,
+        customerMobile: saleForm.customerMobile,
+        planId: saleForm.planId,
+        ePinCode: saleForm.ePinCode
       });
       
       if (res.data.success) {
@@ -117,12 +129,12 @@ export default function NewSaleWizard() {
              <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                 <SectionHeader title="Customer Information" desc="Primary policy holder and nominee details" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <InputField label="Customer Full Name" placeholder="John Doe" val={formData.customerName} onChange={(v) => setFormData({...formData, customerName: v})} required />
-                   <InputField label="Mobile Number" placeholder="9876543210" val={formData.customerMobile} onChange={(v) => setFormData({...formData, customerMobile: v.replace(/\D/g, '')})} maxLength={10} required />
-                   <InputField label="Email Address" placeholder="john@example.com" val={formData.customerEmail} onChange={(v) => setFormData({...formData, customerEmail: v})} />
-                   <SelectField label="Current State" options={states} val={formData.customerState} onChange={(v) => setFormData({...formData, customerState: v})} />
-                   <InputField label="Nominee Name" placeholder="Relation's Name" val={formData.nomineeName} onChange={(v) => setFormData({...formData, nomineeName: v})} required />
-                   <SelectField label="Relation with Nominee" options={relations} val={formData.nomineeRelation} onChange={(v) => setFormData({...formData, nomineeRelation: v})} />
+                   <InputField label="Customer Full Name" placeholder="John Doe" val={saleForm.customerName} onChange={(v: string) => setSaleForm(prev => ({...prev, customerName: v}))} required />
+                   <InputField label="Mobile Number" placeholder="9876543210" val={saleForm.customerMobile} onChange={(v: string) => setSaleForm(prev => ({...prev, customerMobile: v.replace(/\D/g, '')}))} maxLength={10} required />
+                   <InputField label="Email Address" placeholder="john@example.com" val={saleForm.customerEmail} onChange={(v: string) => setSaleForm(prev => ({...prev, customerEmail: v}))} />
+                   <SelectField label="Current State" options={states} val={saleForm.customerState} onChange={(v: string) => setSaleForm(prev => ({...prev, customerState: v}))} />
+                   <InputField label="Nominee Name" placeholder="Relation's Name" val={saleForm.nomineeName} onChange={(v: string) => setSaleForm(prev => ({...prev, nomineeName: v}))} required />
+                   <SelectField label="Relation with Nominee" options={relations} val={saleForm.nomineeRelation} onChange={(v: string) => setSaleForm(prev => ({...prev, nomineeRelation: v}))} />
                 </div>
                 <div className="mt-12 flex justify-end">
                    <button onClick={handleNext} className="bg-hcc text-[#0d0f14] px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all">Next: Select Plan</button>
@@ -139,10 +151,10 @@ export default function NewSaleWizard() {
                       <button 
                         key={plan._id}
                         onClick={() => {
-                          setFormData({...formData, planId: plan._id, ePinCode: ''});
+                          setSaleForm(prev => ({...prev, planId: plan._id, ePinCode: ''}));
                           setSelectedPlan(plan);
                         }}
-                        className={`p-6 rounded-3xl border-2 transition-all text-left relative overflow-hidden group ${formData.planId === plan._id ? 'bg-hcc/10 border-hcc shadow-xl shadow-hcc/5' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
+                        className={`p-6 rounded-3xl border-2 transition-all text-left relative overflow-hidden group ${saleForm.planId === plan._id ? 'bg-hcc/10 border-hcc shadow-xl shadow-hcc/5' : 'bg-white/[0.02] border-white/5 hover:border-white/20'}`}
                       >
                          <div className="text-xs font-black text-muted uppercase tracking-widest mb-1 group-hover:text-white transition-colors">{plan.name}</div>
                          <div className="text-2xl font-display font-bold text-white mb-4">₹{(plan.price / 100).toLocaleString('en-IN')}</div>
@@ -163,8 +175,8 @@ export default function NewSaleWizard() {
                      
                      <div className="flex gap-4 mb-6">
                         <button 
-                          onClick={() => setFormData({...formData, paymentMethod: 'epin'})}
-                          className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${formData.paymentMethod === 'epin' ? 'bg-white text-black border-white' : 'text-muted border-white/10'}`}
+                          onClick={() => setSaleForm(prev => ({...prev, paymentMethod: 'epin'}))}
+                          className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${saleForm.paymentMethod === 'epin' ? 'bg-white text-black border-white' : 'text-muted border-white/10'}`}
                         >
                            Use E-Pin
                         </button>
@@ -176,12 +188,12 @@ export default function NewSaleWizard() {
                         </button>
                      </div>
 
-                     {formData.paymentMethod === 'epin' && (
+                     {saleForm.paymentMethod === 'epin' && (
                         <div className="space-y-3">
                            <p className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Available Matching Pins</p>
                            <select 
-                             value={formData.ePinCode}
-                             onChange={(e) => setFormData({...formData, ePinCode: e.target.value})}
+                             value={saleForm.ePinCode}
+                             onChange={(e) => setSaleForm(prev => ({...prev, ePinCode: e.target.value}))}
                              className="w-full bg-bg border border-white/10 rounded-xl px-5 py-4 text-sm font-mono font-bold text-hba outline-none focus:border-hba/50 appearance-none"
                            >
                               <option value="">Select an E-Pin</option>
@@ -210,10 +222,10 @@ export default function NewSaleWizard() {
                 <SectionHeader title="Review & Confirm" desc="Verify all details before issuing the policy" />
                 
                 <div className="space-y-4 mb-10">
-                   <ReviewItem label="Customer" val={formData.customerName} sub={formData.customerMobile} />
-                   <ReviewItem label="Nominee" val={formData.nomineeName} sub={formData.nomineeRelation} />
+                   <ReviewItem label="Customer" val={saleForm.customerName} sub={saleForm.customerMobile} />
+                   <ReviewItem label="Nominee" val={saleForm.nomineeName} sub={saleForm.nomineeRelation} />
                    <ReviewItem label="Wellness Plan" val={selectedPlan.name} sub={`₹${(selectedPlan.price/100).toLocaleString('en-IN')}`} />
-                   <ReviewItem label="Payment Source" val={`E-Pin: ${formData.ePinCode}`} sub="Immediate Activation" />
+                   <ReviewItem label="Payment Source" val={`E-Pin: ${saleForm.ePinCode}`} sub="Immediate Activation" />
                    
                    <div className="p-6 bg-sh/5 border border-sh/10 rounded-3xl flex justify-between items-center">
                       <div>

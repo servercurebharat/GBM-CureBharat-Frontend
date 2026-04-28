@@ -48,7 +48,7 @@ export default function MiniBarChart({ data, color, title }: MiniBarChartProps) 
                 fontWeight: 600,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
               }}
-              formatter={(value: number) => [`₹${value.toLocaleString('en-IN')}`, '']}
+              formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, '']}
               labelStyle={{ color: '#7c82a6', fontWeight: 700, textTransform: 'uppercase', fontSize: 10 }}
               cursor={{ fill: 'rgba(99, 102, 241, 0.05)' }}
             />

@@ -15,7 +15,7 @@ export default function MembersPage() {
       try {
         const res = await usersAPI.getAll({ limit: 50 });
         if (res.data.success) {
-          setMembers(res.data.data);
+          setMembers(res.data.data || []);
         }
       } catch (err) {
         console.error('Failed to fetch members', err);
