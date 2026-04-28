@@ -13,18 +13,19 @@ const config: Config = {
         display: ['var(--font-syne)', 'sans-serif'],
       },
       colors: {
-        bg: '#0d0f14',
-        surface: '#151820',
-        surface2: '#1c2030',
-        admin: '#8b7cf8',
-        sh: '#34d399',
+        bg: '#ffffff',
+        surface: '#131241',
+        surface2: '#131131',
+        admin: '#7c3aed',
+        sh: '#7c3aed',
         hba: '#fbbf24',
         hcm: '#f87171',
         hcc: '#60a5fa',
-        muted: '#6b7280',
+        muted: '#B5B8BD',
+        slate: '#1E293B',
       },
       borderColor: {
-        DEFAULT: 'rgba(255,255,255,0.07)',
+        DEFAULT: 'rgba(0,0,0,0.05)',
       },
       keyframes: {
         shimmer: {

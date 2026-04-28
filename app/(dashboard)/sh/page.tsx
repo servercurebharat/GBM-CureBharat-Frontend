@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import StatCard from '@/components/ui/StatCard';
-import WalletCard from '@/components/ui/WalletCard';
 import { useAuth } from '@/lib/auth';
 import { walletAPI, salesAPI } from '@/lib/api';
 import { IWallet, ISale } from '@/types';
+import RevenueChart from '@/components/dashboard/sh/RevenueChart';
+import IncomeMixGauge from '@/components/dashboard/sh/IncomeMixGauge';
+import { ROLE_COLORS } from '@/lib/constants';
 
 export default function StateHeadDashboard() {
   const { user } = useAuth();
@@ -35,136 +36,138 @@ export default function StateHeadDashboard() {
 
   if (!user) return null;
 
-  const color = '#34d399'; // SH Emerald
-
   return (
-    <DashboardLayout pageTitle="State Operations Control">
-      {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="w-10 h-10 border-4 border-sh border-t-transparent rounded-full animate-spin" />
+    <DashboardLayout pageTitle="Dashboard">
+      <div className="space-y-6 pb-10">
+        {/* Welcome Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-[#1E293B] tracking-tight">State Head</h2>
+            <p className="text-sm text-[#64748B] mt-1 font-medium opacity-70">Real-time infrastructure and development lifecycle monitoring.</p>
+          </div>
+          <div className="flex items-center gap-3">
+             <div className="flex -space-x-2">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i * 123}`} alt="avatar" />
+                  </div>
+                ))}
+                <div className="w-8 h-8 rounded-full border-2 border-white bg-[#1E293B] flex items-center justify-center text-[10px] font-bold text-white">
+                  +12
+                </div>
+             </div>
+             <div className="h-4 w-[1px] bg-slate-200 mx-2" />
+             <button className="bg-[#60A5FA] text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 hover:bg-blue-600 transition-all">
+                Export Data
+             </button>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-8 pb-10">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <h2 className="font-display text-3xl font-bold text-white tracking-tight">
-                {user.state} Region Overview
-              </h2>
-              <p className="text-sm text-muted mt-1 font-medium">
-                Monitoring 2% leadership bonus and state-wide network performance
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button className="px-5 py-2.5 rounded-xl bg-sh/10 border border-sh/20 text-sh text-xs font-bold uppercase tracking-widest hover:bg-sh/20 transition-all">
-                Export State Ledger
-              </button>
-            </div>
+
+        {/* Top Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+           {[
+             { label: 'Logged in Role', value: 'SH', color: 'blue' },
+             { label: 'Personal Sales', value: '₹3,70,548', color: 'emerald' },
+             { label: 'Team Size', value: user.teamSize || '4', color: 'blue' },
+             { label: 'Compliance', value: '99%', color: 'amber' },
+           ].map((stat, i) => (
+             <div key={i} className="bg-[#131241] border border-white/5 p-6 rounded-[24px] shadow-xl transition-all duration-300">
+                <p className="text-[10px] text-[#B5B8BD] font-bold uppercase tracking-widest mb-6">{stat.label}</p>
+                <h3 className="text-3xl font-bold text-white tracking-tight">{stat.value}</h3>
+             </div>
+           ))}
+        </div>
+
+        {/* Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-9 bg-[#131241] border border-white/5 rounded-[24px] p-8 shadow-2xl">
+             <div className="flex items-center justify-between mb-10">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Role-Based Analytics</h3>
+             </div>
+             <RevenueChart />
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <StatCard
-              label="Leadership Bonus (2%)"
-              value={`₹${((wallet?.provisionalBalance || 0) / 100).toLocaleString('en-IN')}`}
-              change="From state-wide volume"
-              color={color}
-            />
-            <StatCard
-              label="State Team Size"
-              value={String(user.teamSize)}
-              change="Total members in region"
-              color={color}
-            />
-            <StatCard
-              label="New Policies Today"
-              value="14"
-              change="+22% vs yesterday"
-              color={color}
-            />
-            <StatCard
-              label="Active HBAs"
-              value="06"
-              change="Direct state downline"
-              color={color}
-            />
+          <div className="lg:col-span-3 bg-[#131241] border border-white/5 rounded-[24px] p-8 shadow-2xl flex flex-col items-center">
+             <h3 className="w-full text-sm font-bold text-white uppercase tracking-wider mb-8 text-left">Income Mix</h3>
+             <IncomeMixGauge />
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Wallet Section */}
-            <div className="lg:col-span-5 space-y-8">
-               {wallet && (
-                <WalletCard
-                  provisionalBalance={wallet.provisionalBalance / 100}
-                  finalBalance={wallet.finalBalance / 100}
-                  totalEarned={wallet.totalEarned / 100}
-                  totalWithdrawn={wallet.totalWithdrawn / 100}
-                  color={color}
-                  onWithdraw={() => alert('Withdrawal request')}
-                />
-              )}
-
-              {/* State Performance Breakdown */}
-              <div className="bg-surface border border-white/[0.07] rounded-3xl p-6 shadow-xl">
-                 <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-6">Revenue Mix</h4>
-                 <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 rounded-xl bg-sh/10 border border-sh/20 flex items-center justify-center text-sh font-bold">2%</div>
-                       <div className="flex-1">
-                          <div className="text-sm font-bold text-white">Leadership Dividends</div>
-                          <div className="text-[10px] text-muted font-bold uppercase tracking-widest">Main State Income</div>
-                       </div>
-                       <div className="text-right">
-                          <div className="text-sm font-bold text-white">85%</div>
-                       </div>
-                    </div>
-                    <div className="flex items-center gap-4 opacity-50">
-                       <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white font-bold">🛒</div>
-                       <div className="flex-1">
-                          <div className="text-sm font-bold text-white">Personal Sales</div>
-                          <div className="text-[10px] text-muted font-bold uppercase tracking-widest">Direct Commissions</div>
-                       </div>
-                       <div className="text-right">
-                          <div className="text-sm font-bold text-white">15%</div>
-                       </div>
-                    </div>
+        {/* Activity & Promotion Pulse */}
+        <div className="bg-[#131241] border border-white/5 rounded-[24px] p-8 shadow-2xl">
+           <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-10">Activity & Promotion Pulse</h3>
+           
+           <div className="space-y-8 max-w-4xl">
+              <div>
+                 <div className="flex justify-between text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest mb-2">
+                    <span>Monthly Activity</span>
+                    <span className="text-white">85%</span>
+                 </div>
+                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#60A5FA] rounded-full shadow-[0_0_10px_rgba(96,165,250,0.5)]" style={{ width: '85%' }} />
                  </div>
               </div>
-            </div>
+              <div>
+                 <div className="flex justify-between text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest mb-2">
+                    <span>Promotion Readiness</span>
+                    <span className="text-white">60%</span>
+                 </div>
+                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-400 rounded-full shadow-[0_0_10px_rgba(129,140,248,0.5)]" style={{ width: '60%' }} />
+                 </div>
+              </div>
+           </div>
 
-            {/* State Sales Log */}
-            <div className="lg:col-span-7 space-y-8">
-               <div className="bg-surface border border-white/[0.07] rounded-3xl overflow-hidden shadow-2xl h-full flex flex-col">
-                  <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
-                    <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">State Sales Feed</h3>
-                    <button className="text-[10px] font-bold text-sh uppercase tracking-widest hover:underline">Full Report</button>
-                  </div>
-                  <div className="divide-y divide-white/[0.04] overflow-y-auto max-h-[600px] custom-scrollbar">
-                    {stateSales.map((sale) => (
-                      <div key={sale._id} className="px-6 py-4 flex items-center gap-5 hover:bg-white/[0.02] transition-colors group">
-                        <div className="w-10 h-10 rounded-xl bg-sh/10 border border-sh/20 flex items-center justify-center text-sh font-bold group-hover:scale-110 transition-transform">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                        </div>
-                        <div className="flex-1 min-w-0 text-[10px]">
-                          <div className="text-sm text-white font-bold truncate tracking-tight">{sale.customerName}</div>
-                          <div className="flex items-center gap-2 text-muted mt-0.5">
-                             <span className="font-bold text-sh uppercase tracking-tighter">{sale.seller.memberId}</span>
-                             <span className="opacity-20">•</span>
-                             <span className="font-medium truncate">{sale.seller.name}</span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                           <div className="text-sm font-black text-sh tracking-tighter">₹{(sale.amount / 100).toLocaleString('en-IN')}</div>
-                           <div className="text-[10px] text-muted font-bold mt-0.5 uppercase tracking-widest">{sale.cycleMonth}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-               </div>
-            </div>
-          </div>
+           <div className="mt-10 p-4 bg-white/2 border border-white/5 rounded-[12px] flex items-center gap-4">
+              <div className="text-amber-400">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <p className="text-[11px] font-medium text-[#B5B8BD]">Current cycle activity is on track for payout and promotion review.</p>
+           </div>
         </div>
-      )}
+
+        {/* Recent Transactions Table */}
+        <div className="bg-[#131241] border border-white/5 rounded-[24px] shadow-2xl overflow-hidden">
+           <div className="px-8 py-6 border-b border-white/5">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Recent Transactions</h3>
+           </div>
+           <div className="overflow-x-auto">
+             <table className="w-full text-left border-collapse">
+                <thead>
+                   <tr className="bg-white/1 border-b border-white/5">
+                      <th className="px-8 py-4 text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">TRX ID</th>
+                      <th className="px-8 py-4 text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">Cycle</th>
+                      <th className="px-8 py-4 text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">Type</th>
+                      <th className="px-8 py-4 text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">Amount</th>
+                      <th className="px-8 py-4 text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">Status</th>
+                   </tr>
+                </thead>
+                <tbody className="divide-y divide-white/3">
+                   {[
+                     { id: '#TRX-9982', cycle: 'Oct W4', type: 'Direct Comm', amount: '$1,250.00', status: 'PAID' },
+                     { id: '#TRX-9981', cycle: 'Oct W4', type: 'Rank Bonus', amount: '$500.00', status: 'PAID' },
+                     { id: '#TRX-9980', cycle: 'Oct W3', type: 'Team Override', amount: '$3,420.50', status: 'PENDING' },
+                     { id: '#TRX-9979', cycle: 'Oct W3', type: 'Direct Comm', amount: '$850.00', status: 'PAID' },
+                   ].map((trx, i) => (
+                     <tr key={i} className="hover:bg-white/1 transition-colors">
+                        <td className="px-8 py-4 text-[11px] font-bold text-white">{trx.id}</td>
+                        <td className="px-8 py-4 text-[11px] font-bold text-[#B5B8BD]">{trx.cycle}</td>
+                        <td className="px-8 py-4 text-[11px] font-bold text-[#B5B8BD]">{trx.type}</td>
+                        <td className="px-8 py-4 text-[11px] font-bold text-white">{trx.amount}</td>
+                        <td className="px-8 py-4">
+                           <span className={`text-[8px] font-bold px-2 py-0.5 rounded-sm ${
+                             trx.status === 'PAID' ? 'bg-[#60A5FA]/20 text-[#60A5FA]' : 'bg-amber-400/20 text-amber-400'
+                           }`}>
+                             {trx.status}
+                           </span>
+                        </td>
+                     </tr>
+                   ))}
+                </tbody>
+             </table>
+           </div>
+        </div>
+      </div>
     </DashboardLayout>
   );
 }
