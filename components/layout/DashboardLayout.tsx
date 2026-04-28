@@ -12,9 +12,9 @@ interface DashboardLayoutProps {
   pageTitle: string;
 }
 
-export default function DashboardLayout({ 
-  children, 
-  pageTitle 
+export default function DashboardLayout({
+  children,
+  pageTitle
 }: DashboardLayoutProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -27,14 +27,14 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6">
-        <div className="relative w-12 h-12">
-          <div className="absolute top-0 left-0 w-full h-full border-4 border-slate-100 rounded-full" />
-          <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6" style={{ background: '#f4f6fb' }}>
+        <div className="relative w-14 h-14">
+          <div className="absolute top-0 left-0 w-full h-full border-[3px] border-[#e8eaf0] rounded-full" />
+          <div className="absolute top-0 left-0 w-full h-full border-[3px] border-[#6366f1] border-t-transparent rounded-full animate-spin" />
         </div>
         <div className="flex flex-col items-center">
-          <p className="text-sm font-bold text-slate-900 tracking-widest uppercase">Cure Bharat</p>
-          <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wider">Securing session...</p>
+          <p className="text-sm font-bold tracking-widest uppercase" style={{ color: '#1a1d2e' }}>Cure Bharat</p>
+          <p className="text-[11px] mt-1.5 font-medium tracking-wider" style={{ color: '#6b7294' }}>Securing session...</p>
         </div>
       </div>
     );
@@ -43,14 +43,21 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-bg overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: '#f4f6fb' }}>
+      {/* Sidebar */}
       <Sidebar role={user.role} user={user} />
-      
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-white">
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Topbar */}
         <Topbar pageTitle={pageTitle} user={user} />
-        
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative z-1">
-          <div className="max-w-[1400px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+        {/* Content — White Background */}
+        <main
+          className="flex-1 overflow-y-auto custom-scrollbar"
+          style={{ background: '#f4f6fb' }}
+        >
+          <div className="dashboard-page max-w-[1440px] mx-auto px-6 md:px-8 py-6 md:py-8 animate-fade-in">
             {children}
           </div>
         </main>

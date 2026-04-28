@@ -18,7 +18,7 @@ const config: Config = {
         surface2: '#131131',
         admin: '#7c3aed',
         sh: '#7c3aed',
-        hba: '#fbbf24',
+        hba: '#3b82f6',
         hcm: '#f87171',
         hcc: '#60a5fa',
         muted: '#B5B8BD',

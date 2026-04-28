@@ -1,20 +1,8 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Syne } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { ToastProvider } from '@/components/ui/Toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
-
-const dmSans = DM_Sans({ 
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
-});
-
-const syne = Syne({ 
-  subsets: ['latin'],
-  variable: '--font-syne',
-  weight: ['600', '700', '800'],
-});
 
 export const metadata: Metadata = {
   title: 'CureBharat MLM Platform',
@@ -27,8 +15,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${syne.variable}`}>
-      <body className="bg-[#0d0f14] text-[#e8eaf0] font-sans antialiased overflow-x-hidden">
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased overflow-x-hidden" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <ErrorBoundary>
           <AuthProvider>
             <ToastProvider>

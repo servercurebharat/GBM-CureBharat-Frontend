@@ -1,8 +1,8 @@
 'use client';
 
-import { useAuth } from '../../../lib/auth';
-import DashboardLayout from '../../../components/layout/DashboardLayout';
-import RankProgressBar from '../../../components/ui/RankProgressBar';
+import { useAuth } from '@/lib/auth';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import RankProgressBar from '@/components/ui/RankProgressBar';
 
 export default function RankProgress() {
   const { user } = useAuth();

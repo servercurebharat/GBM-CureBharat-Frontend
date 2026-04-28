@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../../components/layout/DashboardLayout';
-import TreeView from '../../../components/genealogy/TreeView';
-import { usersAPI } from '../../../lib/api';
-import { useAuth } from '../../../lib/auth';
-import { ITreeNode } from '../../../types';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import TreeView from '@/components/genealogy/TreeView';
+import { usersAPI } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import { ITreeNode } from '@/types';
 
 export default function GenealogyPage() {
   const { user } = useAuth();
@@ -37,7 +37,7 @@ export default function GenealogyPage() {
         <div className="flex flex-wrap gap-4 bg-surface border border-white/[0.07] p-4 rounded-2xl">
           <LegendItem color="#60a5fa" label="HCC" />
           <LegendItem color="#f87171" label="HCM" />
-          <LegendItem color="#fbbf24" label="HBA" />
+          <LegendItem color="#3b82f6" label="HBA" />
           <LegendItem color="#34d399" label="SH" />
           <div className="ml-auto flex items-center gap-2 px-4 border-l border-white/10">
              <span className="text-[10px] font-bold text-muted uppercase tracking-widest">Max Depth: 5 Levels</span>

@@ -91,7 +91,7 @@ export default function CommissionConfig() {
                    desc="% of HCM earnings paid to the Business Associate"
                    val={config.hba_override_percent}
                    onChange={(v) => setConfig({...config, hba_override_percent: v})}
-                   color="#fbbf24"
+                   color="#3b82f6"
                  />
                  <ConfigSlider 
                    label="SH Leadership Bonus" 
@@ -156,7 +156,7 @@ export default function CommissionConfig() {
 
                  <PreviewRow label="HCC Income (Direct)" val={format(hccIncome)} percent={config.hcc_direct_percent} color="#60a5fa" />
                  <PreviewRow label="HCM Income (Override)" val={format(hcmIncome)} percent={config.hcm_override_percent} color="#f87171" />
-                 <PreviewRow label="HBA Income (Override)" val={format(hbaIncome)} percent={config.hba_override_percent} color="#fbbf24" />
+                 <PreviewRow label="HBA Income (Override)" val={format(hbaIncome)} percent={config.hba_override_percent} color="#3b82f6" />
                  <PreviewRow label="SH Income (Leadership)" val={format(shIncome)} percent={config.sh_leadership_percent} color="#34d399" />
 
                  <div className="pt-6 mt-6 border-t border-white/[0.07] flex justify-between items-center">

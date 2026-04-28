@@ -99,7 +99,7 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                    <ProgressItem label="HCC (Distributors)" val="85%" color="#60a5fa" />
                    <ProgressItem label="HCM (Managers)" val="12%" color="#f87171" />
-                   <ProgressItem label="HBA (Assocs)" val="2%" color="#fbbf24" />
+                   <ProgressItem label="HBA (Assocs)" val="2%" color="#3b82f6" />
                    <ProgressItem label="SH (State Heads)" val="1%" color="#34d399" />
                 </div>
                 <div className="mt-10 p-4 bg-admin/5 border border-admin/10 rounded-2xl">
