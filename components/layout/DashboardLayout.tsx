@@ -12,9 +12,9 @@ interface DashboardLayoutProps {
   pageTitle: string;
 }
 
-export default function DashboardLayout({ 
-  children, 
-  pageTitle 
+export default function DashboardLayout({
+  children,
+  pageTitle
 }: DashboardLayoutProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -27,10 +27,10 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-6">
-        <div className="relative w-12 h-12">
-          <div className="absolute top-0 left-0 w-full h-full border-4 border-slate-100 rounded-full" />
-          <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6" style={{ background: '#f4f6fb' }}>
+        <div className="relative w-14 h-14">
+          <div className="absolute top-0 left-0 w-full h-full border-[3px] border-[#e8eaf0] rounded-full" />
+          <div className="absolute top-0 left-0 w-full h-full border-[3px] border-[#6366f1] border-t-transparent rounded-full animate-spin" />
         </div>
         <div className="flex flex-col items-center">
           <div className="w-32 h-32 p-2 mb-6 animate-bounce">
@@ -56,14 +56,14 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex flex-col h-screen bg-bg overflow-hidden font-sans">
-      <Topbar pageTitle={pageTitle} user={user} />
-      
-      <div className="flex-1 flex min-h-0 overflow-hidden relative bg-bg">
-        <Sidebar role={user.role} user={user} />
-        
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar relative z-1 bg-[#FFFFFF]">
-          <div className="max-w-[1400px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex h-screen overflow-hidden bg-bg">
+      <Sidebar role={user.role} user={user} />
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <Topbar pageTitle={pageTitle} user={user} />
+
+        <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#FFFFFF]">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-8 py-6 md:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {children}
           </div>
         </main>

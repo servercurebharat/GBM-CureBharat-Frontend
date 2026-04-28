@@ -1,136 +1,134 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { usersAPI } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { ITreeNode } from '@/types';
+import StatCard from '@/components/ui/StatCard';
+import { HCM_TEAM_MEMBERS } from '@/lib/mockData';
 
-export default function TeamMonitor() {
-  const { user } = useAuth();
-  const [team, setTeam] = useState<ITreeNode[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function HcmTeamMonitorPage() {
+  const color = '#f87171';
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
-  useEffect(() => {
-    async function fetchTeam() {
-      if (!user) return;
-      try {
-        const res = await usersAPI.getDownline(user._id);
-        if (res.data.success) {
-          // Level 1 only for team monitor
-          setTeam(res.data.data?.children || []);
-        }
-      } catch (err) {
-        console.error('Failed to fetch team', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchTeam();
-  }, [user]);
+  const filtered = filter === 'all' 
+    ? HCM_TEAM_MEMBERS 
+    : HCM_TEAM_MEMBERS.filter(m => m.status === filter);
 
-  const filteredTeam = team.filter(m => {
-    if (filter === 'all') return true;
-    return m.status === filter;
-  });
-
-  const stats = {
-    total: team.length,
-    active: team.filter(m => m.status === 'active').length,
-    inactive: team.filter(m => m.status === 'inactive').length,
-    sales: team.reduce((acc, curr) => acc + curr.personalSalesCount, 0)
-  };
+  const activeCount = HCM_TEAM_MEMBERS.filter(m => m.status === 'active').length;
+  const inactiveCount = HCM_TEAM_MEMBERS.filter(m => m.status === 'inactive').length;
+  const complianceRate = Math.round((HCM_TEAM_MEMBERS.filter(m => m.personalSalesThisMonth >= 1).length / HCM_TEAM_MEMBERS.length) * 100);
 
   return (
-    <DashboardLayout pageTitle="Team Performance Monitor">
-       <div className="space-y-8 pb-20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-             <div>
-                <h2 className="font-display text-2xl font-bold text-white tracking-tight">Direct Network Overview</h2>
-                <p className="text-sm text-muted mt-1 font-medium">Monitoring productivity and activity of your frontline HCCs</p>
-             </div>
-             <div className="flex bg-surface border border-white/10 rounded-xl p-1">
-                {['all', 'active', 'inactive'].map((f) => (
-                  <button 
-                    key={f}
-                    onClick={() => setFilter(f as any)}
-                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === f ? 'bg-hcm text-[#0d0f14]' : 'text-muted hover:text-white'}`}
-                  >
-                    {f}
-                  </button>
-                ))}
-             </div>
-          </div>
+    <DashboardLayout pageTitle="Team Monitor">
+      <div className="space-y-8 pb-10">
+        <div>
+          <h2 className="font-display text-3xl font-bold text-white tracking-tight">HCC Team Monitor</h2>
+          <p className="text-sm text-muted mt-1 font-medium">Real-time activity tracking and compliance monitoring</p>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-             <MiniStat label="Total HCCs" val={String(stats.total)} color="#60a5fa" />
-             <MiniStat label="Active Status" val={String(stats.active)} color="#34d399" />
-             <MiniStat label="Inactive" val={String(stats.inactive)} color="#f87171" />
-             <MiniStat label="Total Team Sales" val={String(stats.sales)} color="#fbbf24" />
-          </div>
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+          <StatCard label="Total Team" value={String(HCM_TEAM_MEMBERS.length)} change="Health Care Consultants" color={color} />
+          <StatCard label="Active" value={String(activeCount)} change={`${Math.round(activeCount / HCM_TEAM_MEMBERS.length * 100)}% active rate`} color={color} />
+          <StatCard label="Inactive" value={String(inactiveCount)} change="Need attention" color={color} isPositive={false} />
+          <StatCard label="Activity Compliance" value={`${complianceRate}%`} change="Min 1 sale/month" color={color} />
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {loading ? (
-                Array(3).fill(0).map((_, i) => (
-                   <div key={i} className="h-48 bg-surface animate-pulse rounded-[32px] border border-white/5" />
-                ))
-             ) : filteredTeam.length === 0 ? (
-                <div className="col-span-full py-20 text-center bg-surface border border-dashed border-white/10 rounded-[32px]">
-                   <p className="text-xs text-muted font-bold uppercase tracking-widest">No members found in this category</p>
+        {/* Filter Tabs */}
+        <div className="flex items-center gap-2">
+          {(['all', 'active', 'inactive'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                filter === f
+                  ? 'bg-hcm text-[#0d0f14]'
+                  : 'bg-white/[0.03] border border-white/[0.07] text-muted hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              {f} ({f === 'all' ? HCM_TEAM_MEMBERS.length : f === 'active' ? activeCount : inactiveCount})
+            </button>
+          ))}
+        </div>
+
+        {/* Individual HCC Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {filtered.map((member) => {
+            const isCompliant = member.personalSalesThisMonth >= 1;
+            return (
+              <div
+                key={member._id}
+                className="bg-surface border border-white/[0.07] rounded-2xl p-6 shadow-xl relative overflow-hidden hover:border-white/[0.12] transition-all group"
+              >
+                {/* Status indicator line */}
+                <div className={`absolute top-0 left-0 right-0 h-1 ${member.status === 'active' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                
+                <div className="flex items-start justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-black"
+                      style={{ backgroundColor: `${color}15`, color }}
+                    >
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-white">{member.name}</div>
+                      <div className="text-[10px] text-muted font-mono mt-0.5">{member.memberId}</div>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                    member.status === 'active'
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      : 'bg-red-500/10 text-red-400 border-red-500/20'
+                  }`}>
+                    <span className={`w-1 h-1 rounded-full ${member.status === 'active' ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                    {member.status}
+                  </span>
                 </div>
-             ) : (
-                filteredTeam.map((m) => (
-                   <div key={m._id} className="bg-surface border border-white/[0.07] rounded-[32px] p-6 hover:border-hcm/40 transition-all group relative overflow-hidden shadow-xl">
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-hcm/5 blur-3xl -mr-12 -mt-12 group-hover:bg-hcm/10 transition-colors" />
-                      
-                      <div className="flex items-center gap-4 mb-6 relative z-10">
-                         <div className="w-12 h-12 rounded-2xl bg-surface2 border border-white/10 flex items-center justify-center font-display font-bold text-white group-hover:scale-110 transition-transform">
-                            {m.name.slice(0, 1)}
-                         </div>
-                         <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-bold text-white tracking-tight truncate">{m.name}</h4>
-                            <p className="text-[10px] font-mono text-muted uppercase tracking-tighter">{m.memberId}</p>
-                         </div>
-                         <div className={`w-2 h-2 rounded-full ${m.status === 'active' ? 'bg-sh animate-pulse' : 'bg-hcm'}`} title={m.status} />
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-6 relative z-10">
-                         <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 text-center">
-                            <p className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Total Sales</p>
-                            <p className="text-lg font-display font-bold text-white">{m.personalSalesCount}</p>
-                         </div>
-                         <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 text-center">
-                            <p className="text-[8px] font-black text-muted uppercase tracking-widest mb-1">Rank Goal</p>
-                            <p className="text-lg font-display font-bold text-hcm">{Math.round((m.personalSalesCount / 12) * 100)}%</p>
-                         </div>
-                      </div>
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                    <div className="text-[9px] text-muted font-bold uppercase tracking-widest">This Month</div>
+                    <div className={`text-lg font-display font-bold ${member.personalSalesThisMonth > 0 ? 'text-white' : 'text-red-400'}`}>
+                      {member.personalSalesThisMonth}
+                    </div>
+                  </div>
+                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                    <div className="text-[9px] text-muted font-bold uppercase tracking-widest">Total Sales</div>
+                    <div className="text-lg font-display font-bold text-white">{member.personalSalesCount}</div>
+                  </div>
+                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                    <div className="text-[9px] text-muted font-bold uppercase tracking-widest">Revenue</div>
+                    <div className="text-sm font-display font-bold" style={{ color }}>₹{(member.totalRevenue / 100 / 1000).toFixed(0)}k</div>
+                  </div>
+                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                    <div className="text-[9px] text-muted font-bold uppercase tracking-widest">Last Active</div>
+                    <div className="text-[11px] font-bold text-white">{new Date(member.lastActive).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>
+                  </div>
+                </div>
 
-                      <div className="pt-4 border-t border-white/5 flex items-center justify-between relative z-10">
-                         <div className="text-[9px] font-bold text-muted uppercase tracking-widest">Override Earned</div>
-                         <div className="text-xs font-black text-sh tracking-tighter">₹---</div>
-                      </div>
-
-                      <button className="w-full mt-6 py-3 rounded-xl bg-white/[0.03] border border-white/10 text-[9px] font-black uppercase tracking-widest text-muted hover:text-white hover:bg-white/[0.05] transition-all">
-                         Send Activity Reminder
-                      </button>
-                   </div>
-                ))
-             )}
-          </div>
-       </div>
+                {/* Compliance Indicator */}
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+                  isCompliant 
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                }`}>
+                  {isCompliant ? (
+                    <>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      Monthly activity met
+                    </>
+                  ) : (
+                    <>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      No sales this month — at risk
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </DashboardLayout>
-  );
-}
-
-function MiniStat({ label, val, color }: any) {
-  return (
-    <div className="bg-surface border border-white/[0.07] rounded-2xl p-4 flex items-center gap-4">
-       <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: color }} />
-       <div>
-          <p className="text-[9px] font-black text-muted uppercase tracking-widest leading-none mb-1">{label}</p>
-          <p className="text-lg font-display font-bold text-white leading-none">{val}</p>
-       </div>
-    </div>
   );
 }

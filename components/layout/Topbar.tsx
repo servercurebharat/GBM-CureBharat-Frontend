@@ -4,8 +4,6 @@ import { IUser, Role } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { ROLE_COLORS, ROLE_TAGS } from '@/lib/constants';
 
-
-
 interface TopbarProps {
   pageTitle: string;
   user: IUser;

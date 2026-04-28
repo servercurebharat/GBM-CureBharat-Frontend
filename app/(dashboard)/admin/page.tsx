@@ -110,8 +110,10 @@ export default function AdminDashboard() {
              <div className="bg-[#131241] rounded-[2rem] p-6 text-white shadow-xl border border-white/[0.03]">
                 <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6">Compliance Pulse</h3>
                 <div className="space-y-6">
-                   <PulseItem label="Active Retention" value="77%" color="bg-[#3B82F6]" />
-                   <PulseItem label="KYC Backlog" value="28%" color="bg-[#fbbf24]" />
+                   <ProgressItem label="HCC (Distributors)" val="85%" color="#60a5fa" />
+                   <ProgressItem label="HCM (Managers)" val="12%" color="#f87171" />
+                   <ProgressItem label="HBA (Assocs)" val="2%" color="#3b82f6" />
+                   <ProgressItem label="SH (State Heads)" val="1%" color="#34d399" />
                 </div>
              </div>
              <div className="bg-[#131241] rounded-[2rem] p-6 text-white shadow-xl border border-white/[0.03]">

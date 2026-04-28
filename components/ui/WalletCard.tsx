@@ -18,15 +18,17 @@ export default function WalletCard({
     `₹${(val).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="bg-surface border border-white/[0.07] rounded-xl overflow-hidden flex flex-col h-full shadow-2xl">
+    <div className="bg-[#0c1033] border border-indigo-500/[0.1] rounded-2xl overflow-hidden flex flex-col h-full"
+      style={{ boxShadow: '0 4px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.02)' }}
+    >
       {/* Header */}
-      <div className="p-6 border-b border-white/[0.07] relative overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${color}10, transparent)` }}>
+      <div className="p-6 border-b border-indigo-500/[0.08] relative overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${color}08, transparent)` }}>
         
         {/* Glow effect */}
-        <div className="absolute -top-10 -right-10 w-32 h-32 blur-[60px] opacity-20" style={{ backgroundColor: color }} />
+        <div className="absolute -top-10 -right-10 w-32 h-32 blur-[60px] opacity-15" style={{ backgroundColor: color }} />
 
-        <div className="text-[10px] text-muted mb-1 uppercase font-bold tracking-widest relative z-10">Available For Withdrawal</div>
+        <div className="text-[10px] text-[#7c82a6] mb-1 uppercase font-bold tracking-[0.15em] relative z-10">Available For Withdrawal</div>
         <div className="font-display text-3xl font-bold text-white relative z-10 mb-1">
           {formatAmount(finalBalance)}
         </div>
@@ -37,15 +39,15 @@ export default function WalletCard({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 divide-x divide-white/[0.07] bg-white/[0.01]">
+      <div className="grid grid-cols-2 divide-x divide-indigo-500/[0.08] bg-[#0a0e2d]">
         <div className="p-5">
-          <div className="text-[10px] text-muted mb-1 uppercase font-bold tracking-tighter">Gross Earnings</div>
-          <div className="font-display text-lg font-bold text-sh">
+          <div className="text-[10px] text-[#7c82a6] mb-1 uppercase font-bold tracking-tight">Gross Earnings</div>
+          <div className="font-display text-lg font-bold text-emerald-400">
             {formatAmount(totalEarned)}
           </div>
         </div>
         <div className="p-5">
-          <div className="text-[10px] text-muted mb-1 uppercase font-bold tracking-tighter">Total Withdrawn</div>
+          <div className="text-[10px] text-[#7c82a6] mb-1 uppercase font-bold tracking-tight">Total Withdrawn</div>
           <div className="font-display text-lg font-bold text-white">
             {formatAmount(totalWithdrawn)}
           </div>
@@ -53,14 +55,17 @@ export default function WalletCard({
       </div>
 
       {/* Action */}
-      <div className="p-5 mt-auto border-t border-white/[0.07] bg-surface">
+      <div className="p-5 mt-auto border-t border-indigo-500/[0.08] bg-[#0c1033]">
         <button
           onClick={onWithdraw}
           disabled={finalBalance < 500}
-          className="w-full py-3 rounded-lg text-sm font-bold text-[#0d0f14] 
+          className="w-full py-3 rounded-xl text-sm font-bold text-white 
             transition-all hover:brightness-110 active:scale-[0.98] 
-            disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed shadow-lg shadow-black/20"
-          style={{ backgroundColor: color }}
+            disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
+          style={{ 
+            backgroundColor: color,
+            boxShadow: `0 4px 16px ${color}30`
+          }}
         >
           {finalBalance < 500 ? 'Minimum ₹500 required' : 'Request Payout'}
         </button>

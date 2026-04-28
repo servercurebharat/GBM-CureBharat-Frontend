@@ -33,9 +33,18 @@ export default function CommissionConfig() {
                  <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">CUREBHARAT / ADMIN / COMMISSION ENGINE</p>
                  <h1 className="text-3xl font-bold font-display">Commission Engine</h1>
               </div>
-              <div className="flex gap-3">
-                 <button className="bg-white/5 px-6 py-3 rounded-xl text-[10px] font-black text-white/60 uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all">Create New Version</button>
-                 <button className="bg-[#6029F1] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#6029F1]/20 hover:brightness-110 transition-all">Save Configuration</button>
+              <div className="space-y-10">
+                 {/* New Interactive Sliders from Test Branch */}
+                 <div className="flex gap-3 mb-8">
+                    <button className="bg-white/5 px-6 py-3 rounded-xl text-[10px] font-black text-white/60 uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all">Create New Version</button>
+                    <button 
+                      onClick={() => {/* handleSave from test branch */}}
+                      className="bg-[#6029F1] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#6029F1]/20 hover:brightness-110 transition-all"
+                    >
+                      Save Configuration
+                    </button>
+                 </div>
+              </div>
               </div>
            </div>
            <p className="text-sm text-white/50 font-medium max-w-2xl leading-relaxed">Configure algorithmic payout structures, waterfall logic, and hierarchical overrides. Use the simulator to validate system outflow before deployment.</p>
@@ -71,6 +80,7 @@ export default function CommissionConfig() {
                  <div className="space-y-6">
                     <Toggle label="GST Exclusion" sub="Calculate commissions after tax deduction" active={gstExclusion} onToggle={() => setGstExclusion(!gstExclusion)} />
                     <Toggle label="Monthly Finalization" sub="Lock config after 28th of every month" active={monthlyFinalization} onToggle={() => setMonthlyFinalization(!monthlyFinalization)} />
+                 </div>
                  </div>
               </div>
 
