@@ -40,8 +40,7 @@ export default function StatCard({ label, value, change, isPositive = true, colo
 
       {/* Value */}
       <div
-        className="text-[24px] font-extrabold text-white leading-none mb-2"
-        style={{ letterSpacing: '-0.03em' }}
+        className={`${value.length > 15 ? 'text-[16px]' : value.length > 12 ? 'text-[19px]' : 'text-[24px]'} font-extrabold text-white leading-tight mb-2 tracking-tighter truncate`}
       >
         {value}
       </div>

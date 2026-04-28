@@ -10,14 +10,21 @@ import { ROLE_COLORS } from '@/lib/constants';
 interface DashboardLayoutProps {
   children: React.ReactNode;
   pageTitle: string;
+  hideSidebar?: boolean;
+  hideTopbar?: boolean;
 }
+
+import { useState } from 'react';
 
 export default function DashboardLayout({
   children,
-  pageTitle
+  pageTitle,
+  hideSidebar = false,
+  hideTopbar = false
 }: DashboardLayoutProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -56,14 +63,14 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-bg">
-      <Sidebar role={user.role} user={user} />
+    <div className="flex h-screen overflow-hidden bg-bg relative">
+      {!hideSidebar && <Sidebar role={user.role} user={user} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Topbar pageTitle={pageTitle} user={user} />
+        {!hideTopbar && <Topbar pageTitle={pageTitle} user={user} setSidebarOpen={setSidebarOpen} />}
 
-        <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#FFFFFF]">
-          <div className="max-w-[1440px] mx-auto px-6 md:px-8 py-6 md:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <main className="flex-1 overflow-y-auto bg-white relative">
+          <div className="max-w-[1440px] mx-auto px-6 md:px-8 py-6 md:py-8 relative animate-in fade-in slide-in-from-bottom-4 duration-700">
             {children}
           </div>
         </main>

@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { authApi, walletApi } from '../../../../lib/api';
-import { IUser, IWallet } from '../../../../types';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { authAPI, walletAPI } from '@/lib/api';
+import { IUser, IWallet } from '@/types';
 
 export default function WithdrawalPage() {
   const [user, setUser] = useState<Partial<IUser>>({});
@@ -12,9 +12,9 @@ export default function WithdrawalPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    authApi.me().then((r) => {
-      setUser(r.data.user);
-      walletApi.get(r.data.user.id).then((wr) => setWallet(wr.data.data || {}));
+    authAPI.getMe().then((r) => {
+      setUser(r.data.data);
+      walletAPI.getMyWallet().then((wr) => setWallet(wr.data.data || {}));
     });
   }, []);
 
@@ -22,7 +22,7 @@ export default function WithdrawalPage() {
     e.preventDefault();
     setLoading(true); setMsg('');
     try {
-      await walletApi.withdraw(parseFloat(amount));
+      await walletAPI.requestWithdrawal(parseFloat(amount));
       setMsg('✅ Withdrawal request submitted! It will be processed in the next cycle.');
       setAmount('');
     } catch (err: any) {
@@ -31,7 +31,7 @@ export default function WithdrawalPage() {
   }
 
   return (
-    <DashboardLayout user={user} role={user.role || 'hcc'}>
+    <DashboardLayout pageTitle="Withdrawal Request">
       <div className="space-y-6 max-w-md">
         <h1 className="text-white text-2xl font-bold">Withdraw Funds</h1>
         <div className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-6">

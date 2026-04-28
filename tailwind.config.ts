@@ -13,20 +13,20 @@ const config: Config = {
         display: ['var(--font-syne)', 'sans-serif'],
       },
       colors: {
-        bg: '#FFFFFF', // Main page background is white in Figma
-        surface: '#131241', // Card backgrounds are dark blue
-        surface2: '#1E293B',
-        admin: '#6029F1', // Purple from Figma highlight
+        bg: '#FFFFFF', // Clean white background
+        surface: '#131241', // Dark blue cards
+        surface2: '#1c2030',
+        admin: '#6029F1',
         sh: '#34d399',
         hba: '#fbbf24',
         hcm: '#f87171',
         hcc: '#60a5fa',
-        muted: '#B5B8BD', // Gray from Figma
-        borderLight: '#E1E2EC', // Light gray borders
-        textDark: '#000000',
-        textLight: '#FFFFFF',
-        slate: '#64748B',
-        sidebarBg: '#131241', // Dark sidebar
+        muted: '#6b7280',
+        borderLight: 'rgba(255,255,255,0.05)',
+        textDark: '#ffffff', // In dark theme, dark text becomes white
+        textLight: '#ffffff',
+        slate: '#94a3b8',
+        sidebarBg: '#131241',
         topbarBg: '#131241',
       },
       borderColor: {
@@ -36,9 +36,19 @@ const config: Config = {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'scale-in': {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
       animation: {
         shimmer: 'shimmer 2s infinite',
+        'fade-in': 'fade-in 0.5s ease-out forwards',
+        'scale-in': 'scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

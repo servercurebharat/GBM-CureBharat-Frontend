@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Role, IUser } from '@/types';
 import { ROLE_COLORS, ROLE_TAGS } from '@/lib/constants';
@@ -56,18 +57,22 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'Network Tree', href: '/sh/state-tree', icon: 'git-branch' },
       { label: 'Direct Team', href: '/sh/direct-team', icon: 'users' },
       { label: 'Team Performance', href: '/sh/team-performance', icon: 'bar-chart' },
+      { label: 'Members', href: '/sh/members', icon: 'list' },
     ]},
     { label: 'Sales', items: [
       { label: 'Sales Entry', href: '/sh/sales-entry', icon: 'plus-circle' },
       { label: 'My Sales', href: '/sh/my-sales', icon: 'list' },
+      { label: 'Revenue', href: '/sh/revenue', icon: 'dollar' },
     ]},
     { label: 'Finance', items: [
       { label: 'Wallet', href: '/sh/wallet', icon: 'wallet' },
       { label: 'Withdrawal', href: '/sh/withdrawal', icon: 'clock' },
       { label: 'Income Breakdown', href: '/sh/income', icon: 'pie-chart' },
-      { label: 'Promotion Tracker', href: '/sh/ranks', icon: 'target' },
+      { label: 'Profit Tracker', href: '/sh/profit-tracker', icon: 'target' },
+      { label: 'Ranks Progress', href: '/sh/ranks', icon: 'award' },
     ]},
     { label: 'System', items: [
+      { label: 'Compliance', href: '/sh/compliance', icon: 'shield' },
       { label: 'Notification', href: '/sh/notifications', icon: 'bell' },
       { label: 'Support', href: '/sh/support', icon: 'help-circle' },
     ]},
@@ -115,42 +120,71 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     { label: 'Overview', items: [
       { label: 'Dashboard', href: '/hcc', icon: 'grid' },
     ]},
+    { label: 'My Business', items: [
+      { label: 'Live', href: '/hcc/network', icon: 'activity' },
+      { label: 'Rank Progress', href: '/hcc/rank-progress', icon: 'target' },
+    ]},
     { label: 'Sales', items: [
-      { label: 'New Sale', href: '/hcc/new-sale', icon: 'plus-circle' },
-      { label: 'History', href: '/hcc/sales', icon: 'list' },
+      { label: 'New Policy Sale', href: '/hcc/new-sale', icon: 'plus-circle' },
+      { label: 'My Sales History', href: '/hcc/sales-history', icon: 'list' },
+      { label: 'Customer KYC Form', href: '/hcc/customer-kyc', icon: 'file-text' },
     ]},
     { label: 'Finance', items: [
       { label: 'My Wallet', href: '/hcc/wallet', icon: 'wallet' },
-      { label: 'Withdraw', href: '/hcc/withdraw', icon: 'arrow-up' },
+      { label: 'Withdrawal Request', href: '/hcc/withdrawal', icon: 'clock' },
     ]},
     { label: 'E-Pin', items: [
-      { label: 'My Pins', href: '/hcc/epins', icon: 'key' },
+      { label: 'My Pin Wallet', href: '/hcc/epins', icon: 'key' },
+      { label: 'Use Pin to Register', href: '/hcc/register-pin', icon: 'plus-circle' },
     ]},
-    { label: 'Account', items: [
-      { label: 'KYC Status', href: '/hcc/kyc', icon: 'shield' },
+    { label: 'Documents', items: [
+      { label: 'My KYC Status', href: '/hcc/kyc', icon: 'shield' },
+      { label: 'Policy Certificates', href: '/hcc/certificates', icon: 'award' },
+    ]},
+    { label: 'System', items: [
+      { label: 'Support', href: '/hcc/support', icon: 'help-circle' },
+      { label: 'Notifications', href: '/hcc/notifications', icon: 'bell' },
     ]},
   ],
 };
 
-export default function Sidebar({ role, user }: { role: Role; user: IUser }) {
+export default function Sidebar({ role, user, isOpen, setIsOpen }: { role: Role; user: IUser; isOpen: boolean; setIsOpen: (val: boolean) => void }) {
   const pathname = usePathname();
   const { logout } = useAuth();
   const sections = NAV_CONFIG[role];
   const color = ROLE_COLORS[role];
 
   return (
-    <aside className="w-[264px] min-h-screen flex flex-col flex-shrink-0 z-20 relative" style={{ background: 'linear-gradient(180deg, #131241 0%, #0d0f14 100%)' }}>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      <aside className={`fixed lg:static inset-y-0 left-0 w-[264px] min-h-screen flex flex-col flex-shrink-0 z-50 transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`} style={{ background: 'linear-gradient(180deg, #131241 0%, #0d0f14 100%)' }}>
       <div className="absolute top-0 left-0 right-0 h-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, ${color}12 0%, transparent 70%)` }} />
 
-      <div className="px-6 py-7 flex items-center gap-3.5 relative">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${color}, ${color}99)`, boxShadow: `0 4px 16px ${color}30` }}>
-          <span className="text-white text-[11px] font-extrabold tracking-tight">CB</span>
+      <div className="h-[90px] px-6 flex items-center gap-3 relative border-b border-white/5 flex-shrink-0">
+        <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 relative transition-all hover:scale-105 active:scale-95">
+           <Image 
+             src="/image.png" 
+             alt="CureBharat Logo" 
+             width={44} 
+             height={44} 
+             className="object-contain"
+             priority
+           />
         </div>
         <div>
-          <div className="font-extrabold text-[15px] text-white uppercase tracking-tighter">
-            Cure<span style={{ color: '#60A5FA' }}>Bharat</span>
-          </div>
-          <div className="text-[9px] mt-0.5 font-bold uppercase tracking-widest text-white/40">{role}</div>
+           <div className="font-display text-[15px] font-black text-white tracking-[0.15em] leading-none uppercase">
+             CURE<span className="text-[#60A5FA]">BHARAT</span>
+           </div>
+           <div className="text-[7px] font-black text-white/20 tracking-[0.2em] uppercase mt-1.5 leading-tight">
+             Wellness Private Ltd.
+           </div>
         </div>
       </div>
 
@@ -189,6 +223,7 @@ export default function Sidebar({ role, user }: { role: Role; user: IUser }) {
         </button>
       </div>
     </aside>
+    </>
   );
 }
 

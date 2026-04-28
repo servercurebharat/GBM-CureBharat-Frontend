@@ -50,14 +50,14 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stat Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-4 gap-4">
             <KPIItem label="Total Users" value={stats.totalUsers} color="text-white" />
             <KPIItem label="Active Users" value={stats.activeUsers} color="text-white" />
             <KPIItem label="Inactive Users" value={stats.inactiveUsers} color="text-white" />
             <KPIItem label="Pending KYC" value={stats.pendingKYC} color="text-white" badge="URGENT" />
           </div>
-          <div className="lg:col-span-4 grid grid-cols-2 gap-4">
+          <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <KPIItem label="Total Sales" value={`₹${stats.totalSales.toLocaleString('en-IN')}`} color="text-white" />
             <KPIItem label="Total Payout" value={`₹${stats.totalPayout.toLocaleString('en-IN')}`} color="text-white" />
           </div>
@@ -221,13 +221,18 @@ export default function AdminDashboard() {
 }
 
 function KPIItem({ label, value, color, badge }: any) {
+  const isLong = String(value).length > 10;
+  const isVeryLong = String(value).length > 14;
+  
   return (
-    <div className="bg-[#131241] rounded-[1.5rem] p-6 text-white shadow-lg flex flex-col justify-between h-36 border border-white/[0.03]">
+    <div className="bg-[#131241] rounded-[1.5rem] p-5 text-white shadow-lg flex flex-col justify-between h-36 border border-white/[0.03]">
       <div className="flex justify-between items-start">
         <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{label}</span>
         {badge && <span className="bg-[#fbbf24] text-[8px] font-black px-1.5 py-0.5 rounded text-black tracking-tighter">{badge}</span>}
       </div>
-      <div className="text-3xl font-bold font-display tracking-tight mt-auto">{value}</div>
+      <div className={`${isVeryLong ? 'text-lg' : isLong ? 'text-xl' : 'text-3xl'} font-bold font-display tracking-tighter mt-auto truncate`}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -241,15 +246,15 @@ function LegendItem({ label, color }: any) {
   );
 }
 
-function PulseItem({ label, value, color }: any) {
+function ProgressItem({ label, val, color }: any) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{label}</span>
-        <span className="text-xs font-bold text-[#60A5FA]">{value}</span>
+        <span className="text-xs font-bold text-[#60A5FA]">{val}</span>
       </div>
       <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-        <div className={`h-full ${color} rounded-full`} style={{ width: value }} />
+        <div className="h-full rounded-full" style={{ width: val, backgroundColor: color }} />
       </div>
     </div>
   );

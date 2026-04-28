@@ -1,16 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { adminAPI } from '@/lib/api';
 
+/**
+ * PREMIUM COMMISSION CONFIG PAGE (STAGED)
+ * This page uses dummy logic but features premium UI and Full Screen capabilities.
+ */
 export default function CommissionConfig() {
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [saleAmount, setSaleAmount] = useState('10000');
-  const [roleOrigin, setRoleOrigin] = useState('HCC - Direct Agent');
-  const [gstExclusion, setGstExclusion] = useState(true);
-  const [monthlyFinalization, setMonthlyFinalization] = useState(false);
-
-  // Constants as per Figma
+  
+  // Dynamic Simulation Logic
   const hccPercent = 40;
   const hcmPercent = 40;
   const hbaPercent = 40;
@@ -19,170 +20,178 @@ export default function CommissionConfig() {
   const hccPayout = (parseFloat(saleAmount) || 0) * (hccPercent / 100);
   const hcmPayout = hccPayout * (hcmPercent / 100);
   const hbaPayout = hcmPayout * (hbaPercent / 100);
-  const shPayout = (parseFloat(saleAmount) || 0) * (shPercent / 100); // Mock SH logic
-
+  const shPayout = (parseFloat(saleAmount) || 0) * (shPercent / 100);
   const totalOutflow = hccPayout + hcmPayout + hbaPayout + shPayout;
 
   return (
-    <DashboardLayout pageTitle="Commission Engine">
-      <div className="space-y-6 pb-10">
+    <DashboardLayout 
+      pageTitle="Commission Engine" 
+      hideSidebar={isFullScreen} 
+      hideTopbar={isFullScreen}
+    >
+      <div className={`space-y-6 pb-10 transition-all duration-700 animate-fade-in ${isFullScreen ? 'max-w-5xl mx-auto pt-10' : ''}`}>
+        
+        {/* Floating Action Button for Exit Full Screen */}
+        {isFullScreen && (
+          <button 
+            onClick={() => setIsFullScreen(false)}
+            className="fixed top-8 right-8 z-50 bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-full text-white hover:bg-white/20 transition-all animate-bounce shadow-2xl"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+               <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+            </svg>
+          </button>
+        )}
+
         {/* Header Section */}
-        <div className="bg-[#131241] rounded-[2rem] p-8 mb-8 border border-white/[0.03] shadow-xl text-white">
-           <div className="flex justify-between items-center mb-6">
-              <div>
-                 <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">CUREBHARAT / ADMIN / COMMISSION ENGINE</p>
-                 <h1 className="text-3xl font-bold font-display">Commission Engine</h1>
+        <div className="bg-[#131241] rounded-[2.5rem] p-10 mb-8 border border-white/[0.05] shadow-2xl text-white relative overflow-hidden group animate-scale-in">
+          {/* Decorative Gradients */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#6029F1]/20 rounded-full blur-[100px] group-hover:bg-[#6029F1]/30 transition-all duration-1000" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px]" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                 <div className="w-2 h-2 rounded-full bg-[#6029F1] animate-pulse" />
+                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">AI-Powered Commission Engine v2.4</p>
               </div>
-              <div className="space-y-10">
-                 {/* New Interactive Sliders from Test Branch */}
-                 <div className="flex gap-3 mb-8">
-                    <button className="bg-white/5 px-6 py-3 rounded-xl text-[10px] font-black text-white/60 uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all">Create New Version</button>
-                    <button 
-                      onClick={() => {/* handleSave from test branch */}}
-                      className="bg-[#6029F1] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#6029F1]/20 hover:brightness-110 transition-all"
-                    >
-                      Save Configuration
-                    </button>
-                 </div>
-              </div>
-              </div>
-           </div>
-           <p className="text-sm text-white/50 font-medium max-w-2xl leading-relaxed">Configure algorithmic payout structures, waterfall logic, and hierarchical overrides. Use the simulator to validate system outflow before deployment.</p>
+              <h1 className="text-4xl font-bold font-display tracking-tight mb-2">Commission Engine</h1>
+              <p className="text-sm text-white/40 font-medium max-w-xl leading-relaxed">
+                Configure algorithmic payout structures, waterfall logic, and hierarchical overrides. All changes are staged for production deployment after validation.
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap gap-4">
+              <button 
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                className="bg-white/5 backdrop-blur-md px-6 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3 group"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:scale-110 transition-transform">
+                   <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
+                {isFullScreen ? 'Exit Focus Mode' : 'Focus Mode'}
+              </button>
+              
+              <button 
+                onClick={() => alert('Validation Engine Started... System Outflow OK.')}
+                className="bg-[#6029F1] px-8 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest shadow-xl shadow-[#6029F1]/30 hover:brightness-110 active:scale-95 transition-all"
+              >
+                Deploy Configuration
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Summary Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-           <SummaryCard label="HCC Direct" value="40%" sub="Applied to net sale amount" />
-           <SummaryCard label="HCM Override" value="40%" sub="of HCC" sub2="Level 2 managerial override" />
-           <SummaryCard label="HBA Override" value="40%" sub="of HCM" sub2="Regional hierarchy bonus" />
-           <SummaryCard label="SH Leadership" value="2%" sub="Profit" sub2="Executive pool distribution" />
+        {/* Real-time KPI Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in [animation-delay:200ms]">
+           <KPICard label="Direct Commission (HCC)" value="40%" sub="Sale Value" trend="+0% (Locked)" color="#60A5FA" />
+           <KPICard label="Managerial Override (HCM)" value="40%" sub="of HCC Payout" trend="Dynamic" color="#8b7cf8" />
+           <KPICard label="Regional Bonus (HBA)" value="40%" sub="of HCM Payout" trend="Cascading" color="#fbbf24" />
+           <KPICard label="Executive Pool (SH)" value="2%" sub="Company Profit" trend="Global" color="#34d399" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-           {/* Left Column: Rule Controls & Simulator */}
-           <div className="lg:col-span-8 space-y-6">
-              {/* Rule Controls Panel */}
-              <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
-                 <div className="flex items-center gap-3 mb-8">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6029F1" strokeWidth="2.5"><path d="M12 20v-6M9 20v-10M15 20v-2M12 4V2M18 4V2M6 4V2"></path></svg>
-                    <h3 className="text-lg font-bold font-display">Rule Controls Panel</h3>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-3">Inactive Income Handling</p>
-                       <select className="w-full bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none"><option>Roll-up to next level</option></select>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4 animate-fade-in [animation-delay:400ms]">
+           {/* Left: Simulator Panel */}
+           <div className="lg:col-span-8 space-y-8">
+              <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100 relative group overflow-hidden">
+                 <div className="flex items-center gap-4 mb-10">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
                     </div>
                     <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-3">Cycle Selection</p>
-                       <select className="w-full bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none"><option>Monthly (Current)</option></select>
+                       <h3 className="text-xl font-bold text-slate-900">Live Simulation Sandbox</h3>
+                       <p className="text-xs text-slate-400 font-medium">Test structural changes before applying them to the live environment</p>
                     </div>
                  </div>
-                 <div className="space-y-6">
-                    <Toggle label="GST Exclusion" sub="Calculate commissions after tax deduction" active={gstExclusion} onToggle={() => setGstExclusion(!gstExclusion)} />
-                    <Toggle label="Monthly Finalization" sub="Lock config after 28th of every month" active={monthlyFinalization} onToggle={() => setMonthlyFinalization(!monthlyFinalization)} />
-                 </div>
-                 </div>
-              </div>
 
-              {/* Live Commission Simulator */}
-              <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
-                 <div className="flex items-center gap-3 mb-8">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
-                    <h3 className="text-lg font-bold font-display">Live Commission Simulator</h3>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                    <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-3">Sale Amount ($)</p>
-                       <input 
-                          type="text" 
-                          value={saleAmount}
-                          onChange={(e) => setSaleAmount(e.target.value)}
-                          className="w-full bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none"
-                       />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div className="space-y-3">
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Simulated Sale Amount (₹)</p>
+                       <div className="relative group">
+                          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                          <input 
+                             type="text" 
+                             value={saleAmount}
+                             onChange={(e) => setSaleAmount(e.target.value)}
+                             className="w-full bg-slate-50 border-2 border-transparent focus:border-[#6029F1] focus:bg-white rounded-2xl pl-10 pr-6 py-5 text-lg font-bold text-slate-900 outline-none transition-all shadow-inner"
+                          />
+                       </div>
                     </div>
-                    <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-3">Role Origin</p>
-                       <select 
-                          value={roleOrigin}
-                          onChange={(e) => setRoleOrigin(e.target.value)}
-                          className="w-full bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none"
-                       >
-                          <option>HCC - Direct Agent</option>
+                    <div className="space-y-3">
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Simulation Context</p>
+                       <select className="w-full bg-slate-50 border-2 border-transparent focus:border-[#6029F1] focus:bg-white rounded-2xl px-6 py-5 text-lg font-bold text-slate-900 outline-none transition-all cursor-pointer">
+                          <option>Direct Agent Sale (New)</option>
+                          <option>Team Leader Referral</option>
                        </select>
                     </div>
                  </div>
-                 <div className="bg-white/[0.01] rounded-2xl overflow-hidden border border-white/5">
+
+                 <div className="bg-slate-900 rounded-[2rem] overflow-hidden shadow-2xl">
                     <table className="w-full text-left">
                        <thead>
-                          <tr className="text-[9px] font-black text-white/20 uppercase tracking-widest border-b border-white/5">
-                             <th className="px-8 py-4">Levels</th>
-                             <th className="px-4 py-4">Formula</th>
-                             <th className="px-8 py-4 text-right">Payout Amount</th>
+                          <tr className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] bg-white/[0.02]">
+                             <th className="px-10 py-6">Commission Tier</th>
+                             <th className="px-6 py-6">Waterfall Logic</th>
+                             <th className="px-10 py-6 text-right">Projected Payout</th>
                           </tr>
                        </thead>
-                       <tbody className="text-sm font-bold">
-                          <SimRow level="HCC" formula="Sale * 40%" amount={hccPayout} color="text-[#60A5FA]" />
-                          <SimRow level="HCM" formula="HCC * 40%" amount={hcmPayout} color="text-[#8b7cf8]" />
-                          <SimRow level="HBA" formula="HCM * 40%" amount={hbaPayout} color="text-[#fbbf24]" />
-                          <SimRow level="SH" formula="Net Profit * 2%" amount={shPayout} color="text-[#34d399]" />
+                       <tbody className="text-sm">
+                          <SimRow level="HCC" formula="Direct Sale * 40%" amount={hccPayout} color="text-blue-400" />
+                          <SimRow level="HCM" formula="HCC Override * 40%" amount={hcmPayout} color="text-indigo-400" />
+                          <SimRow level="HBA" formula="HCM Override * 40%" amount={hbaPayout} color="text-amber-400" />
+                          <SimRow level="SH" formula="Profit Share * 2%" amount={shPayout} color="text-emerald-400" last />
                        </tbody>
                     </table>
-                    <div className="bg-white/[0.03] px-8 py-6 flex justify-between items-center border-t border-white/5">
-                       <span className="text-xs font-black text-white/40 uppercase tracking-widest">Total System Outflow</span>
-                       <span className="text-lg font-black text-[#60A5FA]">${totalOutflow.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <div className="bg-white/[0.05] px-10 py-8 flex justify-between items-center border-t border-white/5">
+                       <div className="flex flex-col">
+                          <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Total System Outflow</span>
+                          <span className="text-xs text-white/20">Calculated on Net Sale Value</span>
+                       </div>
+                       <span className="text-3xl font-bold text-blue-400 tracking-tighter">₹{totalOutflow.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                     </div>
                  </div>
               </div>
            </div>
 
-           {/* Right Column: Trends & Validation */}
-           <div className="lg:col-span-4 space-y-6">
-              {/* Commission Trend */}
-              <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
-                 <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center gap-2">
-                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6029F1" strokeWidth="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                       <h3 className="text-sm font-bold font-display uppercase tracking-widest">Commission Trend</h3>
+           {/* Right: Validation Hub */}
+           <div className="lg:col-span-4 space-y-8">
+              <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100 h-full">
+                 <div className="flex items-center gap-4 mb-10">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                     </div>
-                    <span className="text-[9px] font-black text-[#34d399] tracking-widest uppercase">+12.4% vs LY</span>
+                    <h3 className="text-lg font-bold text-slate-900">Health Check</h3>
                  </div>
-                 <div className="h-48 relative mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#6029F1]/20 to-transparent rounded-xl" />
-                    <svg className="w-full h-full text-[#6029F1]" viewBox="0 0 400 150" preserveAspectRatio="none">
-                       <path d="M0,130 C50,120 100,100 150,90 C200,80 250,110 300,70 C350,30 400,60 400,60 L400,150 L0,150 Z" fill="currentColor" opacity="0.2" />
-                       <path d="M0,130 C50,120 100,100 150,90 C200,80 250,110 300,70 C350,30 400,60 400,60" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                    </svg>
+                 
+                 <div className="space-y-6">
+                    <ValidationItem 
+                       status="success" 
+                       title="Logical Integrity" 
+                       desc="Cascading percentages match system threshold of 100% total outflow." 
+                    />
+                    <ValidationItem 
+                       status="warning" 
+                       title="Tax Compliance" 
+                       desc="TDS calculations for HBA level need manual override for regional states." 
+                    />
+                    <ValidationItem 
+                       status="info" 
+                       title="Audit History" 
+                       desc="Last structural update was performed by Admin at 14:22 PM." 
+                    />
                  </div>
-                 <div className="flex justify-between text-[8px] font-black text-white/20 uppercase tracking-widest mb-8">
-                    <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span>
-                 </div>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/5 p-3 rounded-xl">
-                       <p className="text-[9px] text-white/20 uppercase mb-1">AVG PAYOUT</p>
-                       <p className="text-sm font-bold text-white">$4,290</p>
-                    </div>
-                    <div className="bg-white/5 p-3 rounded-xl">
-                       <p className="text-[9px] text-white/20 uppercase mb-1">EFFICIENCY RATIO</p>
-                       <p className="text-sm font-bold text-[#34d399]">0.92</p>
-                    </div>
-                 </div>
-              </div>
 
-              {/* Validation Engine */}
-              <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
-                 <div className="flex items-center gap-3 mb-8">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2.5"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-                    <h3 className="text-sm font-bold font-display uppercase tracking-widest">Validation Engine</h3>
+                 <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center">Version Control</p>
+                    <div className="flex items-center justify-between mb-2">
+                       <span className="text-xs font-bold text-slate-600">Current Branch</span>
+                       <span className="bg-blue-100 text-blue-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Master</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                       <span className="text-xs font-bold text-slate-600">Environment</span>
+                       <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black px-2 py-0.5 rounded uppercase">Staging</span>
+                    </div>
                  </div>
-                 <div className="space-y-4 mb-8">
-                    <ValidationItem icon="warning" color="text-[#f87171]" bg="bg-[#f87171]/5" title="Hierarchy Conflict Detected" sub="SH Leadership pool exceeds 2.5% threshold when combined with regional HBA override caps. Re-calibration recommended." />
-                    <ValidationItem icon="check" color="text-[#34d399]" bg="bg-[#34d399]/5" title="GST Rules Validated" sub="Sequential validation of net sale calculation successful for all tax jurisdictions." />
-                    <ValidationItem icon="info" color="text-white/40" bg="bg-white/5" title="Audit Trail Initialized" sub="All changes in this session are being staged for version 2.4.1 deployment." />
-                 </div>
-                 <button className="w-full bg-white/5 hover:bg-white/10 rounded-xl py-4 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all flex items-center justify-center gap-2">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                    Run Full Diagnosis
-                 </button>
               </div>
            </div>
         </div>
@@ -191,54 +200,52 @@ export default function CommissionConfig() {
   );
 }
 
-function SummaryCard({ label, value, sub, sub2 }: any) {
+function KPICard({ label, value, sub, trend, color }: any) {
   return (
-    <div className="bg-[#131241] rounded-[1.5rem] p-6 text-white shadow-xl border border-white/[0.03]">
-       <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-4">{label}</p>
-       <p className="text-3xl font-bold font-display mb-2">{value} <span className="text-[10px] text-white/30 font-sans">{sub}</span></p>
-       {sub2 && <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{sub2}</p>}
-    </div>
-  );
-}
-
-function Toggle({ label, sub, active, onToggle }: any) {
-  return (
-    <div className="flex justify-between items-center">
-       <div>
-          <p className="text-xs font-bold text-white">{label}</p>
-          <p className="text-[10px] text-white/30 font-bold">{sub}</p>
+    <div className="bg-white rounded-[2rem] p-8 shadow-lg border border-slate-100 group hover:shadow-2xl transition-all duration-500">
+       <div className="flex justify-between items-start mb-6">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight">{label}</p>
+          <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: color }} />
        </div>
-       <button 
-          onClick={onToggle}
-          className={`w-12 h-6 rounded-full relative transition-all duration-300 ${active ? 'bg-[#6029F1]' : 'bg-white/10'}`}
-       >
-          <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${active ? 'left-7' : 'left-1'}`} />
-       </button>
+       <div className="flex items-baseline gap-2 mb-1">
+          <span className="text-4xl font-bold text-slate-900 tracking-tight">{value}</span>
+          <span className="text-[10px] font-bold text-slate-400">{sub}</span>
+       </div>
+       <p className="text-[10px] font-black uppercase tracking-widest" style={{ color }}>{trend}</p>
     </div>
   );
 }
 
-function SimRow({ level, formula, amount, color }: any) {
+function SimRow({ level, formula, amount, color, last }: any) {
   return (
-    <tr className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
-       <td className={`px-8 py-4 font-black ${color}`}>{level}</td>
-       <td className="px-4 py-4 text-white/40">{formula}</td>
-       <td className="px-8 py-4 text-right text-white">${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+    <tr className={`border-white/5 hover:bg-white/[0.04] transition-colors group ${last ? '' : 'border-b'}`}>
+       <td className="px-10 py-6">
+          <div className="flex items-center gap-3">
+             <div className={`w-1.5 h-1.5 rounded-full ${color} bg-current`} />
+             <span className="font-bold text-white uppercase tracking-wider">{level}</span>
+          </div>
+       </td>
+       <td className="px-6 py-6 text-white/30 font-medium italic">{formula}</td>
+       <td className={`px-10 py-6 text-right font-bold text-lg tracking-tight ${color}`}>
+          ₹{amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+       </td>
     </tr>
   );
 }
 
-function ValidationItem({ icon, color, bg, title, sub }: any) {
+function ValidationItem({ status, title, desc }: any) {
+  const colors: any = {
+    success: 'text-emerald-500 bg-emerald-500',
+    warning: 'text-amber-500 bg-amber-500',
+    info: 'text-blue-500 bg-blue-500'
+  };
+
   return (
-    <div className={`${bg} rounded-xl p-4 border border-white/[0.03] flex gap-4`}>
-       <div className={`mt-0.5 ${color}`}>
-          {icon === 'warning' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>}
-          {icon === 'check' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-          {icon === 'info' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>}
-       </div>
+    <div className="flex gap-5 group">
+       <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${colors[status]} bg-current shadow-[0_0_10px_current]`} />
        <div>
-          <h4 className="text-[11px] font-black text-white uppercase tracking-wider mb-1">{title}</h4>
-          <p className="text-[10px] text-white/40 font-medium leading-relaxed">{sub}</p>
+          <h4 className="text-xs font-bold text-slate-800 group-hover:text-[#6029F1] transition-colors mb-1">{title}</h4>
+          <p className="text-[11px] text-slate-400 leading-relaxed">{desc}</p>
        </div>
     </div>
   );

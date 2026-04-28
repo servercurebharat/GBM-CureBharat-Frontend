@@ -34,7 +34,7 @@ export default function HcmDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="font-display text-3xl font-bold text-white tracking-tight">
+            <h2 className="font-display text-3xl font-black text-slate-900 tracking-tight">
               Welcome, {user.name.split(' ')[0]}
             </h2>
             <p className="text-sm text-muted mt-1 font-medium">
