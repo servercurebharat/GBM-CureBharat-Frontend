@@ -35,10 +35,11 @@ export default function LoginForm() {
     setLoading(true);
     try {
       const res = await authAPI.verifyOTP(mobile, otp);
-      const data = res.data;
-      if (data.success && data.user) {
-        document.cookie = `user_role=${data.user.role}; path=/; max-age=604800`;
-        router.push(getDashboardRoute(data.user.role));
+      const apiResponse = res.data;
+      if (apiResponse.success && apiResponse.data) {
+        const user = apiResponse.data;
+        document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
+        router.push(getDashboardRoute(user.role));
       } else {
         router.push(`/register?mobile=${mobile}`);
       }

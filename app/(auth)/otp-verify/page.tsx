@@ -26,11 +26,12 @@ function OtpVerifyContent() {
     setLoading(true);
     try {
       const res = await authAPI.verifyOTP(mobile, otp);
-      const data = res.data;
-      if (data.success && data.user) {
+      const apiResponse = res.data;
+      if (apiResponse.success && apiResponse.data) {
+        const user = apiResponse.data;
         // In the new system, we set cookies and redirect
-        document.cookie = `user_role=${data.user.role}; path=/; max-age=604800`;
-        router.push(getDashboardRoute(data.user.role));
+        document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
+        router.push(getDashboardRoute(user.role));
       } else {
         router.push(`/register?mobile=${mobile}`);
       }
