@@ -3,58 +3,36 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
-import { authAPI } from '@/lib/api';
-
-type Step = 'mobile' | 'otp';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const [step, setStep] = useState<Step>('mobile');
   const [mobile, setMobile] = useState('');
-  const [otp, setOtp] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [devOtp, setDevOtp] = useState(''); // Only for dev testing
   const { login } = useAuth();
+  const router = useRouter();
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-      setError('Please enter a valid 10-digit Indian mobile number');
+    if (mobile.length < 10) {
+      setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    if (password.length < 4) {
+      setError('Please enter your password');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await authAPI.sendOTP(mobile);
-      if (res.data.success) {
-        setDevOtp(res.data.otp || ''); 
-        setStep('otp');
-      } else {
-        setError(res.data.message || 'User not found or blocked');
-      }
+      // We use the login function which now handles password-based verification
+      await login(mobile, password);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Connection failed. Is the server running?');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (otp.length !== 6) {
-      setError('Please enter the 6-digit verification code');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await login(mobile, otp);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid or expired OTP');
+      setError(err.response?.data?.message || 'Invalid mobile number or password');
     } finally {
       setLoading(false);
     }
@@ -94,67 +72,49 @@ export default function LoginPage() {
         {/* Auth Card */}
         <div className="bg-[#111420]/80 backdrop-blur-xl border border-white/10 rounded-[40px] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-700">
           <div className="mb-10 text-center">
-            <h2 className="text-2xl font-bold text-white mb-3">
-              {step === 'mobile' ? 'Welcome Back' : 'Security Check'}
-            </h2>
-            <p className="text-sm text-slate-400">
-              {step === 'mobile' 
-                ? 'Sign in to manage your business' 
-                : 'Enter the 6-digit code sent to your phone'
-              }
-            </p>
+            <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
+            <p className="text-sm text-slate-400">Sign in to manage your business</p>
           </div>
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold px-4 py-4 rounded-2xl mb-8 flex items-center gap-3 animate-shake">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               {error}
             </div>
           )}
 
-          <form onSubmit={step === 'mobile' ? handleSendOTP : handleVerifyOTP} className="space-y-8">
-            {step === 'mobile' ? (
-              <div className="space-y-4">
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-white/20 group-focus-within:text-hcc transition-colors font-bold">
-                    +91
-                  </div>
-                  <input
-                    type="tel"
-                    autoFocus
-                    maxLength={10}
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                    placeholder="90000 00000"
-                    className="w-full bg-black/40 border border-white/10 rounded-[22px] pl-16 pr-6 py-5 text-lg font-bold text-white placeholder:text-white/5 focus:border-hcc/50 focus:bg-black/60 transition-all outline-none shadow-inner"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {devOtp && (
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Test Mode Code</span>
-                    <span className="font-mono text-xl font-bold text-emerald-400 tracking-[0.3em]">{devOtp}</span>
-                  </div>
-                )}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Mobile Number</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-white/20 group-focus-within:text-hcc transition-colors font-bold">+91</div>
                 <input
                   type="tel"
-                  autoFocus
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="000000"
-                  className="w-full bg-black/40 border border-white/10 rounded-[22px] px-4 py-6 text-4xl font-display font-bold text-white text-center tracking-[0.4em] placeholder:text-white/5 focus:border-hcc/50 focus:bg-black/60 transition-all outline-none"
+                  maxLength={10}
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                  placeholder="90000 00000"
+                  className="w-full bg-black/40 border border-white/10 rounded-[22px] pl-16 pr-6 py-5 text-lg font-bold text-white placeholder:text-white/5 focus:border-hcc/50 focus:bg-black/60 transition-all outline-none shadow-inner"
                 />
               </div>
-            )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-black/40 border border-white/10 rounded-[22px] px-6 py-5 text-lg font-bold text-white placeholder:text-white/5 focus:border-hcc/50 focus:bg-black/60 transition-all outline-none shadow-inner"
+              />
+            </div>
 
             <button
               type="submit"
-              disabled={loading || (step === 'mobile' ? mobile.length < 10 : otp.length < 6)}
-              className={`w-full py-5 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] relative overflow-hidden transition-all duration-500 shadow-xl ${
-                loading || (step === 'mobile' ? mobile.length < 10 : otp.length < 6)
+              disabled={loading || mobile.length < 10 || password.length < 4}
+              className={`w-full py-5 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] relative overflow-hidden transition-all duration-500 shadow-xl mt-4 ${
+                loading || mobile.length < 10 || password.length < 4
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
                 : 'bg-gradient-to-r from-[#60a5fa] to-[#3b82f6] text-[#0d0f14] hover:scale-[1.02] active:scale-95 shadow-[#60a5fa]/40'
               }`}
@@ -164,10 +124,8 @@ export default function LoginPage() {
                   <div className="w-5 h-5 border-3 border-[#0d0f14] border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span className={step === 'mobile' && mobile.length === 10 ? 'animate-pulse' : ''}>
-                      {step === 'mobile' ? 'Get Access Code' : 'Secure Login'}
-                    </span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`${step === 'mobile' && mobile.length === 10 ? 'translate-x-1' : ''} transition-transform`}>
+                    <span>Secure Login</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                       <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
                   </>
@@ -176,14 +134,11 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {step === 'otp' && (
-            <button
-              onClick={() => { setStep('mobile'); setOtp(''); setDevOtp(''); }}
-              className="w-full text-[10px] font-black text-slate-500 hover:text-white mt-8 uppercase tracking-[0.2em] transition-all"
-            >
-              ← Back to Mobile Entry
-            </button>
-          )}
+          <div className="mt-8 pt-8 border-t border-white/5 text-center">
+            <p className="text-xs text-slate-500 font-medium">
+              Don't have an account? <a href="/register" className="text-hcc font-bold hover:underline">Apply for Membership</a>
+            </p>
+          </div>
         </div>
 
         {/* Support Section */}

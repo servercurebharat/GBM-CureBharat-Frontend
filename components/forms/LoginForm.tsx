@@ -36,8 +36,8 @@ export default function LoginForm() {
     try {
       const res = await authAPI.verifyOTP(mobile, otp);
       const apiResponse = res.data;
-      if (apiResponse.success && apiResponse.data) {
-        const user = apiResponse.data;
+      const user = apiResponse.data || (apiResponse as any).user;
+      if (apiResponse.success && user) {
         document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
         router.push(getDashboardRoute(user.role));
       } else {

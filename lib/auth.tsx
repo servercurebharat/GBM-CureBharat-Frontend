@@ -25,10 +25,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     try {
       const res = await authAPI.getMe();
-      if (res.data.success && res.data.data) {
-        setUser(res.data.data);
+      const userData = res.data.data || res.data.user;
+      if (res.data.success && userData) {
+        setUser(userData);
         // Set role cookie for middleware
-        document.cookie = `user_role=${res.data.data.role}; path=/; max-age=604800`;
+        document.cookie = `user_role=${userData.role}; path=/; max-age=604800`;
       } else {
         setUser(null);
       }
@@ -42,27 +43,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (mobile: string, otp: string) => {
     try {
       const res = await authAPI.verifyOTP(mobile, otp);
+      console.log('Raw Login Response:', res.data); // TEMP DEBUG LOG
+
       if (res.data.success) {
-        // Standardizing to res.data.data which is the IUser object
-        const user = res.data.data;
+        // Handle inconsistent backend (some endpoints use .data, some use .user)
+        const user = res.data.data || (res.data as any).user;
+        
         if (user) {
           document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
           await refreshUser();
           window.location.href = `/${user.role}`;
         } else {
-          console.error('Login Error: No user data in response', res.data);
-          throw new Error('Login failed: Invalid response from server');
+          console.error('Login Error: No user object found in response. Response keys:', Object.keys(res.data));
+          throw new Error('Login failed: Server response missing user data');
         }
       } else if (res.data.message) {
         throw new Error(res.data.message);
       }
     } catch (error: any) {
+      console.error('--- LOGIN ERROR DETAIL ---');
+      console.error('Status:', error.response?.status);
+      console.error('Response Data:', error.response?.data);
+      console.error('Config URL:', error.config?.url);
+      
       const serverMessage = error.response?.data?.message || error.response?.data?.error || error.message;
-      console.error('Full Login Error Context:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: serverMessage
-      });
       throw error;
     }
   };
