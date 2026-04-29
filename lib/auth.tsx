@@ -43,16 +43,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await authAPI.verifyOTP(mobile, otp);
       if (res.data.success) {
-        if (res.data.user) {
-          document.cookie = `user_role=${res.data.user.role}; path=/; max-age=604800`;
+        // Standardizing to res.data.data which is the IUser object
+        const user = res.data.data;
+        if (user) {
+          document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
           await refreshUser();
-          window.location.href = `/${res.data.user.role}`;
-        } else if (res.data.registered === false) {
-          throw new Error('This mobile number is not registered in our database.');
+          window.location.href = `/${user.role}`;
+        } else {
+          console.error('Login Error: No user data in response', res.data);
+          throw new Error('Login failed: Invalid response from server');
         }
+      } else if (res.data.message) {
+        throw new Error(res.data.message);
       }
     } catch (error: any) {
-      console.error('Login Error:', error);
+      const serverMessage = error.response?.data?.message || error.response?.data?.error || error.message;
+      console.error('Full Login Error Context:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: serverMessage
+      });
       throw error;
     }
   };

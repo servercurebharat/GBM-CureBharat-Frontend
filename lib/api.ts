@@ -39,7 +39,7 @@ export const authAPI = {
   sendOTP: (mobile: string) => 
     api.post('/auth/send-otp', { mobile }),
   verifyOTP: (mobile: string, otp: string) => 
-    api.post('/auth/verify-otp', { mobile, otp }),
+    api.post<ApiResponse<IUser>>('/auth/verify-otp', { mobile, otp }),
   register: (data: RegisterData) => 
     api.post('/auth/register', data),
   getMe: () => 
