@@ -130,6 +130,19 @@ export default function AddMemberModal({ isOpen, onClose, currentUser, onSuccess
                 </div>
               </div>
 
+              {currentUser.role?.toLowerCase() === 'admin' && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Referrer ID (Sponsor)</label>
+                  <input 
+                    placeholder="e.g. CB-SH-1001" 
+                    value={formData.referrerId} 
+                    onChange={e => setFormData({...formData, referrerId: e.target.value.toUpperCase()})} 
+                    className="w-full bg-black/40 border border-emerald-500/30 rounded-xl px-4 py-3 text-sm font-bold text-emerald-400 outline-none focus:border-emerald-500/60 placeholder:text-white/10" 
+                  />
+                  <p className="text-[9px] text-emerald-500/50 font-bold ml-1 italic">Leave as {currentUser.memberId} to sponsor directly</p>
+                </div>
+              )}
+
               <button disabled={loading} type="submit" className="w-full py-4 rounded-xl bg-blue-500 text-black font-black text-xs uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all shadow-xl shadow-blue-500/10">
                 {loading ? 'Processing...' : 'Confirm Enrollment'}
               </button>

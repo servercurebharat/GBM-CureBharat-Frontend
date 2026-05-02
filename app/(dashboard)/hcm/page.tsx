@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatCard from '@/components/ui/StatCard';
 import WalletCard from '@/components/ui/WalletCard';
@@ -12,9 +13,20 @@ import { useAuth } from '@/lib/auth';
 import { walletAPI, usersAPI, salesAPI } from '@/lib/api';
 import { IWallet, ISale, ITreeNode } from '@/types';
 import { HCM_MONTHLY_PERFORMANCE } from '@/lib/mockData';
+import AddMemberModal from '@/components/dashboard/AddMemberModal';
 
 export default function HcmDashboard() {
+  return (
+    <Suspense fallback={null}>
+      <HcmDashboardContent />
+    </Suspense>
+  );
+}
+
+function HcmDashboardContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const [teamMembers, setTeamMembers] = useState<ITreeNode[]>([]);
   const [teamSales, setTeamSales] = useState<ISale[]>([]);
@@ -53,6 +65,10 @@ export default function HcmDashboard() {
     fetchData();
   }, [user?._id]);
 
+  useEffect(() => {
+    if (searchParams.get('enroll') === 'true') setIsModalOpen(true);
+  }, [searchParams]);
+
   if (!user) return null;
 
   // Calculate stats from real data
@@ -75,6 +91,14 @@ export default function HcmDashboard() {
 
   return (
     <DashboardLayout pageTitle="Manager Dashboard">
+      {user && (
+        <AddMemberModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          currentUser={user}
+          onSuccess={() => setIsModalOpen(false)}
+        />
+      )}
       {loading ? (
         <div className="flex items-center justify-center h-[60vh]">
           <div className="flex flex-col items-center gap-4">

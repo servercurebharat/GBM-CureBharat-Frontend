@@ -1,12 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usersAPI, adminAPI } from '@/lib/api';
 import { IUser } from '@/types';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth';
+import AddMemberModal from '@/components/dashboard/AddMemberModal';
 
 export default function AdminDashboard() {
+  return (
+    <Suspense fallback={null}>
+      <AdminDashboardContent />
+    </Suspense>
+  );
+}
+
+function AdminDashboardContent() {
+  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
@@ -57,6 +71,13 @@ export default function AdminDashboard() {
     fetchAdminData();
   }, []);
 
+  // Auto-open modal if ?enroll=true is in URL
+  useEffect(() => {
+    if (searchParams.get('enroll') === 'true') {
+      setIsModalOpen(true);
+    }
+  }, [searchParams]);
+
   return (
     <DashboardLayout pageTitle="Dashboard">
       {loading ? (
@@ -72,12 +93,30 @@ export default function AdminDashboard() {
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <h1 className="text-3xl font-bold text-[#000000] font-display">Welcome Back, Admin</h1>
             <div className="flex flex-wrap items-center gap-3">
+              {user && (
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center gap-2 bg-[#6029F1] text-white px-5 py-2.5 rounded-lg shadow-lg text-sm font-bold hover:brightness-110 transition-all"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
+                  Enroll Member
+                </button>
+              )}
               <button onClick={() => window.location.reload()} className="flex items-center gap-2 bg-white border border-borderLight px-4 py-2 rounded-lg shadow-sm text-sm font-bold text-textDark hover:bg-gray-50 transition-colors">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                 Refresh
               </button>
             </div>
           </div>
+
+          {user && (
+            <AddMemberModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              currentUser={user}
+              onSuccess={() => window.location.reload()}
+            />
+          )}
 
           {/* Stat Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">

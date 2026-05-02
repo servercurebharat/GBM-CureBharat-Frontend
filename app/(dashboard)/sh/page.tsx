@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/lib/auth';
@@ -13,8 +14,17 @@ import AddMemberModal from '@/components/dashboard/AddMemberModal';
 import { ROLE_COLORS } from '@/lib/constants';
 
 export default function StateHeadDashboard() {
+  return (
+    <Suspense fallback={null}>
+      <StateHeadDashboardContent />
+    </Suspense>
+  );
+}
+
+function StateHeadDashboardContent() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const [stateSales, setStateSales] = useState<ISale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +49,10 @@ export default function StateHeadDashboard() {
     }
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('enroll') === 'true') setIsModalOpen(true);
+  }, [searchParams]);
 
   if (!user) return null;
 

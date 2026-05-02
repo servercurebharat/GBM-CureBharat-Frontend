@@ -17,7 +17,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     ]},
     { label: 'Network Management', items: [
       { label: 'Member List', href: '/admin/members', icon: 'users' },
-      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
+      { label: 'Enroll Member', href: '/admin?enroll=true', icon: 'plus-circle' },
       { label: 'Customer Database', href: '/admin/customers', icon: 'user-search' },
     ]},
     { label: 'Financial Tracking', items: [
@@ -56,7 +56,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC', href: '/sh/kyc', icon: 'shield' },
     ]},
     { label: 'Network', items: [
-      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
+      { label: 'Enroll Member', href: '/sh?enroll=true', icon: 'plus-circle' },
       { label: 'Network Tree', href: '/sh/state-tree', icon: 'git-branch' },
       { label: 'Direct Team', href: '/sh/direct-team', icon: 'users' },
       { label: 'Team Performance', href: '/sh/team-performance', icon: 'bar-chart' },
@@ -87,7 +87,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC Verification', href: '/hba/kyc', icon: 'shield' },
     ]},
     { label: 'Network Management', items: [
-      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
+      { label: 'Enroll Member', href: '/hba?enroll=true', icon: 'plus-circle' },
       { label: 'My HCB Tree', href: '/hba/network', icon: 'git-branch' },
       { label: 'Team Performance', href: '/hba/team-performance', icon: 'bar-chart' },
     ]},
@@ -107,7 +107,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC', href: '/hcm/kyc', icon: 'shield' },
     ]},
     { label: 'Network', items: [
-      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
+      { label: 'Enroll Member', href: '/hcm?enroll=true', icon: 'plus-circle' },
       { label: 'My Tree', href: '/hcm/network', icon: 'git-branch' },
       { label: 'Team Monitor', href: '/hcm/team-monitor', icon: 'activity' },
     ]},

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StatCard from '@/components/ui/StatCard';
 import WalletCard from '@/components/ui/WalletCard';
@@ -11,9 +12,20 @@ import { useAuth } from '@/lib/auth';
 import { walletAPI, usersAPI, salesAPI } from '@/lib/api';
 import { IWallet, ISale, ITreeNode } from '@/types';
 import { HBA_MONTHLY_PERFORMANCE } from '@/lib/mockData';
+import AddMemberModal from '@/components/dashboard/AddMemberModal';
 
 export default function HbaDashboard() {
+  return (
+    <Suspense fallback={null}>
+      <HbaDashboardContent />
+    </Suspense>
+  );
+}
+
+function HbaDashboardContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const [networkMembers, setNetworkMembers] = useState<ITreeNode[]>([]);
   const [recentSales, setRecentSales] = useState<ISale[]>([]);
@@ -48,6 +60,10 @@ export default function HbaDashboard() {
     fetchData();
   }, [user?._id]);
 
+  useEffect(() => {
+    if (searchParams.get('enroll') === 'true') setIsModalOpen(true);
+  }, [searchParams]);
+
   if (!user) return null;
 
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -64,6 +80,14 @@ export default function HbaDashboard() {
 
   return (
     <DashboardLayout pageTitle="Business Associate Portal">
+      {user && (
+        <AddMemberModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          currentUser={user}
+          onSuccess={() => setIsModalOpen(false)}
+        />
+      )}
       {loading ? (
         <div className="flex items-center justify-center h-[60vh]">
           <div className="flex flex-col items-center gap-4">
