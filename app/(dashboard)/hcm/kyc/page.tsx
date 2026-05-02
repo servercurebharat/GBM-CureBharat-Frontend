@@ -1,23 +1,18 @@
 'use client';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import KYCStatusCard from '@/components/ui/KYCStatusCard';
-import { HCM_USER } from '@/lib/mockData';
+import KYCManagement from '@/components/sections/KYCManagement';
+import { useAuth } from '@/lib/auth';
 
 export default function HcmKycPage() {
-  const color = '#f87171';
+  const { user, loading, refreshUser } = useAuth();
+
+  if (loading) return null;
 
   return (
     <DashboardLayout pageTitle="KYC Verification">
-      <div className="space-y-8 pb-10">
-        <div>
-          <h2 className="font-display text-3xl font-bold text-white tracking-tight">KYC Verification</h2>
-          <p className="text-sm text-muted mt-1 font-medium">Your identity and bank verification status</p>
-        </div>
-
-        <div className="max-w-2xl">
-          <KYCStatusCard user={HCM_USER} color={color} />
-        </div>
+      <div className="pb-20">
+        {user && <KYCManagement user={user} onUpdate={refreshUser} />}
       </div>
     </DashboardLayout>
   );

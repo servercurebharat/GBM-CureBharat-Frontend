@@ -15,36 +15,38 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     { label: 'Overview', items: [
       { label: 'Dashboard', href: '/admin', icon: 'grid' },
     ]},
-    { label: 'Network', items: [
-      { label: 'Users', href: '/admin/members', icon: 'users' },
-      { label: 'User Details', href: '/admin/user-details', icon: 'user-search' },
-      { label: 'Hierarchy Tree', href: '/admin/hierarchy', icon: 'git-branch' },
+    { label: 'Network Management', items: [
+      { label: 'Member List', href: '/admin/members', icon: 'users' },
+      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
+      { label: 'Customer Database', href: '/admin/customers', icon: 'user-search' },
     ]},
-    { label: 'Finance', items: [
+    { label: 'Financial Tracking', items: [
       { label: 'Commission Engine', href: '/admin/commission-config', icon: 'settings' },
       { label: 'Payout Management', href: '/admin/payouts', icon: 'dollar' },
       { label: 'Wallet Ledger', href: '/admin/wallet-ledger', icon: 'wallet' },
       { label: 'Manual Adjustments', href: '/admin/manual-adjustments', icon: 'sliders' },
     ]},
-    { label: 'Rules', items: [
+    { label: 'Performance Reports', items: [
+      { label: 'FTD Reports', href: '/admin/reports/ftd', icon: 'activity' },
+      { label: 'MTD Reports', href: '/admin/reports/mtd', icon: 'bar-chart' },
+      { label: 'Tax Reports', href: '/admin/tax-reports', icon: 'file-text' },
+    ]},
+    { label: 'Compliance & Rules', items: [
+      { label: 'KYC Management', href: '/admin/kyc', icon: 'shield' },
       { label: 'Activity Rules', href: '/admin/activity-rules', icon: 'activity' },
       { label: 'Promotion Rules', href: '/admin/promotion-rules', icon: 'tag' },
     ]},
-    { label: 'Compliance', items: [
-      { label: 'KYC Management', href: '/admin/kyc', icon: 'shield' },
+    { label: 'Administration', items: [
+      { label: 'Role & Permissions', href: '/admin/role-manager', icon: 'users-cog' },
+      { label: 'State Performance', href: '/admin/state-performance', icon: 'map' },
       { label: 'Audit Trail', href: '/admin/audit-trail', icon: 'clipboard' },
     ]},
-    { label: 'Administration', items: [
-      { label: 'Role Manager', href: '/admin/role-manager', icon: 'users-cog' },
-      { label: 'Reports', href: '/admin/tax-reports', icon: 'file-text' },
-      { label: 'State Performance', href: '/admin/state-performance', icon: 'map' },
+    { label: 'Product Management', items: [
+      { label: 'Product Catalog', href: '/admin/plans', icon: 'package' },
+      { label: 'Rank Structure', href: '/admin/ranks', icon: 'award' },
     ]},
-    { label: 'Products', items: [
-      { label: 'Plans & Products', href: '/admin/plans', icon: 'package' },
-      { label: 'Ranks', href: '/admin/ranks', icon: 'award' },
-    ]},
-    { label: 'E-Pin', items: [
-      { label: 'Generate', href: '/admin/epins', icon: 'key' },
+    { label: 'Network Hierarchy', items: [
+      { label: 'Genealogy Tree', href: '/admin/hierarchy', icon: 'git-branch' },
     ]},
   ],
   sh: [
@@ -54,6 +56,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC', href: '/sh/kyc', icon: 'shield' },
     ]},
     { label: 'Network', items: [
+      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
       { label: 'Network Tree', href: '/sh/state-tree', icon: 'git-branch' },
       { label: 'Direct Team', href: '/sh/direct-team', icon: 'users' },
       { label: 'Team Performance', href: '/sh/team-performance', icon: 'bar-chart' },
@@ -81,19 +84,20 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     { label: 'Overview', items: [
       { label: 'Dashboard', href: '/hba', icon: 'grid' },
       { label: 'Profile', href: '/hba/profile', icon: 'user' },
-      { label: 'KYC', href: '/hba/kyc', icon: 'shield' },
+      { label: 'KYC Verification', href: '/hba/kyc', icon: 'shield' },
     ]},
-    { label: 'Network', items: [
-      { label: 'My Tree', href: '/hba/network', icon: 'git-branch' },
+    { label: 'Network Management', items: [
+      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
+      { label: 'My HCB Tree', href: '/hba/network', icon: 'git-branch' },
       { label: 'Team Performance', href: '/hba/team-performance', icon: 'bar-chart' },
     ]},
-    { label: 'Finance', items: [
+    { label: 'Financial Tracking', items: [
       { label: 'Override Income', href: '/hba/override-income', icon: 'layers' },
-      { label: 'Wallet', href: '/hba/wallet', icon: 'wallet' },
-      { label: 'Withdrawal', href: '/hba/withdrawal', icon: 'clock' },
+      { label: 'Wallet Ledger', href: '/hba/wallet', icon: 'wallet' },
+      { label: 'Withdrawal History', href: '/hba/withdrawal', icon: 'clock' },
     ]},
-    { label: 'E-Pin', items: [
-      { label: 'Bulk Pins', href: '/hba/bulk-pins', icon: 'key' },
+    { label: 'Inventory Control', items: [
+      { label: 'Bulk E-Pins', href: '/hba/bulk-pins', icon: 'key' },
     ]},
   ],
   hcm: [
@@ -103,6 +107,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC', href: '/hcm/kyc', icon: 'shield' },
     ]},
     { label: 'Network', items: [
+      { label: 'Enroll Member', href: '/register', icon: 'plus-circle' },
       { label: 'My Tree', href: '/hcm/network', icon: 'git-branch' },
       { label: 'Team Monitor', href: '/hcm/team-monitor', icon: 'activity' },
     ]},

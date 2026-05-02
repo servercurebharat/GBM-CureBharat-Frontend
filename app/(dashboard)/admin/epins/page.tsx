@@ -2,31 +2,39 @@
 
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { authAPI, epinsAPI } from '@/lib/api';
+import { authAPI, epinsAPI, plansAPI } from '@/lib/api';
 
 export default function AdminEpinsPage() {
+  const [plans, setPlans] = useState<any[]>([]);
   const [user, setUser] = useState<any>({});
   const [form, setForm] = useState({ planId: '', quantity: 10, assignToUserId: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  const mockInventory = [
-    { id: 'PIN-99201', plan: 'Super Suraksha', qty: 50, status: 'AVAILABLE', date: '2024-05-12' },
-    { id: 'PIN-99182', plan: 'Premium Shield', qty: 25, status: 'USED', date: '2024-05-10' },
-    { id: 'PIN-99175', plan: 'Family Guard', qty: 100, status: 'PENDING', date: '2024-05-08' },
-  ];
-
   useEffect(() => { 
-    authAPI.getMe().then((r) => setUser(r.data.data || {})); 
+    authAPI.getMe().then((r) => setUser(r.data.data || {}));
+    plansAPI.getAll().then((r) => {
+      if (r.data.success) setPlans(r.data.data || []);
+    });
   }, []);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(''); setSuccess('');
+    
+    if (!form.planId) {
+      setError('Please select a product plan');
+      setLoading(false);
+      return;
+    }
+
     try {
       const r = await epinsAPI.generate(form);
-      setSuccess(`✅ Generated ${r.data.count} pins successfully`);
+      if (r.data.success) {
+        setSuccess(`✅ Generated ${form.quantity} pins successfully`);
+        setForm({ ...form, assignToUserId: '' });
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to generate pins');
     } finally { setLoading(false); }
@@ -75,10 +83,12 @@ export default function AdminEpinsPage() {
                        value={form.planId}
                        onChange={(e) => setForm({...form, planId: e.target.value})}
                     >
-                       <option value="">Select a plan...</option>
-                       <option value="1">Super Suraksha (₹1,999)</option>
-                       <option value="2">Premium Shield (₹4,999)</option>
-                       <option value="3">Family Guard (₹9,999)</option>
+                       <option value="" className="bg-[#131241]">Select a plan...</option>
+                       {plans.map((p: any) => (
+                          <option key={p._id} value={p._id} className="bg-[#131241]">
+                             {p.name} (₹{(p.price / 100).toLocaleString('en-IN')})
+                          </option>
+                       ))}
                     </select>
                  </div>
 
@@ -118,44 +128,23 @@ export default function AdminEpinsPage() {
               </form>
            </div>
 
-           {/* Right Column: Inventory History */}
-           <div className="lg:col-span-7 bg-[#131241] rounded-[2rem] shadow-xl border border-white/[0.03] overflow-hidden">
-              <div className="p-8 border-b border-white/5 flex justify-between items-center">
-                 <h3 className="text-xl font-bold font-display text-white">Recent Batches</h3>
-                 <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Global Inventory</span>
-              </div>
-              
-              <div className="divide-y divide-white/5">
-                 {mockInventory.map((item) => (
-                    <div key={item.id} className="p-8 hover:bg-white/[0.02] transition-all group">
-                       <div className="flex justify-between items-start mb-4">
-                          <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[#60A5FA]">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                             </div>
-                             <div>
-                                <h4 className="text-sm font-bold text-white group-hover:text-[#60A5FA] transition-colors">{item.plan}</h4>
-                                <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">{item.id} · {item.date}</p>
-                             </div>
-                          </div>
-                          <div className="text-right">
-                             <p className="text-xl font-bold font-display text-white">{item.qty} PINS</p>
-                             <span className={`text-[8px] font-black px-2 py-0.5 rounded border tracking-widest ${
-                                item.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                item.status === 'USED' ? 'bg-white/5 text-white/40 border-white/10' :
-                                'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                             }`}>
-                                {item.status}
-                             </span>
-                          </div>
-                       </div>
-                    </div>
-                 ))}
-              </div>
-              
-              <div className="p-8 text-center bg-white/[0.01]">
-                 <button className="text-[10px] font-black text-[#60A5FA] uppercase tracking-widest hover:underline">View Full Inventory Report</button>
-              </div>
+           {/* Right Column: Information */}
+           <div className="lg:col-span-7 bg-[#131241] rounded-[2rem] p-10 shadow-xl border border-white/[0.03] overflow-hidden text-white">
+              <h3 className="text-xl font-bold font-display mb-6">Distribution Rules</h3>
+              <ul className="space-y-4 text-sm text-white/60">
+                <li className="flex gap-3">
+                  <span className="text-[#60A5FA] font-bold">01.</span>
+                  Pins can be assigned directly to any member using their Member ID.
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-[#60A5FA] font-bold">02.</span>
+                  If "Assign To" is left blank, pins will be added to the Admin global pool.
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-[#60A5FA] font-bold">03.</span>
+                  Generated pins are immediately active and can be used for new registrations.
+                </li>
+              </ul>
            </div>
         </div>
       </div>

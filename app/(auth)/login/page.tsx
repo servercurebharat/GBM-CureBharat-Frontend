@@ -100,14 +100,17 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Password</label>
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">OTP / Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="123456 or Password"
                 className="w-full bg-black/40 border border-white/10 rounded-[22px] px-6 py-5 text-lg font-bold text-white placeholder:text-white/5 focus:border-hcc/50 focus:bg-black/60 transition-all outline-none shadow-inner"
               />
+              <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest text-center mt-2">
+                Use <span className="text-hcc">123456</span> for instant test access
+              </p>
             </div>
 
             <button

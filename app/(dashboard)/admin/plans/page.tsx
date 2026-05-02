@@ -39,15 +39,28 @@ export default function AdminPlansPage() {
     <DashboardLayout pageTitle="Plans & Products">
       <div className="space-y-6 pb-20">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
            <div>
               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">CUREBHARAT / ADMIN / PLANS & PRODUCTS</p>
-              <h1 className="text-3xl font-bold text-[#000000] font-display">Plans & Products</h1>
+              <h1 className="text-3xl font-bold text-[#000000] font-display">Product Catalog</h1>
            </div>
-           <button className="bg-[#6029F1] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#6029F1]/20 flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              Create New Plan
-           </button>
+           
+           <div className="flex flex-wrap items-center gap-3">
+              <select className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#6029F1] shadow-sm">
+                 <option>All Categories</option>
+                 <option>Individual</option>
+                 <option>Family</option>
+              </select>
+              <select className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#6029F1] shadow-sm">
+                 <option>Sort: Performance</option>
+                 <option>Sort: Best Selling</option>
+                 <option>Sort: High Revenue</option>
+              </select>
+              <button className="bg-[#6029F1] px-6 py-2.5 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#6029F1]/20 flex items-center gap-2">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                 Add New Plan
+              </button>
+           </div>
         </div>
 
         {/* Top Stats */}

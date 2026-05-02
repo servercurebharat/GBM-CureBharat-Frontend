@@ -22,10 +22,15 @@ export interface IUser {
   kycStatus: KycStatus;
   kycDocuments?: {
     aadhaarNumber?: string;
+    aadhaarFrontUrl?: string;
+    aadhaarBackUrl?: string;
     panNumber?: string;
+    panUrl?: string;
     bankName?: string;
     accountNumber?: string;
     ifscCode?: string;
+    bankProofUrl?: string;
+    selfieUrl?: string;
   };
   personalSalesCount: number;
   personalSalesThisMonth: number;
@@ -121,6 +126,7 @@ export interface ITreeNode {
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
+  user?: T;
   message?: string;
   error?: string;
 }

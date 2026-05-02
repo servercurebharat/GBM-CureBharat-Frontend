@@ -49,6 +49,42 @@ export default function HCCDashboard() {
         </div>
       ) : (
         <div className="space-y-8 pb-10">
+          {/* KYC Alert Banner - Redesigned for Premium Visibility */}
+          {user.kycStatus !== 'approved' && (
+            <div className={`relative overflow-hidden p-8 rounded-[2.5rem] border-2 shadow-2xl animate-in slide-in-from-top-4 duration-1000 flex flex-col md:flex-row items-center justify-between gap-8 ${
+              user.kycStatus === 'pending' 
+                ? 'bg-gradient-to-br from-[#F59E0B] to-[#D97706] border-[#FCD34D]/30 text-white' 
+                : 'bg-gradient-to-br from-[#60A5FA] to-[#2563EB] border-[#93C5FD]/30 text-white'
+            }`}>
+              {/* Decorative Glass Circles */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl -mr-32 -mt-32 rounded-full" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 blur-2xl -ml-24 -mb-24 rounded-full" />
+
+              <div className="relative z-10 flex items-center gap-6 text-center md:text-left flex-col md:flex-row">
+                <div className="w-16 h-16 rounded-[1.5rem] bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl shadow-inner">
+                  {user.kycStatus === 'pending' ? '⏳' : '🛡️'}
+                </div>
+                <div>
+                  <h3 className="font-display text-2xl font-black uppercase tracking-tight leading-none mb-2">
+                    {user.kycStatus === 'pending' ? 'Verification In Progress' : 'Action Required: Verify KYC'}
+                  </h3>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] opacity-90 leading-relaxed max-w-md">
+                    {user.kycStatus === 'pending' 
+                      ? 'Our compliance team is currently auditing your documents. This usually takes 24-48 hours.' 
+                      : 'Your account is currently in provisional mode. Complete KYC to unlock full commission withdrawals and rank rewards.'}
+                  </p>
+                </div>
+              </div>
+              
+              <a 
+                href="/hcc/kyc"
+                className="relative z-10 px-10 py-4 rounded-2xl bg-white text-[#0d0f14] font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl hover:shadow-white/20"
+              >
+                {user.kycStatus === 'pending' ? 'Check Status' : 'Verify Now'}
+              </a>
+            </div>
+          )}
+
           {/* Header Greeting */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -173,6 +209,34 @@ export default function HCCDashboard() {
                   }}
                 />
               )}
+
+              {/* Referral Tool */}
+              <div className="bg-[#131241] rounded-2xl p-8 border border-white/[0.07] shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#60a5fa]/5 blur-3xl -mr-16 -mt-16" />
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-6">Referral Network Tool</h4>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Your Referral Code</p>
+                    <p className="text-lg font-mono font-bold text-[#60a5fa]">{user.memberId}</p>
+                  </div>
+                  
+                  <button 
+                    onClick={() => {
+                      const link = `${window.location.origin}/register?ref=${user.memberId}`;
+                      navigator.clipboard.writeText(link);
+                      alert('Referral link copied to clipboard!');
+                    }}
+                    className="w-full py-4 rounded-xl bg-[#60a5fa] text-[#0d0f14] font-black text-[11px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#60a5fa]/10"
+                  >
+                    Copy Referral Link
+                  </button>
+                  
+                  <p className="text-[9px] text-white/20 font-bold uppercase text-center leading-relaxed">
+                    Share this link to onboard new members directly into your team.
+                  </p>
+                </div>
+              </div>
 
               {/* Pin Management Shortcut */}
               <div className="bg-surface border border-white/[0.07] rounded-2xl p-6 shadow-xl relative overflow-hidden group">

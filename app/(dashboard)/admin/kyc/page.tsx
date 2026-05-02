@@ -5,10 +5,10 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { adminAPI } from '@/lib/api'; 
 import { IUser } from '@/types';
 import { useToast } from '@/components/ui/Toast';
+import Link from 'next/link';
 
 export default function AdminKYC() {
   const [pendingUsers, setPendingUsers] = useState<IUser[]>([]);
-  const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -38,7 +38,6 @@ export default function AdminKYC() {
       if (res.data.success) {
         addToast({ message: `KYC ${status} successfully`, type: 'success' });
         setPendingUsers(prev => prev.filter(u => u._id !== id));
-        if (selectedUser?._id === id) setSelectedUser(null);
       }
     } catch (err: any) {
       addToast({ message: err.response?.data?.message || 'Update failed', type: 'error' });
@@ -110,12 +109,12 @@ export default function AdminKYC() {
                                 </td>
                                 <td className="px-4 py-6 text-xs font-bold text-white/40 uppercase">{new Date(u.createdAt).toLocaleDateString()}</td>
                                 <td className="px-4 py-6 text-center">
-                                   <button 
-                                      onClick={() => setSelectedUser(u)}
+                                   <Link 
+                                      href={`/admin/kyc/${u._id}`}
                                       className="text-[10px] font-black text-[#60A5FA] uppercase tracking-widest hover:underline"
                                    >
                                       View Bundle
-                                   </button>
+                                   </Link>
                                 </td>
                                 <td className="px-8 py-6 text-right">
                                    <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -180,49 +179,6 @@ export default function AdminKYC() {
               </div>
            </div>
         </div>
-
-        {/* Modal for detailed view */}
-        {selectedUser && (
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">
-             <div className="absolute inset-0 bg-[#0d0f14]/90 backdrop-blur-xl" onClick={() => setSelectedUser(null)} />
-             <div className="relative w-full max-w-xl bg-[#131241] border border-white/10 rounded-[32px] p-10 shadow-2xl animate-in zoom-in-95 duration-300 text-white">
-                <div className="flex justify-between items-start mb-8">
-                   <div>
-                      <h3 className="font-display text-2xl font-bold tracking-tight">{selectedUser.name}</h3>
-                      <p className="text-[10px] text-white/30 font-bold uppercase tracking-[0.2em] mt-1">Identity Bundle · {selectedUser.memberId}</p>
-                   </div>
-                   <button onClick={() => setSelectedUser(null)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">✕</button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-10">
-                   <DocItem label="AADHAAR NUMBER" val={selectedUser.kycDocuments?.aadhaarNumber || 'Not provided'} />
-                   <DocItem label="PAN NUMBER" val={selectedUser.kycDocuments?.panNumber || 'Not provided'} />
-                   <DocItem label="BANK NAME" val={selectedUser.kycDocuments?.bankName || 'Not provided'} />
-                   <DocItem label="ACCOUNT NUMBER" val={selectedUser.kycDocuments?.accountNumber || 'Not provided'} />
-                   <div className="col-span-2">
-                      <DocItem label="IFSC CODE" val={selectedUser.kycDocuments?.ifscCode || 'Not provided'} />
-                   </div>
-                </div>
-
-                <div className="flex gap-4">
-                   <button 
-                     disabled={processingId === selectedUser._id}
-                     onClick={() => handleUpdateStatus(selectedUser._id, 'approved')}
-                     className="flex-1 py-5 rounded-2xl bg-[#34d399] text-[#0d0f14] font-black text-[11px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#34d399]/20"
-                   >
-                     Approve Application
-                   </button>
-                   <button 
-                     disabled={processingId === selectedUser._id}
-                     onClick={() => handleUpdateStatus(selectedUser._id, 'rejected')}
-                     className="flex-1 py-5 rounded-2xl bg-[#f87171] text-white font-black text-[11px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#f87171]/20"
-                   >
-                     Reject Application
-                   </button>
-                </div>
-             </div>
-          </div>
-        )}
       </div>
     </DashboardLayout>
   );
@@ -252,15 +208,6 @@ function StatRow({ label, value, color }: any) {
           <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{label}</span>
        </div>
        <span className="text-xs font-bold text-white">{value}</span>
-    </div>
-  );
-}
-
-function DocItem({ label, val }: { label: string; val: string }) {
-  return (
-    <div className="space-y-1.5 p-5 bg-white/[0.02] border border-white/[0.05] rounded-2xl group hover:bg-white/[0.04] transition-colors">
-       <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">{label}</p>
-       <p className="text-sm font-bold text-white tracking-tight truncate">{val}</p>
     </div>
   );
 }

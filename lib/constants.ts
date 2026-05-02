@@ -11,7 +11,7 @@ export const ROLE_COLORS: Record<Role, string> = {
 export const ROLE_TAGS: Record<Role, string> = {
   admin: 'ADMINISTRATOR',
   sh: 'STATE HEAD',
-  hba: 'HBA',
+  hba: 'HCB',
   hcm: 'HCM',
   hcc: 'HCC',
 };

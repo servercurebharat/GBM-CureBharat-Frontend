@@ -18,7 +18,6 @@ const api = axios.create({
   // Use relative path for client-side to leverage Next.js rewrites (handles CORS/Cookies)
   baseURL: typeof window !== 'undefined' ? '/api' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'),
   withCredentials: true,
-  headers: { 'Content-Type': 'application/json' }
 });
 
 // Response interceptor - handle 401 globally
@@ -54,7 +53,7 @@ export const usersAPI = {
     api.get<PaginatedResponse<IUser>>('/users', { params }),
   getById: (id: string) => 
     api.get<ApiResponse<IUser>>(`/users/${id}`),
-  updateKYC: (id: string, data: KYCData) =>
+  updateKYC: (id: string, data: any) =>
     api.put<ApiResponse<any>>(`/users/${id}/kyc`, data),
   getDownline: (id: string) =>
     api.get<ApiResponse<ITreeNode>>(`/users/${id}/downline`),
@@ -110,6 +109,8 @@ export const adminAPI = {
     api.get<ApiResponse<{ wallets: any[]; summary: any }>>('/wallet/all-provisional'),
   triggerPayoutCycle: (cycleMonth: string) =>
     api.post<ApiResponse<any>>('/wallet/payout-cycle', { cycleMonth }),
+  getTree: () =>
+    api.get<ApiResponse<any>>('/admin/tree'),
 };
 
 export default api;
