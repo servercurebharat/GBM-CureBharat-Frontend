@@ -35,7 +35,7 @@ export default function NewSaleModal({ isOpen, onClose, onSuccess }: NewSaleModa
     try {
       const res = await plansAPI.getAll();
       if (res.data.success) {
-        setPlans(res.data.data.filter(p => p.isActive) || []);
+        setPlans((res.data.data ?? []).filter((p: any) => p.isActive));
       }
     } catch (error) {
       toast.error('Failed to load plans');

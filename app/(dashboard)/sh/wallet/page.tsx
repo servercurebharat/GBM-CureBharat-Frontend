@@ -1,3 +1,6 @@
+'use client';
+
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import WalletDashboard from '@/components/wallet/WalletDashboard';
 
 export default function WalletPage() {

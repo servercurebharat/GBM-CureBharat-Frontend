@@ -15,7 +15,7 @@ export default function AdminPayouts() {
     try {
       const res = await adminAPI.getAllProvisional();
       if (res.data.success) {
-        setData(res.data.data);
+        setData(res.data.data || null);
       }
     } catch (err) {
       toast.error('Failed to fetch payout data');
@@ -36,7 +36,7 @@ export default function AdminPayouts() {
     try {
       const res = await adminAPI.triggerPayoutCycle(month);
       if (res.data.success) {
-        toast.success(res.data.message);
+        toast.success(res.data.message || 'Payout cycle processed successfully');
         fetchData();
       }
     } catch (err: any) {
@@ -97,15 +97,15 @@ export default function AdminPayouts() {
                  <div className="grid grid-cols-3 gap-8">
                     <div>
                        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Total Provisional</p>
-                       <p className="text-3xl font-black tracking-tighter">₹{(data?.summary.totalProvisional || 0 / 100).toLocaleString('en-IN')}</p>
+                       <p className="text-3xl font-black tracking-tighter">₹{((data?.summary.totalProvisional || 0) / 100).toLocaleString('en-IN')}</p>
                     </div>
                     <div>
                        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Pending TDS (5%)</p>
-                       <p className="text-3xl font-black tracking-tighter text-[#fbbf24]">₹{(data?.summary.estimatedTDS || 0 / 100).toLocaleString('en-IN')}</p>
+                       <p className="text-3xl font-black tracking-tighter text-[#fbbf24]">₹{((data?.summary.estimatedTDS || 0) / 100).toLocaleString('en-IN')}</p>
                     </div>
                     <div>
                        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Net Disbursement</p>
-                       <p className="text-3xl font-black tracking-tighter text-[#34d399]">₹{(data?.summary.netPayout || 0 / 100).toLocaleString('en-IN')}</p>
+                       <p className="text-3xl font-black tracking-tighter text-[#34d399]">₹{((data?.summary.netPayout || 0) / 100).toLocaleString('en-IN')}</p>
                     </div>
                  </div>
 

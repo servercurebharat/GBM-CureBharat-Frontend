@@ -35,9 +35,6 @@ export default function HccWalletPage() {
     </DashboardLayout>
   );
 }
-    </DashboardLayout>
-  );
-}
 
 function BreakdownRow({ label, value, color, percentage }: any) {
   return (

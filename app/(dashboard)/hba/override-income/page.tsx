@@ -26,6 +26,8 @@ export default function HbaOverrideIncomePage() {
         const res = await walletAPI.getMyWallet();
         if (res.data.success) {
           const walletData = res.data.data;
+          if (!walletData) return;
+          
           setWallet(walletData);
 
           const overrideEntries = (walletData.ledger || []).filter((e: any) => e.type === 'override');

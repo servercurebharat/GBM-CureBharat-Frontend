@@ -42,6 +42,7 @@ export interface IUser {
 export interface IPlan {
   _id: string;
   name: string;
+  category?: string;
   price: number;
   businessVolume: number;
   isCommissionable: boolean;
@@ -91,6 +92,11 @@ export interface IWallet {
   finalBalance: number;
   totalEarned: number;
   totalWithdrawn: number;
+  earningsBreakdown?: {
+    direct: number;
+    override: number;
+    leadership: number;
+  };
   ledger: ILedgerEntry[];
 }
 
