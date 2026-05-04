@@ -3,23 +3,53 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { adminAPI } from '@/lib/api';
+import { toast } from 'react-hot-toast';
 
 export default function AdminPayouts() {
   const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<{ wallets: any[]; summary: any } | null>(null);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [processing, setProcessing] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const res = await adminAPI.getAllProvisional();
+      if (res.data.success) {
+        setData(res.data.data);
+      }
+    } catch (err) {
+      toast.error('Failed to fetch payout data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulation of loading
-    setTimeout(() => setLoading(false), 500);
+    fetchData();
   }, []);
 
-  const mockPayouts = [
-    { id: '#PAY-82910', cycle: 'Aug 2024', role: 'Consultant', amount: '₹ 1,28,400', tds: '₹ 12,840', status: 'PAID' },
-    { id: '#PAY-82911', cycle: 'Aug 2024', role: 'Distributor', amount: '₹ 45,000', tds: '₹ 4,500', status: 'HOLD' },
-    { id: '#PAY-82912', cycle: 'Aug 2024', role: 'Agent', amount: '₹ 22,150', tds: '₹ 2,215', status: 'PROVISIONAL' },
-    { id: '#PAY-82913', cycle: 'Aug 2024', role: 'Consultant', amount: '₹ 89,000', tds: '₹ 8,900', status: 'PAID' },
-  ];
+  const handleRunCycle = async () => {
+    const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+    if (!confirm(`Are you sure you want to run the Payout Cycle for ${month}? This will finalize all provisional commissions.`)) return;
+
+    setProcessing(true);
+    try {
+      const res = await adminAPI.triggerPayoutCycle(month);
+      if (res.data.success) {
+        toast.success(res.data.message);
+        fetchData();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Cycle processing failed');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const filteredWallets = data?.wallets.filter(w => 
+    w.user?.name.toLowerCase().includes(search.toLowerCase()) ||
+    w.user?.memberId.toLowerCase().includes(search.toLowerCase())
+  ) || [];
 
   return (
     <DashboardLayout pageTitle="Payout Management">
@@ -27,164 +57,169 @@ export default function AdminPayouts() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
            <div>
-              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">CUREBHARAT / ADMIN / PAYOUT MANAGEMENT</p>
-              <h1 className="text-3xl font-bold text-[#000000] font-display">Payout Management</h1>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CUREBHARAT / ADMIN / PAYOUT MANAGEMENT</p>
+              <h1 className="text-3xl font-black text-slate-800 font-display">Payout Command Center</h1>
            </div>
         </div>
 
         {/* Action Buttons Row */}
         <div className="flex flex-wrap gap-4">
-           <button className="bg-[#60A5FA] px-6 py-3 rounded-xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#60A5FA]/20">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              Open Monthly Cycle
+           <button 
+             onClick={handleRunCycle}
+             disabled={processing}
+             className="bg-[#60A5FA] px-6 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-[#60A5FA]/20 hover:brightness-110 active:scale-95 transition-all"
+           >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+              {processing ? 'Processing...' : 'Run T+3 Cycle'}
            </button>
-           <button className="bg-[#E65C00] px-6 py-3 rounded-xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#E65C00]/20">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-              Run T+3 Processor
+           <button className="bg-[#009966] px-6 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-[#009966]/20 hover:brightness-110 active:scale-95 transition-all">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              Disbursement T+5
            </button>
-           <button className="bg-[#009966] px-6 py-3 rounded-xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#009966]/20">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              Run T+5 Disbursement
-           </button>
-           <button className="bg-[#1c2030] px-6 py-3 rounded-xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-black/20">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Download Payout Sheet
+           <button className="bg-[#131241] px-6 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10 hover:brightness-110 active:scale-95 transition-all">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Export Report
            </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-           {/* Cycle Board */}
-           <div className="lg:col-span-8 bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03] min-h-[300px] flex flex-col">
-              <div className="flex justify-between items-center mb-12">
-                 <h3 className="text-xl font-bold font-display">Cycle Board</h3>
-                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Current Cycle: Aug 2024</span>
-              </div>
-              <div className="mt-auto">
-                 <div className="flex w-full h-2 rounded-full overflow-hidden mb-4">
-                    <div className="w-[30%] bg-[#60A5FA]" />
-                    <div className="w-[20%] bg-[#009966]" />
-                    <div className="w-[20%] bg-[#E65C00]" />
-                    <div className="w-[30%] bg-[#3B82F6]" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+           {/* Summary Stats */}
+           <div className="lg:col-span-8 bg-[#131241] rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-hcc/5 blur-3xl -mr-32 -mt-32" />
+              <div className="relative z-10 flex flex-col h-full">
+                 <div className="flex justify-between items-center mb-12">
+                    <h3 className="text-xl font-black font-display uppercase tracking-tight">Cycle Summary</h3>
+                    <span className="bg-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">
+                       Cycle: {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </span>
                  </div>
-                 <div className="flex justify-between text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                    <span>PROVISIONAL</span>
-                    <span>FINALIZED</span>
-                    <span>HOLD</span>
-                    <span>PAID</span>
+                 
+                 <div className="grid grid-cols-3 gap-8">
+                    <div>
+                       <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Total Provisional</p>
+                       <p className="text-3xl font-black tracking-tighter">₹{(data?.summary.totalProvisional || 0 / 100).toLocaleString('en-IN')}</p>
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Pending TDS (5%)</p>
+                       <p className="text-3xl font-black tracking-tighter text-[#fbbf24]">₹{(data?.summary.estimatedTDS || 0 / 100).toLocaleString('en-IN')}</p>
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Net Disbursement</p>
+                       <p className="text-3xl font-black tracking-tighter text-[#34d399]">₹{(data?.summary.netPayout || 0 / 100).toLocaleString('en-IN')}</p>
+                    </div>
+                 </div>
+
+                 <div className="mt-12 flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#34d399] animate-pulse" />
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                       {data?.summary.walletCount || 0} Member Wallets loaded and ready for settlement
+                    </p>
                  </div>
               </div>
            </div>
 
-           {/* Deduction Summary */}
-           <div className="lg:col-span-4 bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
-              <h3 className="text-xl font-bold font-display mb-8">Deduction Summary</h3>
-              <div className="space-y-4">
-                 <DeductionRow icon="%" label="TDS" value="₹ 4,52,290" />
-                 <DeductionRow icon="reserve" label="Chargeback Reserve" value="₹ 1,20,000" />
-                 <DeductionRow icon="edit" label="Manual Corrections" value="- ₹ 42,500" color="text-[#f87171]" />
+           {/* Quick Analytics */}
+           <div className="lg:col-span-4 bg-[#131241] rounded-[2.5rem] p-10 text-white shadow-2xl border border-white/5 relative overflow-hidden">
+              <h3 className="text-xl font-black font-display mb-8 uppercase tracking-tight">Wallet Status</h3>
+              <div className="space-y-6">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 rounded-xl bg-hcc/10 flex items-center justify-center text-hcc">📜</div>
+                       <span className="text-xs font-bold text-white/60">Approved KYC</span>
+                    </div>
+                    <span className="text-sm font-black">{data?.wallets.filter(w => w.user?.kycStatus === 'approved').length || 0}</span>
+                 </div>
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 rounded-xl bg-hcm/10 flex items-center justify-center text-hcm">⏳</div>
+                       <span className="text-xs font-bold text-white/60">Pending KYC</span>
+                    </div>
+                    <span className="text-sm font-black text-hcm">{data?.wallets.filter(w => w.user?.kycStatus !== 'approved').length || 0}</span>
+                 </div>
               </div>
+              <p className="mt-10 text-[9px] text-white/20 font-black uppercase tracking-widest leading-relaxed">
+                 * KYC approved members will be moved to settlement automatically on cycle completion.
+              </p>
            </div>
         </div>
 
-        {/* Search & Filter & Table Container */}
-        <div className="bg-[#131241] rounded-[2rem] shadow-xl border border-white/[0.03] overflow-hidden">
-           <div className="p-8 border-b border-white/5 flex flex-col md:flex-row gap-4 items-center">
+        {/* Members Table */}
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+           <div className="p-10 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center">
               <div className="relative flex-1">
-                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                  <input
                    type="text"
-                   placeholder="Search payout by ID/role/status"
+                   placeholder="Search Member ID or Name..."
                    value={search}
                    onChange={(e) => setSearch(e.target.value)}
-                   className="w-full bg-white border border-[#E1E2EC] rounded-xl pl-12 pr-4 py-3 text-sm text-black focus:outline-none"
+                   className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-6 py-4 text-sm text-slate-800 font-bold focus:bg-white focus:ring-2 focus:ring-hcc/20 transition-all outline-none"
                  />
-              </div>
-              <div className="flex gap-4">
-                 <select 
-                   value={statusFilter}
-                   onChange={(e) => setStatusFilter(e.target.value)}
-                   className="bg-white border border-[#E1E2EC] rounded-xl px-6 py-3 text-sm font-bold text-black outline-none min-w-[150px]"
-                 >
-                    <option>All Status</option>
-                 </select>
-                 <button className="bg-[#6029F1] px-6 py-3 rounded-xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#6029F1]/20">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    Finalize Visible
-                 </button>
               </div>
            </div>
            
            <div className="overflow-x-auto">
               <table className="w-full text-left">
                  <thead>
-                    <tr className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] border-b border-white/5 bg-white/[0.01]">
-                       <th className="px-8 py-5">ID</th>
-                       <th className="px-4 py-5">CYCLE</th>
-                       <th className="px-4 py-5">ROLE</th>
-                       <th className="px-4 py-5">AMOUNT</th>
-                       <th className="px-4 py-5">TDS</th>
-                       <th className="px-8 py-5">STATUS</th>
+                    <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 bg-slate-50/50">
+                       <th className="px-10 py-6">Member</th>
+                       <th className="px-6 py-6">Role / Rank</th>
+                       <th className="px-6 py-6">Provisional</th>
+                       <th className="px-6 py-6">TDS (5%)</th>
+                       <th className="px-6 py-6">Net Payout</th>
+                       <th className="px-10 py-6 text-center">KYC</th>
                     </tr>
                  </thead>
-                 <tbody className="divide-y divide-white/5">
-                    {mockPayouts.map((row) => (
-                       <tr key={row.id} className="hover:bg-white/[0.02] transition-colors group">
-                          <td className="px-8 py-6 text-sm font-bold text-white/80">{row.id}</td>
-                          <td className="px-4 py-6 text-xs font-bold text-white/40">{row.cycle}</td>
-                          <td className="px-4 py-6 text-xs font-bold text-white/40">{row.role}</td>
-                          <td className="px-4 py-6 text-sm font-black text-white">{row.amount}</td>
-                          <td className="px-4 py-6 text-sm font-bold text-white/60">{row.tds}</td>
-                          <td className="px-8 py-6">
-                             <span className={`px-4 py-1 rounded-full text-[9px] font-black tracking-widest border ${
-                                row.status === 'PAID' ? 'bg-[#009966]/10 text-[#009966] border-[#009966]/30' :
-                                row.status === 'HOLD' ? 'bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/30' :
-                                'bg-[#E65C00]/10 text-[#E65C00] border-[#E65C00]/30'
-                             }`}>
-                                {row.status}
-                             </span>
+                 <tbody className="divide-y divide-slate-100">
+                    {loading ? (
+                       Array(5).fill(0).map((_, i) => (
+                         <tr key={i} className="animate-pulse">
+                            <td colSpan={6} className="px-10 py-8"><div className="h-4 bg-slate-50 rounded w-full" /></td>
+                         </tr>
+                       ))
+                    ) : filteredWallets.length === 0 ? (
+                       <tr>
+                          <td colSpan={6} className="px-10 py-20 text-center text-slate-300 font-black uppercase tracking-widest text-xs">
+                             No pending payouts found ✨
                           </td>
                        </tr>
-                    ))}
+                    ) : (
+                       filteredWallets.map((wallet) => (
+                          <tr key={wallet._id} className="hover:bg-slate-50/50 transition-colors group">
+                             <td className="px-10 py-6">
+                                <div className="text-sm font-black text-slate-800">{wallet.user?.name}</div>
+                                <div className="text-[10px] font-mono font-bold text-hcc uppercase mt-0.5">{wallet.user?.memberId}</div>
+                             </td>
+                             <td className="px-6 py-6">
+                                <div className="text-[10px] font-black text-slate-500 uppercase">{wallet.user?.role}</div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">{wallet.user?.rank}</div>
+                             </td>
+                             <td className="px-6 py-6 text-sm font-black text-slate-800">
+                                ₹{(wallet.provisionalBalance / 100).toLocaleString('en-IN')}
+                             </td>
+                             <td className="px-6 py-6 text-sm font-bold text-slate-400">
+                                ₹{(wallet.provisionalBalance * 0.05 / 100).toLocaleString('en-IN')}
+                             </td>
+                             <td className="px-6 py-6 text-sm font-black text-sh">
+                                ₹{(wallet.provisionalBalance * 0.95 / 100).toLocaleString('en-IN')}
+                             </td>
+                             <td className="px-10 py-6 text-center">
+                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black tracking-widest border ${
+                                   wallet.user?.kycStatus === 'approved' 
+                                     ? 'bg-sh/10 text-sh border-sh/20' 
+                                     : 'bg-hcm/10 text-hcm border-hcm/20'
+                                }`}>
+                                   {wallet.user?.kycStatus?.toUpperCase() || 'NOT SUBMITTED'}
+                                </span>
+                             </td>
+                          </tr>
+                       ))
+                    )}
                  </tbody>
               </table>
-           </div>
-
-           <div className="px-8 py-5 flex items-center justify-between border-t border-white/5 bg-white/[0.01]">
-              <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
-                 Showing 1-10 of 26 records
-              </div>
-              <div className="flex items-center gap-1">
-                 <button className="p-2 text-white/20 hover:text-white transition-colors">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                 </button>
-                 {[1, 2, 3].map(p => (
-                   <button key={p} className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${p === 1 ? 'bg-[#3B82F6] text-white shadow-lg shadow-[#3B82F6]/20' : 'text-white/40 hover:text-white'}`}>
-                     {p}
-                   </button>
-                 ))}
-                 <button className="p-2 text-white/20 hover:text-white transition-colors">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                 </button>
-              </div>
            </div>
         </div>
       </div>
     </DashboardLayout>
-  );
-}
-
-function DeductionRow({ icon, label, value, color = 'text-white' }: any) {
-  return (
-    <div className="bg-white/5 rounded-xl p-5 flex justify-between items-center border border-white/5 group hover:bg-white/[0.08] transition-all">
-       <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white/30 group-hover:text-white transition-colors">
-             {icon === '%' && <span className="text-xl font-bold">%</span>}
-             {icon === 'reserve' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>}
-             {icon === 'edit' && <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>}
-          </div>
-          <span className="text-sm font-bold text-white/60">{label}</span>
-       </div>
-       <span className={`text-sm font-black ${color}`}>{value}</span>
-    </div>
   );
 }

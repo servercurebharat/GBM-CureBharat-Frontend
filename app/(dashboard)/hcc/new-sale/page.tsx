@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { plansAPI, salesAPI, epinsAPI } from '@/lib/api';
 import { IPlan, IEPin } from '@/types';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'react-hot-toast';
 
 type Step = 1 | 2 | 3;
 
@@ -23,7 +23,6 @@ interface SaleFormData {
 
 export default function NewSaleWizard() {
   const router = useRouter();
-  const { addToast } = useToast();
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -57,28 +56,28 @@ export default function NewSaleWizard() {
         if (plansRes.data.success) setPlans(plansRes.data.data?.filter(p => p.isCommissionable) || []);
         if (pinsRes.data.success) setUnusedPins(pinsRes.data.data?.unused || []);
       } catch (err) {
-        addToast({ message: 'Failed to initialize sales form', type: 'error' });
+        toast.error('Failed to initialize sales form');
       } finally {
         setLoading(false);
       }
     }
     init();
-  }, [addToast]);
+  }, []);
 
   const handleNext = () => {
     if (step === 1) {
       if (!saleForm.customerName || !saleForm.customerMobile || !saleForm.nomineeName) {
-        addToast({ message: 'Please fill in all required customer details', type: 'warning' });
+        toast.error('Please fill in all required customer details');
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (!saleForm.planId) {
-        addToast({ message: 'Please select a wellness plan', type: 'warning' });
+        toast.error('Please select a wellness plan');
         return;
       }
       if (saleForm.paymentMethod === 'epin' && !saleForm.ePinCode) {
-        addToast({ message: 'Please select an E-Pin for payment', type: 'warning' });
+        toast.error('Please select an E-Pin for payment');
         return;
       }
       setStep(3);
@@ -96,11 +95,11 @@ export default function NewSaleWizard() {
       });
       
       if (res.data.success) {
-        addToast({ message: 'Policy issued successfully!', type: 'success' });
+        toast.success('Policy issued successfully!');
         router.push('/hcc');
       }
     } catch (err: any) {
-      addToast({ message: err.response?.data?.message || 'Transaction failed', type: 'error' });
+      toast.error(err.response?.data?.message || 'Transaction failed');
     } finally {
       setSubmitting(false);
     }

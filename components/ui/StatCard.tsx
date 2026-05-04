@@ -13,9 +13,9 @@ export default function StatCard({ label, value, change, isPositive = true, colo
     <div
       className="stat-card group cursor-default"
       style={{
-        background: 'linear-gradient(135deg, #0d1030 0%, #131845 100%)',
-        border: '1px solid rgba(99, 102, 241, 0.08)',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.03)',
+        background: '#131241',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
       }}
     >
       {/* Accent corner glow */}
@@ -32,15 +32,15 @@ export default function StatCard({ label, value, change, isPositive = true, colo
 
       {/* Label */}
       <div
-        className="text-[10px] mb-3 uppercase font-bold"
-        style={{ color: 'rgba(148, 163, 184, 0.6)', letterSpacing: '0.16em' }}
+        className="text-[10px] mb-3 uppercase font-black"
+        style={{ color: 'rgba(255, 255, 255, 0.4)', letterSpacing: '0.16em' }}
       >
         {label}
       </div>
 
       {/* Value */}
       <div
-        className={`${value.length > 15 ? 'text-[16px]' : value.length > 12 ? 'text-[19px]' : 'text-[24px]'} font-extrabold text-white leading-tight mb-2 tracking-tighter truncate`}
+        className={`${value.length > 15 ? 'text-[16px]' : value.length > 12 ? 'text-[19px]' : 'text-[24px]'} font-black text-white leading-tight mb-2 tracking-tighter truncate`}
       >
         {value}
       </div>

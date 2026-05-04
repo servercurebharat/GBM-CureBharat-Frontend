@@ -145,20 +145,20 @@ function HcmDashboardContent() {
           )}
 
           {/* Welcome Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h2 className="font-display text-3xl font-black text-slate-900 tracking-tight">
+              <h2 className="font-display text-4xl font-black text-slate-800 tracking-tight">
                 Welcome, {user.name.split(' ')[0]}
               </h2>
-              <p className="text-sm text-muted mt-1 font-medium">
-                You are an active <span className="text-hcm font-bold tracking-tight">Health Care Manager</span> managing {teamMembers.length} HCCs
+              <p className="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
+                Authorized <span className="text-hcm">Health Care Manager</span> • Managing {teamMembers.length} HCCs
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href="/hcm/team-monitor" className="px-5 py-2.5 rounded-xl bg-hcm/10 border border-hcm/20 text-hcm text-xs font-bold uppercase tracking-widest hover:bg-hcm/20 transition-all">
+            <div className="flex flex-wrap items-center gap-4">
+              <Link href="/hcm/team-monitor" className="px-6 py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition-all shadow-sm">
                 Monitor Team
               </Link>
-              <Link href="/hcm/override-ledger" className="px-5 py-2.5 rounded-xl bg-hcm text-[#0d0f14] text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-hcm/10">
+              <Link href="/hcm/override-ledger" className="px-8 py-3.5 rounded-2xl bg-hcm text-[#0d0f14] text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-hcm/20">
                 Override Ledger
               </Link>
             </div>
@@ -178,35 +178,35 @@ function HcmDashboardContent() {
           )}
 
           {/* Core Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <StatCard
-              label="Manager Override"
-              value={`₹${(overrideThisMonth / 100).toLocaleString('en-IN')}`}
+              label="My Total Balance"
+              value={`₹${(((wallet?.provisionalBalance || 0) + (wallet?.finalBalance || 0)) / 100).toLocaleString('en-IN')}`}
+              change="Cumulative Success"
+              color="#3b82f6"
+            />
+            <StatCard
+              label="Available Payout"
+              value={`₹${((wallet?.finalBalance || 0) / 100).toLocaleString('en-IN')}`}
+              change="Ready for withdrawal"
+              color="#10b981"
+            />
+            <StatCard
+              label="Manager Overrides"
+              value={`₹${((wallet?.earningsBreakdown?.override || 0) / 100).toLocaleString('en-IN')}`}
               change="Provisional this cycle"
               color={color}
             />
             <StatCard
-              label="Active HCCs"
+              label="Active Network"
               value={`${activeHCCs}/${teamMembers.length}`}
-              change={`${teamMembers.length - activeHCCs} inactive`}
-              color={color}
+              change="HCC Activity Status"
+              color="#60a5fa"
             />
             <StatCard
-              label="Team Volume"
-              value={String(teamSalesCountThisMonth)}
-              change="Total unit sales"
-              color={color}
-            />
-            <StatCard
-              label="Goal to HBA"
+              label="Promotion Path"
               value={`${Math.round((hcmPromotionSalesProgress / 12 + hcmPromotionRecruitProgress / 12) / 2 * 100)}%`}
-              change={`${12 - hcmPromotionRecruitProgress} more HCCs needed`}
-              color={color}
-            />
-            <StatCard
-              label="Cap Amount"
-              value="₹2,00,000"
-              change="Manager Earnings Limit"
+              change="Goal to HBA Rank"
               color="#fbbf24"
             />
           </div>
@@ -319,8 +319,8 @@ function HcmDashboardContent() {
               />
 
               {/* HCC Activity Monitor */}
-              <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
-                <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
+              <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col">
+                <div className="px-8 py-6 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
                   <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Direct HCC Monitor</h3>
                   <Link href="/hcm/team-monitor" className="text-[10px] font-bold text-hcm uppercase tracking-widest hover:underline">View All</Link>
                 </div>
@@ -365,10 +365,10 @@ function HcmDashboardContent() {
           </div>
 
           {/* Team Sales Feed */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
-            <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
+          <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="px-8 py-6 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
               <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Recent Team Activity</h3>
-              <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{teamSales.length} total entries</span>
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{teamSales.length} entries</span>
             </div>
             <div className="divide-y divide-white/[0.04]">
               {teamSales.length === 0 ? (
@@ -383,8 +383,8 @@ function HcmDashboardContent() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm text-white font-bold truncate">{sale.customerName}</div>
-                      <div className="text-[10px] text-muted mt-0.5 flex items-center gap-2">
-                        <span className="font-medium">by {sale.seller.name}</span>
+                      <div className="text-[10px] text-white/40 mt-0.5 flex items-center gap-2">
+                        <span className="font-medium text-hcm uppercase tracking-tighter">by {sale.seller?.name || 'Direct Sale'}</span>
                         <span className="opacity-20">•</span>
                         <span>{sale.plan.name}</span>
                       </div>
