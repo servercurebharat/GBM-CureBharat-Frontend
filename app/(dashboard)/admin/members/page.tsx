@@ -4,20 +4,46 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usersAPI } from '@/lib/api';
 import { IUser } from '@/types';
+import { useAuth } from '@/lib/auth';
+import AddMemberModal from '@/components/dashboard/AddMemberModal';
 
 export default function AdminMembers() {
+  const { user } = useAuth();
   const [members, setMembers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('ALL ROLES');
+  const [stats, setStats] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await usersAPI.getStats();
+        if (res.data.success) {
+          setStats(res.data.data);
+        }
+      } catch (err) {
+        console.error('Stats fetch failed', err);
+      }
+    }
+    fetchStats();
+  }, [refreshKey]);
 
   useEffect(() => {
     async function fetchMembers() {
       setLoading(true);
       try {
-        const res = await usersAPI.getAll({ page, limit: 10, search });
+        let roleFilter = undefined;
+        if (activeTab === 'STATE HEAD') roleFilter = 'sh';
+        else if (activeTab === 'HBA') roleFilter = 'hba';
+        else if (activeTab === 'HCM') roleFilter = 'hcm';
+        else if (activeTab === 'HCC') roleFilter = 'hcc';
+
+        const res = await usersAPI.getAll({ page, limit: 10, search, role: roleFilter });
         if (res.data.success) {
           setMembers(res.data.data || []);
           setTotal(res.data.pagination.total);
@@ -29,24 +55,32 @@ export default function AdminMembers() {
       }
     }
     fetchMembers();
-  }, [page, search]);
+  }, [page, search, activeTab, refreshKey]);
 
   const tabs = ['ALL ROLES', 'STATE HEAD', 'HBA', 'HCM', 'HCC'];
 
   return (
     <DashboardLayout pageTitle="Member Management">
-      <div className="space-y-6 pb-10">
+      {user && (
+        <AddMemberModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          currentUser={user}
+          onSuccess={() => setRefreshKey(prev => prev + 1)}
+        />
+      )}
+      <div className="space-y-6 pb-10 stagger-children">
         {/* Top KPI Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="TOTAL MEMBERS" value="124,582" sub="+12.5% vs last month" trend="up" />
-          <StatCard label="ACTIVE MEMBERS" value="98,240" sub="78.8% Retention" trend="up" />
-          <StatCard label="INACTIVE MEMBERS" value="21,342" sub="Awaiting reactivation" trend="none" />
-          <StatCard label="PENDING KYC" value="4,998" sub="Urgent Action Required" trend="warning" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up stagger-children">
+          <StatCard label="TOTAL MEMBERS" value={stats ? stats.totalUsers : '-'} sub="Total registered" trend="none" />
+          <StatCard label="ACTIVE MEMBERS" value={stats ? stats.activeUsers : '-'} sub="Currently active" trend="up" />
+          <StatCard label="INACTIVE MEMBERS" value={stats ? stats.inactiveUsers : '-'} sub="Awaiting reactivation" trend="none" />
+          <StatCard label="PENDING KYC" value={stats ? stats.pendingKycUsers : '-'} sub="Urgent Action Required" trend={stats?.pendingKycUsers > 0 ? 'warning' : 'none'} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
           {/* Main Content Area */}
-          <div className="lg:col-span-9 space-y-6">
+          <div className="lg:col-span-9 space-y-6 animate-slide-up stagger-children">
             {/* Filter Tabs & Add User */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex bg-[#131241] p-1 rounded-xl shadow-lg border border-white/[0.03]">
@@ -64,7 +98,7 @@ export default function AdminMembers() {
                   </button>
                 ))}
               </div>
-              <button className="bg-[#6029F1] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#6029F1]/20 hover:brightness-110 transition-all">
+              <button onClick={() => setIsModalOpen(true)} className="bg-[#6029F1] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#6029F1]/20 hover:brightness-110 transition-all">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Add User
               </button>
@@ -191,7 +225,7 @@ export default function AdminMembers() {
           </div>
 
           {/* Right Sidebar Area */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-6 animate-slide-up stagger-children">
             {/* Role Distribution Chart */}
             <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
                <h3 className="text-sm font-bold font-display uppercase tracking-widest mb-10">Role Distribution</h3>
@@ -199,19 +233,19 @@ export default function AdminMembers() {
                   <div className="w-40 h-40 relative flex items-center justify-center">
                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="42" fill="none" stroke="white" strokeWidth="10" opacity="0.05" />
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="#60A5FA" strokeWidth="10" strokeDasharray="264" strokeDashoffset="66" strokeLinecap="round" />
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="#8b7cf8" strokeWidth="10" strokeDasharray="264" strokeDashoffset="220" strokeLinecap="round" />
-                        <circle cx="50" cy="50" r="42" fill="none" stroke="#fbbf24" strokeWidth="10" strokeDasharray="264" strokeDashoffset="250" strokeLinecap="round" />
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="#60A5FA" strokeWidth="10" strokeDasharray="264" strokeDashoffset={stats ? 264 - 264 * (((stats.roleDistribution?.hba || 0) + (stats.roleDistribution?.hcm || 0) + (stats.roleDistribution?.hcc || 0)) / (stats.totalUsers || 1)) : 66} strokeLinecap="round" />
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="#8b7cf8" strokeWidth="10" strokeDasharray="264" strokeDashoffset={stats ? 264 - 264 * (((stats.roleDistribution?.hba || 0) + (stats.roleDistribution?.hcm || 0)) / (stats.totalUsers || 1)) : 220} strokeLinecap="round" />
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="#fbbf24" strokeWidth="10" strokeDasharray="264" strokeDashoffset={stats ? 264 - 264 * ((stats.roleDistribution?.hba || 0) / (stats.totalUsers || 1)) : 250} strokeLinecap="round" />
                      </svg>
                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl font-bold font-display">124k</span>
+                        <span className="text-2xl font-bold font-display">{stats ? stats.totalUsers : '-'}</span>
                         <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">TOTAL</span>
                      </div>
                   </div>
                   <div className="mt-10 space-y-4 w-full">
-                     <DistributionItem label="HCC Members" value="75%" color="bg-[#60A5FA]" />
-                     <DistributionItem label="HCM Leads" value="15%" color="bg-[#8b7cf8]" />
-                     <DistributionItem label="HBA Partners" value="10%" color="bg-[#fbbf24]" />
+                     <DistributionItem label="HCC Members" value={stats ? `${Math.round(((stats.roleDistribution?.hcc || 0) / (stats.totalUsers || 1)) * 100)}%` : '-'} color="bg-[#60A5FA]" />
+                     <DistributionItem label="HCM Leads" value={stats ? `${Math.round(((stats.roleDistribution?.hcm || 0) / (stats.totalUsers || 1)) * 100)}%` : '-'} color="bg-[#8b7cf8]" />
+                     <DistributionItem label="HBA Partners" value={stats ? `${Math.round(((stats.roleDistribution?.hba || 0) / (stats.totalUsers || 1)) * 100)}%` : '-'} color="bg-[#fbbf24]" />
                   </div>
                </div>
             </div>
@@ -246,7 +280,7 @@ export default function AdminMembers() {
 
 function StatCard({ label, value, sub, trend, trendValue }: any) {
   return (
-    <div className="bg-[#131241] rounded-2xl p-6 text-white shadow-xl border border-white/[0.03]">
+    <div className="bg-[#131241] rounded-2xl p-6 text-white shadow-xl border border-white/[0.03] animate-slide-up">
       <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-3">{label}</div>
       <div className="text-3xl font-bold font-display mb-3">{value}</div>
       <div className="flex items-center gap-2">

@@ -1,17 +1,17 @@
 import axios from 'axios';
-import { 
-  ApiResponse, 
-  IUser, 
-  RegisterData, 
-  KYCData, 
-  ITreeNode, 
-  CreateSaleData, 
-  ISale, 
-  PaginatedResponse, 
-  IWallet, 
-  GenerateEPinData, 
+import {
+  ApiResponse,
+  IUser,
+  RegisterData,
+  KYCData,
+  ITreeNode,
+  CreateSaleData,
+  ISale,
+  PaginatedResponse,
+  IWallet,
+  GenerateEPinData,
   IEPin,
-  IPlan 
+  IPlan
 } from '../types';
 
 const api = axios.create({
@@ -25,14 +25,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        // Clear cookies to prevent infinite redirect loops in middleware
-        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        
-        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
-          window.location.href = '/login';
-        }
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);
@@ -41,23 +35,25 @@ api.interceptors.response.use(
 
 // AUTH
 export const authAPI = {
-  sendOTP: (mobile: string) => 
+  sendOTP: (mobile: string) =>
     api.post('/auth/send-otp', { mobile }),
-  verifyOTP: (mobile: string, otp: string) => 
+  verifyOTP: (mobile: string, otp: string) =>
     api.post<ApiResponse<IUser>>('/auth/verify-otp', { mobile, otp }),
-  register: (data: RegisterData) => 
+  register: (data: RegisterData) =>
     api.post('/auth/register', data),
-  getMe: () => 
+  getMe: () =>
     api.get<ApiResponse<IUser>>('/auth/me'),
-  logout: () => 
+  logout: () =>
     api.post('/auth/logout'), // Note: Backend needs to implement this or just clear cookie on client
 };
 
 // USERS
 export const usersAPI = {
-  getAll: (params?: { page?: number; limit?: number; search?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string }) =>
     api.get<PaginatedResponse<IUser>>('/users', { params }),
-  getById: (id: string) => 
+  getStats: () =>
+    api.get<ApiResponse<any>>('/users/stats'),
+  getById: (id: string) =>
     api.get<ApiResponse<IUser>>(`/users/${id}`),
   updateKYC: (id: string, data: any) =>
     api.put<ApiResponse<any>>(`/users/${id}/kyc`, data),
@@ -69,8 +65,12 @@ export const usersAPI = {
 export const salesAPI = {
   create: (data: CreateSaleData) =>
     api.post<ApiResponse<ISale>>('/sales', data),
-  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string; search?: string; status?: string }) =>
     api.get<PaginatedResponse<ISale>>('/sales', { params }),
+  getFTDAnalytics: (date: string) =>
+    api.get<ApiResponse<any>>('/sales/analytics/ftd', { params: { date } }),
+  getMTDAnalytics: (month: string) =>
+    api.get<ApiResponse<any>>('/sales/analytics/mtd', { params: { month } }),
   getById: (id: string) =>
     api.get<ApiResponse<ISale>>(`/sales/${id}`),
 };
@@ -133,6 +133,14 @@ export const teamAPI = {
     api.get<ApiResponse<any>>('/team/stats'),
   getMembers: (params?: { role?: string; search?: string; page?: number; limit?: number }) =>
     api.get<PaginatedResponse<any>>('/team/members', { params }),
+};
+
+// DASHBOARD
+export const dashboardAPI = {
+  getSummary: () =>
+    api.get<ApiResponse<any>>('/dashboard/summary'),
+  getLeaders: () =>
+    api.get<ApiResponse<any>>('/dashboard/leaders'),
 };
 
 export default api;

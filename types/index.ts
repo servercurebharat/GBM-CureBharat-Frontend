@@ -84,12 +84,17 @@ export interface ISale {
     name: string;
     memberId: string;
   };
+  hccId?: {
+    _id: string;
+    name: string;
+    memberId: string;
+  };
   customerName: string;
   customerMobile: string;
   plan: IPlan;
   amount: number;
   businessVolume: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  status: 'pending' | 'completed' | 'cancelled' | 'active';
   commissionProcessed: boolean;
   cycleMonth: string;
   createdAt: string;
