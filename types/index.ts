@@ -11,7 +11,7 @@ export interface IUser {
   role: Role;
   rank: Rank;
   memberId: string;
-  referrer?: {
+  referrerId?: string | {
     _id: string;
     name: string;
     memberId: string;
@@ -20,6 +20,31 @@ export interface IUser {
   state: string;
   status: Status;
   kycStatus: KycStatus;
+  
+  // New Profile Fields
+  gender?: 'male' | 'female' | 'other';
+  dob?: string;
+  profileImage?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+  bankDetails?: {
+    accountHolderName?: string;
+    accountNumber?: string;
+    bankName?: string;
+    ifscCode?: string;
+    branchName?: string;
+  };
+  nomineeDetails?: {
+    name?: string;
+    relation?: string;
+    mobile?: string;
+  };
+  
   kycDocuments?: {
     aadhaarNumber?: string;
     aadhaarFrontUrl?: string;

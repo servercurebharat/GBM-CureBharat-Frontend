@@ -57,21 +57,14 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     ]},
     { label: 'Network', items: [
       { label: 'Enroll Member', href: '/sh?enroll=true', icon: 'plus-circle' },
-      { label: 'Network Tree', href: '/sh/state-tree', icon: 'git-branch' },
-      { label: 'Direct Team', href: '/sh/direct-team', icon: 'users' },
-      { label: 'Team Performance', href: '/sh/team-performance', icon: 'bar-chart' },
-      { label: 'Members', href: '/sh/members', icon: 'list' },
+      { label: 'Team', href: '/sh/team', icon: 'users' },
     ]},
     { label: 'Sales', items: [
-      { label: 'Sales Entry', href: '/sh/sales-entry', icon: 'plus-circle' },
-      { label: 'My Sales', href: '/sh/my-sales', icon: 'list' },
-      { label: 'Revenue', href: '/sh/revenue', icon: 'dollar' },
+      { label: 'New Sale', href: '/sh/sales/new', icon: 'plus-circle' },
+      { label: 'My Sales', href: '/sh/sales/history', icon: 'list' },
     ]},
     { label: 'Finance', items: [
-      { label: 'Wallet', href: '/sh/wallet', icon: 'wallet' },
-      { label: 'Withdrawal', href: '/sh/withdrawal', icon: 'clock' },
-      { label: 'Income Breakdown', href: '/sh/income', icon: 'pie-chart' },
-      { label: 'Profit Tracker', href: '/sh/profit-tracker', icon: 'target' },
+      { label: 'Finance Hub', href: '/sh/finance', icon: 'wallet' },
       { label: 'Ranks Progress', href: '/sh/ranks', icon: 'award' },
     ]},
     { label: 'System', items: [
@@ -88,13 +81,14 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     ]},
     { label: 'Network Management', items: [
       { label: 'Enroll Member', href: '/hba?enroll=true', icon: 'plus-circle' },
-      { label: 'My HCB Tree', href: '/hba/network', icon: 'git-branch' },
-      { label: 'Team Performance', href: '/hba/team-performance', icon: 'bar-chart' },
+      { label: 'Team', href: '/hba/team', icon: 'users' },
     ]},
     { label: 'Financial Tracking', items: [
-      { label: 'Override Income', href: '/hba/override-income', icon: 'layers' },
-      { label: 'Wallet Ledger', href: '/hba/wallet', icon: 'wallet' },
-      { label: 'Withdrawal History', href: '/hba/withdrawal', icon: 'clock' },
+      { label: 'Finance Hub', href: '/hba/finance', icon: 'wallet' },
+    ]},
+    { label: 'Sales', items: [
+      { label: 'New Sale', href: '/hba/sales/new', icon: 'plus-circle' },
+      { label: 'My Sales', href: '/hba/sales/history', icon: 'list' },
     ]},
     { label: 'Inventory Control', items: [
       { label: 'Bulk E-Pins', href: '/hba/bulk-pins', icon: 'key' },
@@ -108,14 +102,15 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     ]},
     { label: 'Network', items: [
       { label: 'Enroll Member', href: '/hcm?enroll=true', icon: 'plus-circle' },
-      { label: 'My Tree', href: '/hcm/network', icon: 'git-branch' },
-      { label: 'Team Monitor', href: '/hcm/team-monitor', icon: 'activity' },
+      { label: 'Team', href: '/hcm/team', icon: 'users' },
     ]},
     { label: 'Finance', items: [
-      { label: 'Override Ledger', href: '/hcm/override-ledger', icon: 'layers' },
-      { label: 'Wallet', href: '/hcm/wallet', icon: 'wallet' },
-      { label: 'Withdrawal', href: '/hcm/withdrawal', icon: 'clock' },
+      { label: 'Finance Hub', href: '/hcm/finance', icon: 'wallet' },
       { label: 'Rank Progress', href: '/hcm/rank-progress', icon: 'target' },
+    ]},
+    { label: 'Sales', items: [
+      { label: 'New Sale', href: '/hcm/sales/new', icon: 'plus-circle' },
+      { label: 'My Sales', href: '/hcm/sales/history', icon: 'list' },
     ]},
     { label: 'E-Pin', items: [
       { label: 'Push Pins', href: '/hcm/push-pins', icon: 'key' },
@@ -124,19 +119,18 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
   hcc: [
     { label: 'Overview', items: [
       { label: 'Dashboard', href: '/hcc', icon: 'grid' },
+      { label: 'Profile', href: '/hcc/profile', icon: 'user' },
     ]},
     { label: 'My Business', items: [
-      { label: 'Live', href: '/hcc/network', icon: 'activity' },
+      { label: 'Team', href: '/hcc/team', icon: 'users' },
       { label: 'Rank Progress', href: '/hcc/rank-progress', icon: 'target' },
     ]},
     { label: 'Sales', items: [
-      { label: 'New Policy Sale', href: '/hcc/new-sale', icon: 'plus-circle' },
-      { label: 'My Sales History', href: '/hcc/sales-history', icon: 'list' },
-      { label: 'Customer KYC Form', href: '/hcc/customer-kyc', icon: 'file-text' },
+      { label: 'New Sale', href: '/hcc/sales/new', icon: 'plus-circle' },
+      { label: 'My Sales', href: '/hcc/sales/history', icon: 'list' },
     ]},
     { label: 'Finance', items: [
-      { label: 'My Wallet', href: '/hcc/wallet', icon: 'wallet' },
-      { label: 'Withdrawal Request', href: '/hcc/withdrawal', icon: 'clock' },
+      { label: 'Finance Hub', href: '/hcc/finance', icon: 'wallet' },
     ]},
     { label: 'E-Pin', items: [
       { label: 'My Pin Wallet', href: '/hcc/epins', icon: 'key' },

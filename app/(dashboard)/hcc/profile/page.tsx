@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { IWallet } from '@/types';
 import toast from 'react-hot-toast';
 
-export default function HcmProfilePage() {
+export default function HccProfilePage() {
   const { user } = useAuth();
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const [loadingWallet, setLoadingWallet] = useState(true);
@@ -165,6 +165,28 @@ export default function HcmProfilePage() {
               ))}
             </div>
           </div>
+
+          {/* Nominee Details Section */}
+          <div>
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-8 h-8 rounded-lg bg-[#60A5FA]/10 flex items-center justify-center text-[#60A5FA]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Nominee Information</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: 'Nominee Name', value: user.nomineeDetails?.name || 'N/A' },
+                { label: 'Relationship', value: user.nomineeDetails?.relation || 'N/A' },
+                { label: 'Mobile Number', value: user.nomineeDetails?.mobile || 'N/A' },
+              ].map((field, i) => (
+                <div key={i} className="space-y-2">
+                  <label className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest pl-1">{field.label}</label>
+                  <div className="bg-white/2 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-inner">{field.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* 3. Stats Grid */}
@@ -185,4 +207,3 @@ export default function HcmProfilePage() {
     </DashboardLayout>
   );
 }
-

@@ -25,8 +25,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
-        window.location.href = '/login';
+      if (typeof window !== 'undefined') {
+        // Clear cookies to prevent infinite redirect loops in middleware
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        
+        if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
@@ -75,6 +81,8 @@ export const walletAPI = {
     api.get<ApiResponse<IWallet>>('/wallet/my'),
   requestWithdrawal: (amount: number) =>
     api.post('/wallet/withdraw', { amount }),
+  getMyWithdrawals: () =>
+    api.get<ApiResponse<any[]>>('/wallet/withdrawals'),
   triggerPayoutCycle: (cycleMonth: string) =>
     api.post('/wallet/payout-cycle', { cycleMonth }),
 };
@@ -113,12 +121,18 @@ export const adminAPI = {
     api.get<ApiResponse<any>>('/admin/commission-config'),
   updateCommissionConfig: (data: any) =>
     api.put<ApiResponse<any>>('/admin/commission-config', data),
-  getAllProvisional: () =>
-    api.get<ApiResponse<{ wallets: any[]; summary: any }>>('/wallet/all-provisional'),
   triggerPayoutCycle: (cycleMonth: string) =>
     api.post<ApiResponse<any>>('/wallet/payout-cycle', { cycleMonth }),
   getTree: () =>
     api.get<ApiResponse<any>>('/admin/tree'),
+};
+
+// TEAM
+export const teamAPI = {
+  getStats: () =>
+    api.get<ApiResponse<any>>('/team/stats'),
+  getMembers: (params?: { role?: string; search?: string; page?: number; limit?: number }) =>
+    api.get<PaginatedResponse<any>>('/team/members', { params }),
 };
 
 export default api;

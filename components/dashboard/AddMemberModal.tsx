@@ -36,8 +36,18 @@ export default function AddMemberModal({ isOpen, onClose, currentUser, onSuccess
       { id: 'hcm', label: 'HCM' },
       { id: 'hcc', label: 'HCC' }
     ];
-    if (role === 'sh') return [{ id: 'hba', label: 'HBA' }, { id: 'hcc', label: 'HCC' }];
-    if (role === 'hba') return [{ id: 'hcm', label: 'HCM' }, { id: 'hcc', label: 'HCC' }];
+    if (role === 'sh') return [
+      { id: 'hba', label: 'HBA' },
+      { id: 'hcm', label: 'HCM' },
+      { id: 'hcc', label: 'HCC' }
+    ];
+    if (role === 'hba') return [
+      { id: 'hcm', label: 'HCM' },
+      { id: 'hcc', label: 'HCC' }
+    ];
+    if (role === 'hcm' || role === 'hcc') return [
+      { id: 'hcc', label: 'HCC' }
+    ];
     return [{ id: 'hcc', label: 'HCC' }];
   };
 
