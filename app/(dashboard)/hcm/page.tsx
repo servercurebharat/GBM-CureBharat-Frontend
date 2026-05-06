@@ -100,14 +100,14 @@ function HcmDashboardContent() {
         />
       )}
       {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center justify-center h-[60vh] animate-fade-in">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-hcm border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-bold text-muted uppercase tracking-widest">Synchronizing Team Data...</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-widest animate-pulse">Synchronizing Team Data...</p>
           </div>
         </div>
       ) : (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-8 pb-10 stagger-children">
           {/* KYC Alert Banner - Premium Redesign */}
           {user.kycStatus !== 'approved' && (
             <div className={`relative overflow-hidden p-8 rounded-[2.5rem] border-2 shadow-2xl animate-in slide-in-from-top-4 duration-1000 flex flex-col md:flex-row items-center justify-between gap-8 ${
@@ -145,7 +145,7 @@ function HcmDashboardContent() {
           )}
 
           {/* Welcome Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
             <div>
               <h2 className="font-display text-3xl font-black text-slate-900 tracking-tight">
                 Welcome, {user.name.split(' ')[0]}
@@ -166,7 +166,7 @@ function HcmDashboardContent() {
 
           {/* Activity Compliance Banner */}
           {user.personalSalesThisMonth < 1 && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3 flex items-center gap-3">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3 flex items-center gap-3 animate-slide-up">
               <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center text-red-400">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
@@ -178,7 +178,7 @@ function HcmDashboardContent() {
           )}
 
           {/* Core Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 animate-slide-up stagger-children">
             <StatCard
               label="Manager Override"
               value={`₹${(overrideThisMonth / 100).toLocaleString('en-IN')}`}
@@ -212,7 +212,7 @@ function HcmDashboardContent() {
           </div>
 
           {/* Top 10 HCC Sales Performance */}
-          <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up">
              <div className="px-8 py-6 border-b border-white/[0.07] flex justify-between items-center bg-white/[0.01]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-hcm/10 flex items-center justify-center text-hcm border border-hcm/20">
@@ -262,7 +262,7 @@ function HcmDashboardContent() {
           </div>
 
           {/* Row 2: Wallet + Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up">
             <div className="lg:col-span-5 space-y-8">
               {wallet && (
                 <WalletCard
@@ -365,7 +365,7 @@ function HcmDashboardContent() {
           </div>
 
           {/* Team Sales Feed */}
-          <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl animate-slide-up">
             <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
               <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Recent Team Activity</h3>
               <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{teamSales.length} total entries</span>

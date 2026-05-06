@@ -41,14 +41,14 @@ export default function HCCDashboard() {
   return (
     <DashboardLayout pageTitle="My Business Workspace">
       {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center justify-center h-[60vh] animate-fade-in">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-hcc border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-bold text-muted uppercase tracking-widest">Loading Analytics...</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-widest animate-pulse">Loading Analytics...</p>
           </div>
         </div>
       ) : (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-8 pb-10 stagger-children">
           {/* KYC Alert Banner - Redesigned for Premium Visibility */}
           {user.kycStatus !== 'approved' && (
             <div className={`relative overflow-hidden p-8 rounded-[2.5rem] border-2 shadow-2xl animate-in slide-in-from-top-4 duration-1000 flex flex-col md:flex-row items-center justify-between gap-8 ${
@@ -86,7 +86,7 @@ export default function HCCDashboard() {
           )}
 
           {/* Header Greeting */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
             <div>
               <h2 className="font-display text-3xl font-black text-slate-900 tracking-tight">
                 Welcome, {user.name.split(' ')[0]}
@@ -106,7 +106,7 @@ export default function HCCDashboard() {
           </div>
 
           {/* Core Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-slide-up stagger-children">
             <StatCard
               label="Provisional Earnings"
               value={`₹${((wallet?.provisionalBalance || 0) / 100).toLocaleString('en-IN')}`}
@@ -134,7 +134,7 @@ export default function HCCDashboard() {
           </div>
 
           {/* Detailed Analytics Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up">
             {/* Rank and Performance */}
             <div className="lg:col-span-7 space-y-8">
               <RankProgressBar

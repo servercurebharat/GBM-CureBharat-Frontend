@@ -26,6 +26,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.href = '/login';
       }
     }
@@ -49,8 +51,10 @@ export const authAPI = {
 
 // USERS
 export const usersAPI = {
-  getAll: (params?: { page?: number; limit?: number; search?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string }) =>
     api.get<PaginatedResponse<IUser>>('/users', { params }),
+  getStats: () =>
+    api.get<ApiResponse<any>>('/users/stats'),
   getById: (id: string) => 
     api.get<ApiResponse<IUser>>(`/users/${id}`),
   updateKYC: (id: string, data: any) =>
@@ -63,8 +67,12 @@ export const usersAPI = {
 export const salesAPI = {
   create: (data: CreateSaleData) =>
     api.post<ApiResponse<ISale>>('/sales', data),
-  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string; search?: string; status?: string }) =>
     api.get<PaginatedResponse<ISale>>('/sales', { params }),
+  getFTDAnalytics: (date: string) =>
+    api.get<ApiResponse<any>>('/sales/analytics/ftd', { params: { date } }),
+  getMTDAnalytics: (month: string) =>
+    api.get<ApiResponse<any>>('/sales/analytics/mtd', { params: { month } }),
   getById: (id: string) =>
     api.get<ApiResponse<ISale>>(`/sales/${id}`),
 };

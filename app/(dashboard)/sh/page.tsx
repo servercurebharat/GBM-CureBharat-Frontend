@@ -59,14 +59,14 @@ function StateHeadDashboardContent() {
   return (
     <DashboardLayout pageTitle="Dashboard">
       {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center justify-center h-[60vh] animate-fade-in">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
             <p className="text-xs font-bold text-muted uppercase tracking-widest">Loading State Analytics...</p>
           </div>
         </div>
       ) : (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-8 pb-10 stagger-children">
           {/* KYC Alert Banner */}
           {user.kycStatus !== 'approved' && (
             <div className={`p-6 rounded-[2rem] border animate-in slide-in-from-top duration-700 flex flex-col md:flex-row items-center justify-between gap-6 ${
@@ -105,7 +105,7 @@ function StateHeadDashboardContent() {
           )}
 
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-slide-up">
             <div>
               <h2 className="text-2xl font-bold text-[#1E293B] tracking-tight">State Head</h2>
               <p className="text-sm text-[#64748B] mt-1 font-medium opacity-70">Monitoring {user.state || 'N/A'} territory performance and compliance.</p>
@@ -134,7 +134,7 @@ function StateHeadDashboardContent() {
           />
 
           {/* Top Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-slide-up stagger-children">
              {[
                { label: 'Territory', value: user.state || 'N/A' },
                { label: 'Personal Sales', value: user.personalSalesCount.toString() },
@@ -142,7 +142,7 @@ function StateHeadDashboardContent() {
                { label: 'Total Earned', value: `₹${((wallet?.totalEarned || 0) / 100).toLocaleString('en-IN')}` },
                { label: 'Cap Amount', value: '₹10,00,000' },
              ].map((stat, i) => (
-               <div key={i} className="bg-[#131241] border border-white/5 p-6 rounded-[24px] shadow-xl transition-all duration-300 hover:border-white/10 group">
+               <div key={i} className="bg-[#131241] border border-white/5 p-6 rounded-[24px] shadow-xl transition-all duration-300 hover:border-white/10 group animate-slide-up">
                   <p className="text-[10px] text-[#B5B8BD] font-bold uppercase tracking-widest mb-6 group-hover:text-[#60A5FA] transition-colors">{stat.label}</p>
                   <h3 className="text-2xl font-bold text-white tracking-tight">{stat.value}</h3>
                </div>
@@ -150,7 +150,7 @@ function StateHeadDashboardContent() {
           </div>
 
           {/* Top 10 HBA Sales in Territory */}
-          <div className="bg-[#131241] border border-white/5 rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="bg-[#131241] border border-white/5 rounded-[24px] shadow-2xl overflow-hidden animate-slide-up">
              <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#60A5FA]/10 flex items-center justify-center text-[#60A5FA]">
@@ -196,7 +196,7 @@ function StateHeadDashboardContent() {
           </div>
 
           {/* Analytics Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-slide-up">
             <div className="lg:col-span-9 bg-[#131241] border border-white/5 rounded-[24px] p-8 shadow-2xl">
                <div className="flex items-center justify-between mb-10">
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider">Role-Based Analytics</h3>
@@ -211,7 +211,7 @@ function StateHeadDashboardContent() {
           </div>
 
           {/* Activity & Promotion Pulse */}
-          <div className="bg-[#131241] border border-white/5 rounded-[24px] p-8 shadow-2xl">
+          <div className="bg-[#131241] border border-white/5 rounded-[24px] p-8 shadow-2xl animate-slide-up">
              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-10">Activity & Promotion Pulse</h3>
              
              <div className="space-y-8 max-w-4xl">
@@ -244,7 +244,7 @@ function StateHeadDashboardContent() {
           </div>
 
           {/* Recent Ledger Transactions */}
-          <div className="bg-[#131241] border border-white/5 rounded-[24px] shadow-2xl overflow-hidden">
+          <div className="bg-[#131241] border border-white/5 rounded-[24px] shadow-2xl overflow-hidden animate-slide-up">
              <div className="px-8 py-6 border-b border-white/5">
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Recent Transactions</h3>
              </div>

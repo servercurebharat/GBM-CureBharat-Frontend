@@ -37,20 +37,25 @@ function AdminDashboardContent() {
     async function fetchAdminData() {
       try {
         setLoading(true);
-        const [usersRes, pendingRes] = await Promise.all([
-          usersAPI.getAll({ page: 1, limit: 1000 }), // Get all for counts
-          adminAPI.getPendingKYC()
+        const [usersRes, pendingRes, statsRes] = await Promise.all([
+          usersAPI.getAll({ page: 1, limit: 10 }), // We don't need all users for stats anymore, just recent
+          adminAPI.getPendingKYC(),
+          usersAPI.getStats()
         ]);
+
+        if (statsRes.data.success) {
+          const s = statsRes.data.data;
+          setStats(prev => ({
+            ...prev,
+            totalUsers: s.totalUsers,
+            activeUsers: s.activeUsers,
+            inactiveUsers: s.inactiveUsers,
+            roleDistribution: s.roleDistribution,
+          }));
+        }
 
         if (usersRes.data.success) {
           const allUsers = usersRes.data.data;
-          const active = allUsers.filter((u: IUser) => u.status === 'active').length;
-          setStats(prev => ({
-            ...prev,
-            totalUsers: usersRes.data.pagination.total,
-            activeUsers: active,
-            inactiveUsers: usersRes.data.pagination.total - active,
-          }));
           setRecentJoins(allUsers.slice(0, 5));
         }
 
@@ -81,16 +86,16 @@ function AdminDashboardContent() {
   return (
     <DashboardLayout pageTitle="Dashboard">
       {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center justify-center h-[60vh] animate-fade-in">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-[#6029F1] border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-bold text-muted uppercase tracking-widest text-[#131241]">Loading Command Center...</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-widest text-[#131241] animate-pulse">Loading Command Center...</p>
           </div>
         </div>
       ) : (
-        <div className="space-y-6 pb-10">
+        <div className="space-y-6 pb-10 stagger-children">
           {/* Header Controls */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 animate-slide-up">
             <h1 className="text-3xl font-bold text-[#000000] font-display">Welcome Back, Admin</h1>
             <div className="flex flex-wrap items-center gap-3">
               {user && (
@@ -119,8 +124,8 @@ function AdminDashboardContent() {
           )}
 
           {/* Stat Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 animate-slide-up">
+            <div className="lg:col-span-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 stagger-children">
               <KPIItem label="Total Users" value={stats.totalUsers} />
               <KPIItem label="Active Users" value={stats.activeUsers} />
               <KPIItem label="Pending KYC" value={stats.pendingKYC} badge={stats.pendingKYC > 0 ? "URGENT" : ""} />
@@ -131,7 +136,7 @@ function AdminDashboardContent() {
           </div>
 
           {/* Charts and Side Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
             {/* Revenue Trends */}
             <div className="lg:col-span-6 bg-[#131241] rounded-[2rem] p-6 text-white overflow-hidden relative shadow-xl border border-white/[0.03]">
                <div className="flex justify-between items-center mb-8">
@@ -158,10 +163,10 @@ function AdminDashboardContent() {
                      <span className="text-3xl font-bold font-display leading-none">{stats.totalUsers}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-x-8 gap-y-3 w-full">
-                     <LegendItem label="SH" color="bg-[#60A5FA]" />
-                     <LegendItem label="HCB" color="bg-[#8b7cf8]" />
-                     <LegendItem label="HCM" color="bg-[#34d399]" />
-                     <LegendItem label="HCC" color="bg-[#64748B]" />
+                     <LegendItem label={`SH (${(stats as any).roleDistribution?.sh || 0})`} color="bg-[#60A5FA]" />
+                     <LegendItem label={`HCB (${(stats as any).roleDistribution?.hba || 0})`} color="bg-[#8b7cf8]" />
+                     <LegendItem label={`HCM (${(stats as any).roleDistribution?.hcm || 0})`} color="bg-[#34d399]" />
+                     <LegendItem label={`HCC (${(stats as any).roleDistribution?.hcc || 0})`} color="bg-[#64748B]" />
                   </div>
                </div>
             </div>
@@ -187,7 +192,7 @@ function AdminDashboardContent() {
           </div>
 
           {/* Bottom Section: Tables and Alerts */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-slide-up">
             <div className="lg:col-span-9 space-y-6">
                 {/* Top 10 State Head (SH) Sales */}
                 <div className="bg-[#131241] rounded-[2rem] text-white shadow-xl overflow-hidden border border-white/[0.03] animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -302,7 +307,7 @@ function AdminDashboardContent() {
 function KPIItem({ label, value, badge }: any) {
   const isLong = String(value).length > 10;
   return (
-    <div className="bg-[#131241] rounded-[1.5rem] p-5 text-white shadow-lg flex flex-col justify-between h-36 border border-white/[0.03] hover:scale-[1.05] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 group cursor-default">
+    <div className="bg-[#131241] rounded-[1.5rem] p-5 text-white shadow-lg flex flex-col justify-between h-36 border border-white/[0.03] hover:scale-[1.05] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 group cursor-default animate-slide-up">
       <div className="flex justify-between items-start">
         <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors">{label}</span>
         {badge && <span className="bg-[#fbbf24] text-[8px] font-black px-1.5 py-0.5 rounded text-black tracking-tighter">{badge}</span>}

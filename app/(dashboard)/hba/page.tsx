@@ -89,14 +89,14 @@ function HbaDashboardContent() {
         />
       )}
       {loading ? (
-        <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center justify-center h-[60vh] animate-fade-in">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-hba border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-bold text-muted uppercase tracking-widest">Loading Network Analytics...</p>
+            <p className="text-xs font-bold text-muted uppercase tracking-widest animate-pulse">Loading Network Analytics...</p>
           </div>
         </div>
       ) : (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-8 pb-10 stagger-children">
           {/* KYC Alert Banner */}
           {user.kycStatus !== 'approved' && (
             <div className={`p-6 rounded-[2rem] border animate-in slide-in-from-top duration-700 flex flex-col md:flex-row items-center justify-between gap-6 ${
@@ -135,7 +135,7 @@ function HbaDashboardContent() {
           )}
 
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
             <div>
               <h2 className="font-display text-3xl font-bold text-black tracking-tight">
                 Welcome, {user.name.split(' ')[0]}
@@ -156,7 +156,7 @@ function HbaDashboardContent() {
 
           {/* Activity Compliance Banner */}
           {user.personalSalesThisMonth < 1 && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3 flex items-center gap-3">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3 flex items-center gap-3 animate-slide-up">
               <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center text-red-400">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               </div>
@@ -168,7 +168,7 @@ function HbaDashboardContent() {
           )}
 
           {/* Core Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 animate-slide-up stagger-children">
             <StatCard
               label="Override Income"
               value={`₹${(overrideThisMonth / 100).toLocaleString('en-IN')}`}
@@ -202,7 +202,7 @@ function HbaDashboardContent() {
           </div>
 
           {/* Top 10 HCM Sales Performance */}
-          <div className="bg-surface border border-white/[0.07] rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="bg-surface border border-white/[0.07] rounded-[32px] shadow-2xl overflow-hidden animate-slide-up">
              <div className="px-8 py-6 border-b border-white/[0.07] flex justify-between items-center bg-white/[0.01]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-hba/10 flex items-center justify-center text-hba border border-hba/20">
@@ -252,7 +252,7 @@ function HbaDashboardContent() {
           </div>
 
           {/* Wallet + Chart + Team */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up">
             {/* Left: Wallet */}
             <div className="lg:col-span-5 space-y-8">
               {wallet && (
@@ -346,12 +346,14 @@ function HbaDashboardContent() {
           </div>
 
           {/* Team Members Table */}
-          <TeamMemberTable
-            members={networkMembers as any}
-            color={color}
-            title="HCM Network Overview"
-            showTeamSize={true}
-          />
+          <div className="animate-slide-up">
+            <TeamMemberTable
+              members={networkMembers as any}
+              color={color}
+              title="HCM Network Overview"
+              showTeamSize={true}
+            />
+          </div>
         </div>
       )}
     </DashboardLayout>

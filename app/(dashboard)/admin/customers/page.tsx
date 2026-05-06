@@ -1,34 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-
-interface Customer {
-  id: string;
-  name: string;
-  mobile: string;
-  policyId: string;
-  planName: string;
-  assignedHCC: string;
-  status: 'active' | 'lapsed' | 'pending';
-  purchaseDate: string;
-}
-
-const MOCK_CUSTOMERS: Customer[] = [
-  { id: 'CUS001', name: 'Amit Sharma', mobile: '9876543210', policyId: 'POL-7721', planName: 'CureBharat Gold', assignedHCC: 'HCC-4001', status: 'active', purchaseDate: '2024-04-12' },
-  { id: 'CUS002', name: 'Surbhi Gupta', mobile: '9822114433', policyId: 'POL-9923', planName: 'CureBharat Platinum', assignedHCC: 'HCC-4022', status: 'active', purchaseDate: '2024-04-15' },
-  { id: 'CUS003', name: 'Rohan Deshmukh', mobile: '9122334455', policyId: 'POL-1102', planName: 'Wellness Basic', assignedHCC: 'HCC-4015', status: 'pending', purchaseDate: '2024-04-20' },
-  { id: 'CUS004', name: 'Meena Iyer', mobile: '9000111222', policyId: 'POL-4452', planName: 'CureBharat Silver', assignedHCC: 'HCC-4100', status: 'active', purchaseDate: '2024-04-22' },
-];
+import { salesAPI } from '@/lib/api';
+import { ISale } from '@/types';
 
 export default function CustomerDatabase() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [customers, setCustomers] = useState<ISale[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
 
-  const filteredCustomers = MOCK_CUSTOMERS.filter(c => 
-    (c.name.toLowerCase().includes(search.toLowerCase()) || c.mobile.includes(search) || c.policyId.includes(search)) &&
-    (filter === 'all' || c.status === filter)
-  );
+  useEffect(() => {
+    async function fetchCustomers() {
+      setLoading(true);
+      try {
+        const res = await salesAPI.getAll({ 
+          page: 1, 
+          limit: 100, // Show a good amount initially 
+          search, 
+          status: filter === 'all' ? undefined : filter 
+        });
+        if (res.data.success) {
+          setCustomers(res.data.data || []);
+          setTotal(res.data.pagination.total);
+        }
+      } catch (err) {
+        console.error('Failed to fetch customers', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // Add a simple debounce for search
+    const timer = setTimeout(() => {
+      fetchCustomers();
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [search, filter]);
 
   return (
     <DashboardLayout pageTitle="Customer Database">
@@ -72,34 +83,41 @@ export default function CustomerDatabase() {
                     <tr className="bg-slate-50/50 border-b border-slate-100">
                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer</th>
                        <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Policy Details</th>
-                       <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigned HCC</th>
+                       <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Sold By</th>
                        <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Join Date</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-50">
-                    {filteredCustomers.length === 0 ? (
-                      <tr><td colSpan={5} className="px-8 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No customer records found Matching your search</td></tr>
+                    {loading ? (
+                      <tr>
+                        <td colSpan={5} className="px-8 py-20 text-center">
+                          <div className="w-8 h-8 border-4 border-[#60A5FA] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                          <div className="text-slate-400 font-bold uppercase tracking-widest text-xs">Loading records...</div>
+                        </td>
+                      </tr>
+                    ) : customers.length === 0 ? (
+                      <tr><td colSpan={5} className="px-8 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No customer records found matching your search</td></tr>
                     ) : (
-                      filteredCustomers.map((c) => (
-                        <tr key={c.id} className="hover:bg-slate-50/50 transition-colors group">
+                      customers.map((c) => (
+                        <tr key={c._id} className="hover:bg-slate-50/50 transition-colors group">
                            <td className="px-8 py-5">
                               <div className="flex items-center gap-4">
-                                 <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold">{c.name[0]}</div>
+                                 <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold uppercase">{c.customerName[0]}</div>
                                  <div>
-                                    <div className="text-sm font-bold text-slate-900 group-hover:text-[#60A5FA] transition-colors">{c.name}</div>
-                                    <div className="text-[10px] font-bold text-slate-400">{c.mobile}</div>
+                                    <div className="text-sm font-bold text-slate-900 group-hover:text-[#60A5FA] transition-colors">{c.customerName}</div>
+                                    <div className="text-[10px] font-bold text-slate-400">{c.customerMobile}</div>
                                  </div>
                               </div>
                            </td>
                            <td className="px-4 py-5">
-                              <div className="text-sm font-bold text-slate-700">{c.planName}</div>
+                              <div className="text-sm font-bold text-slate-700">{(c.plan as any)?.name || 'Unknown Plan'}</div>
                               <div className="text-[10px] font-mono text-[#60A5FA] font-bold mt-0.5">{c.policyId}</div>
                            </td>
                            <td className="px-4 py-5">
                               <div className="flex items-center gap-2">
                                  <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                                 <span className="text-xs font-bold text-slate-600">{c.assignedHCC}</span>
+                                 <span className="text-xs font-bold text-slate-600">{(c.hccId as any)?.name || 'Unknown'}</span>
                               </div>
                            </td>
                            <td className="px-4 py-5 text-center">
@@ -111,7 +129,7 @@ export default function CustomerDatabase() {
                               </span>
                            </td>
                            <td className="px-8 py-5 text-right">
-                              <div className="text-xs font-bold text-slate-400">{new Date(c.purchaseDate).toLocaleDateString()}</div>
+                              <div className="text-xs font-bold text-slate-400">{new Date(c.createdAt).toLocaleDateString('en-IN')}</div>
                            </td>
                         </tr>
                       ))
@@ -123,9 +141,9 @@ export default function CustomerDatabase() {
 
         {/* Quick Insights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <InsightCard label="Total Customers" value="12,402" icon="users" color="text-blue-500" />
-           <InsightCard label="New This Month" value="+1,842" icon="trending-up" color="text-emerald-500" />
-           <InsightCard label="Retention Rate" value="94.2%" icon="award" color="text-amber-500" />
+           <InsightCard label="Total Customers" value={total.toLocaleString()} icon="users" color="text-blue-500" />
+           <InsightCard label="Active Policies" value={customers.filter(c => c.status === 'active').length.toLocaleString()} icon="trending-up" color="text-emerald-500" />
+           <InsightCard label="Pending Policies" value={customers.filter(c => c.status === 'pending').length.toLocaleString()} icon="award" color="text-amber-500" />
         </div>
       </div>
     </DashboardLayout>

@@ -17,24 +17,19 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     ]},
     { label: 'Network Management', items: [
       { label: 'Member List', href: '/admin/members', icon: 'users' },
-      { label: 'Enroll Member', href: '/admin?enroll=true', icon: 'plus-circle' },
       { label: 'Customer Database', href: '/admin/customers', icon: 'user-search' },
     ]},
     { label: 'Financial Tracking', items: [
       { label: 'Commission Engine', href: '/admin/commission-config', icon: 'settings' },
-      { label: 'Payout Management', href: '/admin/payouts', icon: 'dollar' },
+      { label: 'Payout Management', href: '/admin/payouts', icon: 'rupee' },
       { label: 'Wallet Ledger', href: '/admin/wallet-ledger', icon: 'wallet' },
       { label: 'Manual Adjustments', href: '/admin/manual-adjustments', icon: 'sliders' },
     ]},
     { label: 'Performance Reports', items: [
-      { label: 'FTD Reports', href: '/admin/reports/ftd', icon: 'activity' },
-      { label: 'MTD Reports', href: '/admin/reports/mtd', icon: 'bar-chart' },
-      { label: 'Tax Reports', href: '/admin/tax-reports', icon: 'file-text' },
+      { label: 'FTD + MTD Reports', href: '/admin/reports/performance', icon: 'activity' },
     ]},
-    { label: 'Compliance & Rules', items: [
+    { label: 'Compliance', items: [
       { label: 'KYC Management', href: '/admin/kyc', icon: 'shield' },
-      { label: 'Activity Rules', href: '/admin/activity-rules', icon: 'activity' },
-      { label: 'Promotion Rules', href: '/admin/promotion-rules', icon: 'tag' },
     ]},
     { label: 'Administration', items: [
       { label: 'Role & Permissions', href: '/admin/role-manager', icon: 'users-cog' },
@@ -56,7 +51,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC', href: '/sh/kyc', icon: 'shield' },
     ]},
     { label: 'Network', items: [
-      { label: 'Enroll Member', href: '/sh?enroll=true', icon: 'plus-circle' },
       { label: 'Network Tree', href: '/sh/state-tree', icon: 'git-branch' },
       { label: 'Direct Team', href: '/sh/direct-team', icon: 'users' },
       { label: 'Team Performance', href: '/sh/team-performance', icon: 'bar-chart' },
@@ -87,7 +81,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC Verification', href: '/hba/kyc', icon: 'shield' },
     ]},
     { label: 'Network Management', items: [
-      { label: 'Enroll Member', href: '/hba?enroll=true', icon: 'plus-circle' },
       { label: 'My HCB Tree', href: '/hba/network', icon: 'git-branch' },
       { label: 'Team Performance', href: '/hba/team-performance', icon: 'bar-chart' },
     ]},
@@ -107,7 +100,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       { label: 'KYC', href: '/hcm/kyc', icon: 'shield' },
     ]},
     { label: 'Network', items: [
-      { label: 'Enroll Member', href: '/hcm?enroll=true', icon: 'plus-circle' },
       { label: 'My Tree', href: '/hcm/network', icon: 'git-branch' },
       { label: 'Team Monitor', href: '/hcm/team-monitor', icon: 'activity' },
     ]},
@@ -241,6 +233,7 @@ function getIcon(name: string, color: string = 'currentColor'): React.ReactNode 
     shield: <svg {...s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
     award: <svg {...s}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
     dollar: <svg {...s}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+    rupee: <svg {...s}><path d="M6 3h12"/><path d="M6 8h12"/><path d="M6 13h8.5a4.5 4.5 0 1 0 0-9"/><path d="M11 13l5 8"/></svg>,
     'file-text': <svg {...s}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
     settings: <svg {...s}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
     key: <svg {...s}><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>,
