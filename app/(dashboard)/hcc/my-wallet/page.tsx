@@ -3,85 +3,67 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import WalletCard from '@/components/ui/WalletCard';
-import { authAPI, walletAPI } from '@/lib/api';
-import { IUser, IWallet, ILedgerEntry } from '@/types';
+import { walletAPI } from '@/lib/api';
+import { ILedgerEntry } from '@/types';
+import { toast } from 'react-hot-toast';
 
-const TYPE_LABELS: Record<string, string> = {
-  direct: '🟢 Direct Commission',
-  override: '🔵 Override Income',
-  leadership: '🏆 Leadership Bonus',
-  withdrawal: '🔴 Withdrawal',
-  tds_deduction: '📋 TDS Deduction',
-};
+import WalletDashboard from '@/components/wallet/WalletDashboard';
 
 export default function HccWalletPage() {
-  const [user, setUser] = useState<Partial<IUser>>({});
-  const [wallet, setWallet] = useState<Partial<IWallet>>({});
-  const [ledger, setLedger] = useState<ILedgerEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    authAPI.getMe().then((r) => {
-      const u = r.data.data; // Note: api.ts returns ApiResponse<IUser> where data is IUser
-      if (u) {
-        setUser(u);
-        walletAPI.getMyWallet().then((wr) => {
-          setWallet(wr.data.data || {});
-          setLedger(wr.data.data?.ledger || []);
-        }).finally(() => setLoading(false));
-      }
-    }).catch(() => setLoading(false));
-  }, []);
-
   return (
-    <DashboardLayout pageTitle="My Wallet">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-white text-2xl font-bold">My Wallet</h1>
-          <p className="text-slate-400 text-sm">Track your earnings and transactions</p>
+    <DashboardLayout pageTitle="Earnings & Wallet">
+      <div className="space-y-8 pb-20">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">CUREBHARAT / DASHBOARD / WALLET</p>
+            <h1 className="text-3xl font-bold text-[#000000] font-display">Financial Ledger</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <button 
+              onClick={() => window.location.href = '/hcc/withdrawal'}
+              className="bg-[#6029F1] px-6 py-2.5 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-lg shadow-[#6029F1]/20"
+             >
+               Request Withdrawal
+             </button>
+          </div>
         </div>
 
-        <div className="max-w-sm">
-          <WalletCard
-            provisionalBalance={wallet.provisionalBalance || 0}
-            finalBalance={wallet.finalBalance || 0}
-            totalEarned={wallet.totalEarned || 0}
-            totalWithdrawn={wallet.totalWithdrawn || 0}
-            color="#60a5fa"
-            onWithdraw={() => window.location.href = '/hcc/withdrawal'}
-          />
-        </div>
-
-        {/* Ledger */}
-        <div className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-5">
-          <h2 className="text-white font-semibold mb-4">Transaction History</h2>
-          {loading ? (
-            <p className="text-slate-500 text-sm text-center py-8">Loading...</p>
-          ) : ledger.length === 0 ? (
-            <p className="text-slate-500 text-sm text-center py-8">No transactions yet</p>
-          ) : (
-            <div className="space-y-2">
-              {ledger.map((entry, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-slate-700/50 last:border-0">
-                  <div>
-                    <p className="text-white text-sm font-medium">{TYPE_LABELS[entry.type] || entry.type}</p>
-                    <p className="text-slate-500 text-xs">{entry.description}</p>
-                    <p className="text-slate-600 text-xs">{entry.cycleMonth}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-bold text-sm ${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {entry.amount >= 0 ? '+' : ''}₹{Math.abs(entry.amount).toLocaleString('en-IN')}
-                    </p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${entry.status === 'provisional' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                      {entry.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <WalletDashboard color="#6029F1" withdrawalPath="/hcc/withdrawal" />
       </div>
     </DashboardLayout>
+  );
+}
+
+function BreakdownRow({ label, value, color, percentage }: any) {
+  return (
+    <div className="space-y-2">
+       <div className="flex justify-between items-end">
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{label}</p>
+          <p className="text-sm font-bold text-white">₹{value.toLocaleString('en-IN')}</p>
+       </div>
+       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+          <div 
+            className={`h-full ${color} transition-all duration-1000`} 
+            style={{ width: `${Math.max(percentage, 2)}%` }} 
+          />
+       </div>
+    </div>
+  );
+}
+
+function FilterButton({ active, children, onClick }: any) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+        active 
+          ? 'bg-white text-[#6029F1] shadow-sm' 
+          : 'text-slate-400 hover:text-slate-600'
+      }`}
+    >
+      {children}
+    </button>
   );
 }

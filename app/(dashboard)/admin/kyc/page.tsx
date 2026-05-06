@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { adminAPI } from '@/lib/api'; 
 import { IUser } from '@/types';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function AdminKYC() {
   const [pendingUsers, setPendingUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const { addToast } = useToast();
 
   useEffect(() => {
     fetchPending();
@@ -25,7 +24,7 @@ export default function AdminKYC() {
         setPendingUsers(res.data.data || []);
       }
     } catch (err) {
-      addToast({ message: 'Failed to fetch pending KYC', type: 'error' });
+      toast.error('Failed to fetch pending KYC');
     } finally {
       setLoading(false);
     }
@@ -36,11 +35,11 @@ export default function AdminKYC() {
     try {
       const res = await adminAPI.updateKYCStatus(id, status);
       if (res.data.success) {
-        addToast({ message: `KYC ${status} successfully`, type: 'success' });
+        toast.success(`KYC ${status} successfully`);
         setPendingUsers(prev => prev.filter(u => u._id !== id));
       }
     } catch (err: any) {
-      addToast({ message: err.response?.data?.message || 'Update failed', type: 'error' });
+      toast.error(err.response?.data?.message || 'Update failed');
     } finally {
       setProcessingId(null);
     }

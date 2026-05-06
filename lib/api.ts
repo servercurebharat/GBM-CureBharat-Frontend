@@ -101,6 +101,14 @@ export const epinsAPI = {
 export const plansAPI = {
   getAll: () =>
     api.get<ApiResponse<IPlan[]>>('/plans'),
+  getAllAdmin: () =>
+    api.get<ApiResponse<IPlan[]>>('/plans/admin/all'),
+  create: (data: Partial<IPlan>) =>
+    api.post<ApiResponse<IPlan>>('/plans', data),
+  update: (id: string, data: Partial<IPlan>) =>
+    api.put<ApiResponse<IPlan>>(`/plans/${id}`, data),
+  delete: (id: string) =>
+    api.delete<ApiResponse<any>>(`/plans/${id}`),
 };
 
 // ADMIN

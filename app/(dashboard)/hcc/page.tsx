@@ -8,29 +8,32 @@ import WalletCard from '@/components/ui/WalletCard';
 import { useAuth } from '@/lib/auth';
 import { walletAPI, salesAPI } from '@/lib/api';
 import { IWallet, ISale } from '@/types';
+import NewSaleModal from '@/components/modals/NewSaleModal';
 
 export default function HCCDashboard() {
   const { user } = useAuth();
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const [recentSales, setRecentSales] = useState<ISale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const [walletRes, salesRes] = await Promise.all([
+        walletAPI.getMyWallet(),
+        salesAPI.getAll({ page: 1, limit: 5 }),
+      ]);
+      
+      if (walletRes.data.success) setWallet(walletRes.data.data || null);
+      if (salesRes.data.success) setRecentSales(salesRes.data.data || []);
+    } catch (err) {
+      console.error('Dashboard data fetch failed', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [walletRes, salesRes] = await Promise.all([
-          walletAPI.getMyWallet(),
-          salesAPI.getAll({ page: 1, limit: 5 }),
-        ]);
-        
-        if (walletRes.data.success) setWallet(walletRes.data.data || null);
-        if (salesRes.data.success) setRecentSales(salesRes.data.data || []);
-      } catch (err) {
-        console.error('Dashboard data fetch failed', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchData();
   }, []);
 
@@ -86,57 +89,72 @@ export default function HCCDashboard() {
           )}
 
           {/* Header Greeting */}
+<<<<<<< HEAD
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
+=======
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
             <div>
-              <h2 className="font-display text-3xl font-black text-slate-900 tracking-tight">
+              <h2 className="font-display text-4xl font-black text-slate-800 tracking-tight">
                 Welcome, {user.name.split(' ')[0]}
               </h2>
-              <p className="text-sm text-muted mt-1 font-medium">
-                You are currently an active <span className="text-hcc font-bold tracking-tight">Health Care Consultant</span>
+              <p className="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
+                Authorized <span className="text-hcc">Health Care Consultant</span> • Active Cycle
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <button className="px-5 py-2.5 rounded-xl bg-hcc/10 border border-hcc/20 text-hcc text-xs font-bold uppercase tracking-widest hover:bg-hcc/20 transition-all">
+            <div className="flex flex-wrap items-center gap-4">
+              <button className="px-6 py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition-all shadow-sm">
                 Download Brochure
               </button>
-              <button className="px-5 py-2.5 rounded-xl bg-hcc text-[#0d0f14] text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-hcc/10">
+              <button 
+                onClick={() => setIsSaleModalOpen(true)}
+                className="px-8 py-3.5 rounded-2xl bg-hcc text-[#0d0f14] text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-hcc/20"
+              >
                 New Sale +
               </button>
             </div>
           </div>
 
           {/* Core Stats */}
+<<<<<<< HEAD
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-slide-up stagger-children">
+=======
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
             <StatCard
-              label="Provisional Earnings"
+              label="My Total Balance"
+              value={`₹${(((wallet?.provisionalBalance || 0) + (wallet?.finalBalance || 0)) / 100).toLocaleString('en-IN')}`}
+              change="Cumulative Success"
+              color="#3b82f6"
+            />
+            <StatCard
+              label="Ready to Withdraw"
+              value={`₹${((wallet?.finalBalance || 0) / 100).toLocaleString('en-IN')}`}
+              change="Settled Payouts"
+              color="#10b981"
+            />
+            <StatCard
+              label="Cycle Earnings"
               value={`₹${((wallet?.provisionalBalance || 0) / 100).toLocaleString('en-IN')}`}
-              change="Settlement on 5th"
-              color={color}
+              change="Settlement Pending"
+              color="#f59e0b"
             />
             <StatCard
-              label="Total Policies"
-              value={String(user.personalSalesCount)}
-              change="All-time personal sales"
-              color={color}
-            />
-            <StatCard
-              label="Team Recruits"
+              label="Team Size"
               value={String(user.teamSize)}
-              change="Total direct downline"
-              color={color}
-            />
-            <StatCard
-              label="Cycle Progress"
-              value={String(user.personalSalesThisMonth)}
-              change="Sales this cycle"
-              color={color}
+              change="Active Network"
+              color="#60a5fa"
             />
           </div>
 
           {/* Detailed Analytics Section */}
+<<<<<<< HEAD
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up">
+=======
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
             {/* Rank and Performance */}
-            <div className="lg:col-span-7 space-y-8">
+            <div className="lg:col-span-7 flex flex-col gap-8">
               <RankProgressBar
                 currentRank="HCC"
                 nextRank="HCM"
@@ -148,21 +166,21 @@ export default function HCCDashboard() {
               />
 
               {/* Recent Activity List */}
-              <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
-                <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
-                  <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">
+              <div className="bg-[#131241] border border-white/5 rounded-[2rem] overflow-hidden flex flex-col shadow-2xl">
+                <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                  <h3 className="font-display text-sm font-black text-white uppercase tracking-wider">
                     Recent Policy Sales
                   </h3>
-                  <button className="text-[10px] font-bold text-hcc uppercase tracking-widest hover:underline">
+                  <button className="text-[10px] font-black text-hcc uppercase tracking-widest hover:underline">
                     View All
                   </button>
                 </div>
-                <div className="divide-y divide-white/[0.04]">
+                <div className="divide-y divide-white/[0.05]">
                   {recentSales.length === 0 ? (
                     <div className="px-6 py-12 text-center">
                       <div className="text-4xl mb-4 opacity-20">📂</div>
-                      <p className="text-xs text-muted font-bold uppercase tracking-widest">No sales recorded this cycle</p>
-                      <p className="text-[10px] text-muted mt-1">Start by clicking 'New Sale' button above</p>
+                      <p className="text-xs text-white/40 font-bold uppercase tracking-widest">No sales recorded this cycle</p>
+                      <p className="text-[10px] text-white/20 mt-1">Start by clicking 'New Sale' button above</p>
                     </div>
                   ) : (
                     recentSales.map((sale) => (
@@ -211,9 +229,9 @@ export default function HCCDashboard() {
               )}
 
               {/* Referral Tool */}
-              <div className="bg-[#131241] rounded-2xl p-8 border border-white/[0.07] shadow-xl relative overflow-hidden">
+              <div className="bg-[#131241] rounded-2xl p-8 border border-white/5 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#60a5fa]/5 blur-3xl -mr-16 -mt-16" />
-                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-6">Referral Network Tool</h4>
+                <h4 className="text-xs font-black text-white/40 uppercase tracking-widest mb-6">Referral Network Tool</h4>
                 
                 <div className="space-y-4">
                   <div className="p-4 bg-white/5 rounded-xl border border-white/5">
@@ -239,24 +257,24 @@ export default function HCCDashboard() {
               </div>
 
               {/* Pin Management Shortcut */}
-              <div className="bg-surface border border-white/[0.07] rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+              <div className="bg-[#131241] border border-white/5 rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-hcc/5 blur-3xl -mr-16 -mt-16 group-hover:bg-hcc/10 transition-colors" />
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zM12 2l.79.79m.35 1.35l.79.79m.35 1.35l.79.79m.35 1.35l.79.79M16.5 10.5l-3 3"></path></svg>
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">E-Pin Wallet</h4>
-                    <p className="text-[10px] text-muted font-medium uppercase tracking-widest">Activation Inventory</p>
+                    <h4 className="text-sm font-black text-white uppercase tracking-wider">E-Pin Wallet</h4>
+                    <p className="text-[10px] text-white/40 font-medium uppercase tracking-widest">Activation Inventory</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between bg-white/[0.03] border border-white/[0.07] rounded-xl px-5 py-4 mb-6">
+                <div className="flex items-center justify-between bg-white/5 border border-white/5 rounded-xl px-5 py-4 mb-6">
                   <div>
-                    <div className="text-[10px] text-muted font-bold uppercase tracking-widest">Available Pins</div>
+                    <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Available Pins</div>
                     <div className="text-2xl font-display font-bold text-white mt-1">04</div>
                   </div>
-                  <button className="text-[10px] font-black text-[#0d0f14] bg-white px-3 py-1.5 rounded-lg uppercase tracking-tighter hover:bg-white/90 transition-all">
+                  <button className="text-[10px] font-black text-[#131241] bg-white px-3 py-1.5 rounded-lg uppercase tracking-tighter hover:bg-white/90 transition-all">
                     View All
                   </button>
                 </div>
@@ -274,6 +292,12 @@ export default function HCCDashboard() {
           </div>
         </div>
       )}
+
+      <NewSaleModal 
+        isOpen={isSaleModalOpen} 
+        onClose={() => setIsSaleModalOpen(false)} 
+        onSuccess={fetchData}
+      />
     </DashboardLayout>
   );
 }

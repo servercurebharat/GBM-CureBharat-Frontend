@@ -134,21 +134,26 @@ function HbaDashboardContent() {
             </div>
           )}
 
+<<<<<<< HEAD
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
+=======
+          {/* Header Greeting */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
             <div>
-              <h2 className="font-display text-3xl font-bold text-black tracking-tight">
+              <h2 className="font-display text-4xl font-black text-slate-800 tracking-tight">
                 Welcome, {user.name.split(' ')[0]}
               </h2>
-              <p className="text-sm text-muted mt-1 font-medium">
-                You are an active <span className="text-hba font-bold tracking-tight">Health Business Associate</span> managing {networkMembers.length} HCMs
+              <p className="text-xs text-slate-400 mt-2 font-bold uppercase tracking-widest">
+                Authorized <span className="text-hba">Health Business Associate</span> • Managing {networkMembers.length} HCM Leads
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <Link href="/hba/network" className="px-5 py-2.5 rounded-xl bg-hba/10 border border-hba/20 text-hba text-xs font-bold uppercase tracking-widest hover:bg-hba/20 transition-all">
+            <div className="flex flex-wrap items-center gap-4">
+              <Link href="/hba/network" className="px-6 py-3.5 rounded-2xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition-all shadow-sm">
                 View Network
               </Link>
-              <Link href="/hba/override-income" className="px-5 py-2.5 rounded-xl bg-hba text-[#0d0f14] text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-hba/10">
+              <Link href="/hba/override-income" className="px-8 py-3.5 rounded-2xl bg-hba text-[#0d0f14] text-[10px] font-black uppercase tracking-[0.2em] hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-hba/20">
                 Override Ledger
               </Link>
             </div>
@@ -168,58 +173,73 @@ function HbaDashboardContent() {
           )}
 
           {/* Core Stats */}
+<<<<<<< HEAD
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 animate-slide-up stagger-children">
+=======
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
             <StatCard
-              label="Override Income"
-              value={`₹${(overrideThisMonth / 100).toLocaleString('en-IN')}`}
+              label="My Total Balance"
+              value={`₹${(((wallet?.provisionalBalance || 0) + (wallet?.finalBalance || 0)) / 100).toLocaleString('en-IN')}`}
+              change="Cumulative Profit"
+              color="#3b82f6"
+            />
+            <StatCard
+              label="Available Payout"
+              value={`₹${((wallet?.finalBalance || 0) / 100).toLocaleString('en-IN')}`}
+              change="Ready to withdraw"
+              color="#10b981"
+            />
+            <StatCard
+              label="Cycle Overrides"
+              value={`₹${((wallet?.earningsBreakdown?.override || 0) / 100).toLocaleString('en-IN')}`}
               change="Provisional this cycle"
-              color={color}
+              color="#f59e0b"
             />
             <StatCard
-              label="Active HCMs"
-              value={String(activeHCMs).padStart(2, '0')}
-              change={`${networkMembers.length} total network managers`}
-              color={color}
-            />
-            <StatCard
-              label="Team Size"
+              label="Team Network"
               value={String(user.teamSize)}
-              change="Total direct & indirect"
+              change={`${networkMembers.length} active managers`}
               color={color}
             />
             <StatCard
-              label="Current Rank"
-              value="HBA"
-              change="Health Business Associate"
+              label="Unit Sales"
+              value={String(user.personalSalesThisMonth)}
+              change="Personal production"
               color={color}
-            />
-            <StatCard
-              label="Cap Amount"
-              value="₹5,00,000"
-              change="Personal Earnings Limit"
-              color="#fbbf24"
             />
           </div>
 
           {/* Top 10 HCM Sales Performance */}
+<<<<<<< HEAD
           <div className="bg-surface border border-white/[0.07] rounded-[32px] shadow-2xl overflow-hidden animate-slide-up">
              <div className="px-8 py-6 border-b border-white/[0.07] flex justify-between items-center bg-white/[0.01]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-hba/10 flex items-center justify-center text-hba border border-hba/20">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+=======
+          <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+             <div className="px-10 py-8 border-b border-white/[0.07] flex justify-between items-center bg-white/[0.01]">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-hba/10 flex items-center justify-center text-hba border border-hba/20">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                   </div>
-                  <h3 className="font-display text-sm font-bold text-black uppercase tracking-wider">Top 10 HCM Performers</h3>
+                  <div>
+                    <h3 className="font-display text-base font-black text-white uppercase tracking-wider">Top 10 HCM Performers</h3>
+                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mt-1">Leading Regional Managers</p>
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
+                  </div>
                 </div>
-                <Link href="/hba/team-performance" className="text-[10px] font-black text-hba uppercase tracking-widest hover:underline">Full Analytics</Link>
+                <Link href="/hba/team-performance" className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-hba uppercase tracking-widest hover:bg-white/10 transition-all">Full Analytics</Link>
              </div>
              <div className="overflow-x-auto">
                <table className="w-full text-left border-collapse">
                   <thead>
                      <tr className="bg-white/[0.02] border-b border-white/[0.05]">
-                        <th className="px-8 py-5 text-[10px] font-black text-muted uppercase tracking-[0.2em]">Pos</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-muted uppercase tracking-[0.2em]">HCM Lead</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-muted uppercase tracking-[0.2em] text-center">Policies</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-muted uppercase tracking-[0.2em] text-right">Volume</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Pos</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">HCM Lead</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-white/40 uppercase tracking-[0.2em] text-center">Policies</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-white/40 uppercase tracking-[0.2em] text-right">Volume</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-white/[0.03]">
@@ -231,19 +251,19 @@ function HbaDashboardContent() {
                       { rank: 5, name: 'Sameer Khan', units: 65, revenue: 1300000 },
                     ].map((hcm) => (
                       <tr key={hcm.rank} className="hover:bg-white/[0.01] transition-all group">
-                         <td className="px-8 py-5">
-                            <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-inner ${
-                              hcm.rank === 1 ? 'bg-hba text-white' : 'bg-white/5 text-muted'
+                         <td className="px-10 py-6">
+                            <span className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black shadow-inner ${
+                              hcm.rank === 1 ? 'bg-hba text-white shadow-hba/20' : 'bg-white/5 text-white/30'
                             }`}>
                               {hcm.rank}
                             </span>
                          </td>
-                         <td className="px-8 py-5">
-                            <div className="text-sm font-bold text-black group-hover:text-hba transition-colors">{hcm.name}</div>
-                            <div className="text-[9px] font-black text-muted uppercase tracking-tighter mt-0.5">TEAM LEADER</div>
+                         <td className="px-10 py-6">
+                            <div className="text-sm font-bold text-white group-hover:text-hba transition-colors">{hcm.name}</div>
+                            <div className="text-[9px] font-black text-white/20 uppercase tracking-tighter mt-1">TEAM LEADER</div>
                          </td>
-                         <td className="px-8 py-5 text-sm font-bold text-emerald-600 text-center">{hcm.units}</td>
-                         <td className="px-8 py-5 text-sm font-black text-black text-right">₹{(hcm.revenue / 100).toLocaleString('en-IN')}</td>
+                         <td className="px-10 py-6 text-sm font-bold text-emerald-400 text-center">{hcm.units}</td>
+                         <td className="px-10 py-6 text-sm font-black text-white text-right">₹{((hcm.revenue || 0) / 100).toLocaleString('en-IN')}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -251,44 +271,59 @@ function HbaDashboardContent() {
              </div>
           </div>
 
+<<<<<<< HEAD
           {/* Wallet + Chart + Team */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up">
             {/* Left: Wallet */}
             <div className="lg:col-span-5 space-y-8">
+=======
+          {/* Financials & Activity Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+            {/* Left: Wallet & Overrides */}
+            <div className="lg:col-span-5 flex flex-col gap-10">
+>>>>>>> 27a04e873fec0d2ae5459746dba565864000010b
               {wallet && (
-                <WalletCard
-                  provisionalBalance={wallet.provisionalBalance / 100}
-                  finalBalance={wallet.finalBalance / 100}
-                  totalEarned={wallet.totalEarned / 100}
-                  totalWithdrawn={wallet.totalWithdrawn / 100}
-                  color={color}
-                  onWithdraw={() => alert('Withdrawal request feature coming soon!')}
-                />
+                <div className="flex-1">
+                  <WalletCard
+                    provisionalBalance={(wallet?.provisionalBalance || 0) / 100}
+                    finalBalance={(wallet?.finalBalance || 0) / 100}
+                    totalEarned={(wallet?.totalEarned || 0) / 100}
+                    totalWithdrawn={(wallet?.totalWithdrawn || 0) / 100}
+                    color={color}
+                    onWithdraw={() => alert('Withdrawal request feature coming soon!')}
+                  />
+                </div>
               )}
 
               {/* Recent Override Income */}
-              <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
-                <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
-                  <h3 className="font-display text-sm font-bold text-black uppercase tracking-wider">Recent Override Ledger</h3>
-                  <Link href="/hba/override-income" className="text-[10px] font-bold text-hba uppercase tracking-widest hover:underline">View All</Link>
+              <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col flex-1">
+                <div className="px-10 py-8 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
+                  <div>
+                    <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Recent Override Ledger</h3>
+                    <p className="text-[9px] text-white/20 font-black uppercase tracking-widest mt-1">Live Profit Tracking</p>
+                  </div>
+                  <Link href="/hba/override-income" className="px-4 py-2 rounded-lg bg-white/5 text-[10px] font-black text-hba uppercase tracking-widest hover:bg-white/10 transition-all">View All</Link>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {wallet?.ledger?.filter(e => e.type === 'override').length === 0 ? (
-                    <div className="px-6 py-10 text-center text-muted text-xs font-bold uppercase tracking-widest">No override income recorded</div>
+                    <div className="px-10 py-16 text-center">
+                       <div className="text-5xl mb-6 opacity-10 grayscale">📜</div>
+                       <p className="text-[10px] text-white/20 font-black uppercase tracking-widest">No overrides this cycle</p>
+                    </div>
                   ) : (
                     wallet?.ledger?.filter(e => e.type === 'override').slice(0, 5).map((entry) => (
-                      <div key={entry._id} className="px-6 py-3.5 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
-                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+                      <div key={entry._id} className="px-10 py-5 flex items-center gap-6 hover:bg-white/[0.02] transition-colors group">
+                        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-black font-medium truncate">{entry.description}</p>
-                          <p className="text-[10px] text-muted mt-0.5">{new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
+                          <p className="text-sm text-white font-bold truncate tracking-tight">{entry.description}</p>
+                          <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-1">{new Date(entry.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-sm font-black text-emerald-600">+₹{(entry.amount / 100).toLocaleString('en-IN')}</span>
-                          <div className="mt-0.5">
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${entry.status === 'final' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}`}>
+                          <span className="text-base font-black text-[#34d399] tracking-tighter">+₹{((entry.amount || 0) / 100).toLocaleString('en-IN')}</span>
+                          <div className="mt-1">
+                            <span className={`text-[8px] px-2 py-0.5 rounded-lg font-black uppercase tracking-widest border ${entry.status === 'final' ? 'bg-[#34d399]/10 text-[#34d399] border-[#34d399]/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
                               {entry.status}
                             </span>
                           </div>
@@ -301,39 +336,47 @@ function HbaDashboardContent() {
             </div>
 
             {/* Right: Chart + Recent Sales */}
-            <div className="lg:col-span-7 space-y-8">
-              <MiniBarChart
-                data={HBA_MONTHLY_PERFORMANCE}
-                color={color}
-                title="Monthly Revenue & Override Trend"
-              />
+            <div className="lg:col-span-7 flex flex-col gap-10">
+              <div className="flex-1">
+                <MiniBarChart
+                  data={HBA_MONTHLY_PERFORMANCE}
+                  color={color}
+                  title="Monthly Revenue & Override Trend"
+                />
+              </div>
 
               {/* Recent Personal Sales */}
-              <div className="bg-surface border border-white/[0.07] rounded-2xl overflow-hidden shadow-xl">
-                <div className="px-6 py-5 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
-                  <h3 className="font-display text-sm font-bold text-black uppercase tracking-wider">Recent Personal Sales</h3>
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-widest">{user.personalSalesThisMonth} this month</span>
+              <div className="bg-[#131241] border border-white/[0.07] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col flex-1">
+                <div className="px-10 py-8 border-b border-white/[0.07] flex items-center justify-between bg-white/[0.01]">
+                  <div>
+                    <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Recent Personal Sales</h3>
+                    <p className="text-[9px] text-white/20 font-black uppercase tracking-widest mt-1">Individual Production</p>
+                  </div>
+                  <span className="px-4 py-2 rounded-lg bg-hba/10 text-[10px] font-black text-hba uppercase tracking-widest">{user.personalSalesThisMonth} this month</span>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {recentSales.length === 0 ? (
-                    <div className="px-6 py-10 text-center text-muted text-xs font-bold uppercase tracking-widest">No recent personal sales</div>
+                    <div className="px-10 py-16 text-center">
+                       <div className="text-5xl mb-6 opacity-10 grayscale">📂</div>
+                       <p className="text-[10px] text-white/20 font-black uppercase tracking-widest">No sales recorded yet</p>
+                    </div>
                   ) : (
                     recentSales.map((sale) => (
-                      <div key={sale._id} className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
-                        <div className="w-10 h-10 rounded-xl bg-hba/10 border border-hba/20 flex items-center justify-center text-hba">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <div key={sale._id} className="px-10 py-5 flex items-center gap-6 hover:bg-white/[0.02] transition-colors group">
+                        <div className="w-12 h-12 rounded-2xl bg-hba/10 border border-hba/20 flex items-center justify-center text-hba group-hover:scale-110 transition-transform">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm text-black font-bold truncate">{sale.customerName}</div>
-                          <div className="text-[10px] text-muted mt-0.5 flex items-center gap-2">
-                            <span>{sale.plan.name}</span>
+                          <div className="text-sm text-white font-bold truncate tracking-tight">{sale.customerName}</div>
+                          <div className="text-[10px] text-white/30 mt-1 flex items-center gap-2 font-black uppercase tracking-widest">
+                            <span>{sale.plan?.name || 'Standard Plan'}</span>
                             <span className="opacity-20">•</span>
                             <span className="font-mono">{sale.policyId}</span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-black text-hba">₹{(sale.amount / 100).toLocaleString('en-IN')}</div>
-                          <div className="text-[10px] text-muted font-medium mt-0.5">
+                          <div className="text-base font-black text-hba tracking-tighter">₹{((sale.amount || 0) / 100).toLocaleString('en-IN')}</div>
+                          <div className="text-[10px] text-white/20 font-black mt-1 uppercase tracking-widest">
                             {new Date(sale.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                           </div>
                         </div>

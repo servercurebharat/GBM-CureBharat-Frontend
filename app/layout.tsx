@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Questrial } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
-import { ToastProvider } from '@/components/ui/Toast';
+import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 const questrial = Questrial({ 
@@ -26,9 +26,8 @@ export default function RootLayout({
       <body className="bg-[#0d0f14] text-[#e8eaf0] font-sans antialiased overflow-x-hidden">
         <ErrorBoundary>
           <AuthProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
+            {children}
+            <Toaster position="top-right" />
           </AuthProvider>
         </ErrorBoundary>
       </body>

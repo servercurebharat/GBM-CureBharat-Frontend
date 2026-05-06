@@ -5,13 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usersAPI, adminAPI } from '@/lib/api';
 import { IUser } from '@/types';
-import { useToast } from '@/components/ui/Toast';
+import { toast } from 'react-hot-toast';
 
 export default function IndividualKYCReview() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { addToast } = useToast();
   const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -31,7 +30,7 @@ export default function IndividualKYCReview() {
         setUser(res.data.data || null);
       }
     } catch (err) {
-      addToast({ message: 'Failed to load user KYC details', type: 'error' });
+      toast.error('Failed to load user KYC details');
     } finally {
       setLoading(false);
     }
@@ -42,11 +41,11 @@ export default function IndividualKYCReview() {
     try {
       const res = await adminAPI.updateKYCStatus(id, status);
       if (res.data.success) {
-        addToast({ message: `Application ${status} successfully`, type: 'success' });
+        toast.success(`Application ${status} successfully`);
         router.push('/admin/kyc');
       }
     } catch (err: any) {
-      addToast({ message: err.response?.data?.message || 'Update failed', type: 'error' });
+      toast.error(err.response?.data?.message || 'Update failed');
     } finally {
       setProcessing(false);
     }
