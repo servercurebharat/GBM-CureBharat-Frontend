@@ -95,17 +95,16 @@ export default function ProfileCard({ user, color }: ProfileCardProps) {
           </div>
         </div>
 
-        {/* Referrer */}
-        {user.referrer && (
+        {user.referrerId && typeof user.referrerId === 'object' && (
           <div className="border-t border-indigo-500/[0.06] pt-4">
             <div className="text-[10px] text-[#7c82a6] font-bold uppercase tracking-widest mb-3">Upline / Sponsor</div>
             <div className="flex items-center gap-3 bg-[#0a0e2d] border border-indigo-500/[0.08] rounded-xl p-3">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-[10px] font-black">
-                {user.referrer.rank}
+                {user.referrerId.rank}
               </div>
               <div>
-                <div className="text-sm font-bold text-white">{user.referrer.name}</div>
-                <div className="text-[10px] text-[#7c82a6] font-mono">{user.referrer.memberId}</div>
+                <div className="text-sm font-bold text-white">{user.referrerId.name}</div>
+                <div className="text-[10px] text-[#7c82a6] font-mono">{user.referrerId.memberId}</div>
               </div>
             </div>
           </div>

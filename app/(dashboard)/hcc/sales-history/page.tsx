@@ -79,7 +79,7 @@ export default function SalesHistory() {
                       {new Date(sale.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-4 py-6 text-sm font-bold text-slate-800">
-                      ₹{(sale.amount / 100).toLocaleString('en-IN')}
+                      ₹{(sale.saleAmount / 100).toLocaleString('en-IN')}
                     </td>
                     <td className="px-4 py-6 text-sm font-black text-sh">
                       + ₹{((sale.businessVolume * 0.4) / 100).toLocaleString('en-IN')}

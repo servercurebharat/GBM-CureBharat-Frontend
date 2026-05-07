@@ -92,8 +92,11 @@ export interface ISale {
   customerName: string;
   customerMobile: string;
   plan: IPlan;
-  amount: number;
+  saleAmount: number;
   businessVolume: number;
+  hcmId?: any;
+  hbaId?: any;
+  shId?: any;
   status: 'pending' | 'completed' | 'cancelled' | 'active';
   commissionProcessed: boolean;
   cycleMonth: string;

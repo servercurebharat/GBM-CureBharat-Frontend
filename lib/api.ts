@@ -123,6 +123,8 @@ export const adminAPI = {
     api.put<ApiResponse<any>>('/admin/commission-config', data),
   triggerPayoutCycle: (cycleMonth: string) =>
     api.post<ApiResponse<any>>('/wallet/payout-cycle', { cycleMonth }),
+  getAllProvisional: () =>
+    api.get<ApiResponse<{ wallets: any[]; summary: any }>>('/wallet/all-provisional'),
   getTree: () =>
     api.get<ApiResponse<any>>('/admin/tree'),
 };

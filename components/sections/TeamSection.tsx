@@ -7,6 +7,7 @@ import { teamAPI } from '@/lib/api';
 import api from '@/lib/api';
 import { IUser } from '@/types';
 import toast from 'react-hot-toast';
+import AddMemberModal from '../dashboard/AddMemberModal';
 
 interface TeamMember extends IUser {
   directCount?: number;
@@ -25,6 +26,7 @@ export default function TeamSection({ user }: { user: IUser }) {
   const [expandedTeam, setExpandedTeam] = useState<Record<string, TeamMember[]>>({});
   const [loadingChildren, setLoadingChildren] = useState<Record<string, boolean>>({});
   const [isAllExpanded, setIsAllExpanded] = useState(false);
+  const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
 
   const fetchStats = async () => {
     try {
@@ -182,13 +184,34 @@ export default function TeamSection({ user }: { user: IUser }) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{user.role} / Hierarchy Tree</p>
-          <h2 className="text-3xl font-black text-[#1E293B] tracking-tight">Hierarchy Tree</h2>
+          <h2 className="text-3xl font-black text-[#1E293B] tracking-tight">Team Management</h2>
         </div>
-        <button className="px-8 py-3 bg-[#131241] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#1e1c5c] transition-all flex items-center gap-2 shadow-xl shadow-blue-900/20">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export Network
-        </button>
+        <div className="flex gap-4">
+          {user.role !== 'hcc' && (
+            <button 
+              onClick={() => setIsEnrollModalOpen(true)}
+              className="px-8 py-3 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-500 transition-all flex items-center gap-2 shadow-xl shadow-blue-900/20"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
+              Enroll Member
+            </button>
+          )}
+          <button className="px-8 py-3 bg-[#131241] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#1e1c5c] transition-all flex items-center gap-2 shadow-xl shadow-blue-900/20">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Network
+          </button>
+        </div>
       </div>
+
+      <AddMemberModal 
+        isOpen={isEnrollModalOpen} 
+        onClose={() => setIsEnrollModalOpen(false)} 
+        currentUser={user} 
+        onSuccess={() => {
+           fetchStats();
+           fetchMembers();
+        }} 
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -215,37 +238,62 @@ export default function TeamSection({ user }: { user: IUser }) {
       </div>
 
       {/* Role Distribution Bar */}
-      <div className="bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5 space-y-6">
-         <div className="flex items-center justify-between">
-            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-               Network Role Distribution
-            </h5>
-            <div className="flex items-center gap-6">
-               {[
-                 { label: 'Super Head', count: stats?.roleDistribution?.sh || 0, color: 'bg-blue-500' },
-                 { label: 'HBA', count: stats?.roleDistribution?.hba || 0, color: 'bg-indigo-500' },
-                 { label: 'HCM', count: stats?.roleDistribution?.hcm || 0, color: 'bg-purple-500' },
-                 { label: 'HCC', count: stats?.roleDistribution?.hcc || 0, color: 'bg-cyan-500' },
-               ].map((role, i) => (
-                 <div key={i} className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${role.color}`} />
-                    <span className="text-[9px] font-bold text-slate-400">{role.label}: <span className="text-white">{role.count.toLocaleString()}</span></span>
-                 </div>
-               ))}
-            </div>
-         </div>
-         <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden flex">
-            {['sh', 'hba', 'hcm', 'hcc'].map((role, i) => {
-              const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-cyan-500'];
-              const count = stats?.roleDistribution?.[role] || 0;
-              const percent = stats?.totalMembers ? (count / stats.totalMembers) * 100 : 0;
-              return (
-                <div key={i} className={`h-full ${colors[i]} transition-all duration-1000`} style={{ width: `${percent}%` }} />
-              );
-            })}
-         </div>
-      </div>
+      {user.role !== 'hcc' && (
+        <div className="bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5 space-y-6">
+           <div className="flex items-center justify-between">
+              <h5 className="text-[10px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                 Network Role Distribution
+              </h5>
+              <div className="flex items-center gap-6">
+                 {[
+                   { id: 'hba', label: 'HBA', color: 'bg-indigo-500' },
+                   { id: 'hcm', label: 'HCM', color: 'bg-purple-500' },
+                   { id: 'hcc', label: 'HCC', color: 'bg-cyan-500' },
+                 ]
+                 .filter(r => {
+                   if (user.role === 'sh') return true;
+                   if (user.role === 'hba') return ['hcm', 'hcc'].includes(r.id);
+                   if (user.role === 'hcm') return r.id === 'hcc';
+                   return false;
+                 })
+                 .map((role, i) => (
+                   <div key={i} className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${role.color}`} />
+                      <span className="text-[9px] font-bold text-slate-400">{role.label}: <span className="text-white">{(stats?.roleDistribution?.[role.id] || 0).toLocaleString()}</span></span>
+                   </div>
+                 ))}
+              </div>
+           </div>
+           <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden flex">
+              {['hba', 'hcm', 'hcc']
+                .filter(r => {
+                  if (user.role === 'sh') return true;
+                  if (user.role === 'hba') return ['hcm', 'hcc'].includes(r);
+                  if (user.role === 'hcm') return r === 'hcc';
+                  return false;
+                })
+                .map((role, i) => {
+                const colors: Record<string, string> = { hba: 'bg-indigo-500', hcm: 'bg-purple-500', hcc: 'bg-cyan-500' };
+                const count = stats?.roleDistribution?.[role] || 0;
+                
+                // Calculate total based only on visible roles
+                const visibleRoles = ['hba', 'hcm', 'hcc'].filter(r => {
+                  if (user.role === 'sh') return true;
+                  if (user.role === 'hba') return ['hcm', 'hcc'].includes(r);
+                  if (user.role === 'hcm') return r === 'hcc';
+                  return false;
+                });
+                const visibleTotal = visibleRoles.reduce((acc, r) => acc + (stats?.roleDistribution?.[r] || 0), 0);
+                
+                const percent = visibleTotal > 0 ? (count / visibleTotal) * 100 : 0;
+                return (
+                  <div key={i} className={`h-full ${colors[role]} transition-all duration-1000`} style={{ width: `${percent}%` }} />
+                );
+              })}
+           </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">

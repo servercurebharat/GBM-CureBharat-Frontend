@@ -22,7 +22,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
         walletAPI.getMyWithdrawals()
       ]);
       if (walletRes.data.success) setData(walletRes.data.data);
-      if (withdrawalRes.data.success) setWithdrawals(withdrawalRes.data.data);
+      if (withdrawalRes.data.success) setWithdrawals(withdrawalRes.data.data || []);
     } catch (error) {
       console.error('Error fetching finance data:', error);
     } finally {

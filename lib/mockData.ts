@@ -14,7 +14,7 @@ export const HBA_USER: IUser = {
   role: 'hba',
   rank: 'HBA',
   memberId: 'CB-HBA-1001',
-  referrer: {
+  referrerId: {
     _id: 'sh-001',
     name: 'Vikram Singh',
     memberId: 'CB-SH-0001',
@@ -46,7 +46,7 @@ export const HCM_USER: IUser = {
   role: 'hcm',
   rank: 'HCM',
   memberId: 'CB-HCM-2001',
-  referrer: {
+  referrerId: {
     _id: 'hba-001',
     name: 'Rajesh Kumar',
     memberId: 'CB-HBA-1001',
@@ -212,28 +212,28 @@ const PLANS = {
 };
 
 export const HBA_RECENT_SALES: ISale[] = [
-  { _id: 's-hba-1', policyId: 'POL-2026-04-0189', seller: { _id: 'hba-001', name: 'Rajesh Kumar', memberId: 'CB-HBA-1001' }, customerName: 'Sanjay Mehta', customerMobile: '9887766554', plan: PLANS.sampoornaPremium, amount: 499900, businessVolume: 499900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-25T14:30:00Z' },
-  { _id: 's-hba-2', policyId: 'POL-2026-04-0156', seller: { _id: 'hba-001', name: 'Rajesh Kumar', memberId: 'CB-HBA-1001' }, customerName: 'Pooja Agarwal', customerMobile: '9776655443', plan: PLANS.sampoornaSuraksha, amount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-18T11:00:00Z' },
-  { _id: 's-hba-3', policyId: 'POL-2026-04-0123', seller: { _id: 'hba-001', name: 'Rajesh Kumar', memberId: 'CB-HBA-1001' }, customerName: 'Manish Tiwari', customerMobile: '9665544332', plan: PLANS.superSuraksha, amount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-10T16:45:00Z' },
+  { _id: 's-hba-1', policyId: 'POL-2026-04-0189', seller: { _id: 'hba-001', name: 'Rajesh Kumar', memberId: 'CB-HBA-1001' }, customerName: 'Sanjay Mehta', customerMobile: '9887766554', plan: PLANS.sampoornaPremium, saleAmount: 499900, businessVolume: 499900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-25T14:30:00Z' },
+  { _id: 's-hba-2', policyId: 'POL-2026-04-0156', seller: { _id: 'hba-001', name: 'Rajesh Kumar', memberId: 'CB-HBA-1001' }, customerName: 'Pooja Agarwal', customerMobile: '9776655443', plan: PLANS.sampoornaSuraksha, saleAmount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-18T11:00:00Z' },
+  { _id: 's-hba-3', policyId: 'POL-2026-04-0123', seller: { _id: 'hba-001', name: 'Rajesh Kumar', memberId: 'CB-HBA-1001' }, customerName: 'Manish Tiwari', customerMobile: '9665544332', plan: PLANS.superSuraksha, saleAmount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-10T16:45:00Z' },
 ];
 
 export const HCM_RECENT_SALES: ISale[] = [
-  { _id: 's-hcm-1', policyId: 'POL-2026-04-0201', seller: { _id: 'hcm-001', name: 'Priya Sharma', memberId: 'CB-HCM-2001' }, customerName: 'Ramesh Yadav', customerMobile: '9554433221', plan: PLANS.sampoornaSuper, amount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-26T09:00:00Z' },
-  { _id: 's-hcm-2', policyId: 'POL-2026-04-0178', seller: { _id: 'hcm-001', name: 'Priya Sharma', memberId: 'CB-HCM-2001' }, customerName: 'Sunita Chopra', customerMobile: '9443322110', plan: PLANS.sampoornaSuraksha, amount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-19T13:30:00Z' },
+  { _id: 's-hcm-1', policyId: 'POL-2026-04-0201', seller: { _id: 'hcm-001', name: 'Priya Sharma', memberId: 'CB-HCM-2001' }, customerName: 'Ramesh Yadav', customerMobile: '9554433221', plan: PLANS.sampoornaSuper, saleAmount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-26T09:00:00Z' },
+  { _id: 's-hcm-2', policyId: 'POL-2026-04-0178', seller: { _id: 'hcm-001', name: 'Priya Sharma', memberId: 'CB-HCM-2001' }, customerName: 'Sunita Chopra', customerMobile: '9443322110', plan: PLANS.sampoornaSuraksha, saleAmount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-19T13:30:00Z' },
 ];
 
 // Team sales visible to HCM (sales by their HCCs)
 export const HCM_TEAM_SALES: ISale[] = [
-  { _id: 's-t1', policyId: 'POL-2026-04-0210', seller: { _id: 'hcc-001', name: 'Meera Nair', memberId: 'CB-HCC-3001' }, customerName: 'Ajay Bhatt', customerMobile: '9111222333', plan: PLANS.sampoornaPremium, amount: 499900, businessVolume: 499900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-27T10:00:00Z' },
-  { _id: 's-t2', policyId: 'POL-2026-04-0205', seller: { _id: 'hcc-001', name: 'Meera Nair', memberId: 'CB-HCC-3001' }, customerName: 'Nisha Kapoor', customerMobile: '9222333444', plan: PLANS.sampoornaSuper, amount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-24T11:30:00Z' },
-  { _id: 's-t3', policyId: 'POL-2026-04-0198', seller: { _id: 'hcc-002', name: 'Arjun Reddy', memberId: 'CB-HCC-3002' }, customerName: 'Kiran Rao', customerMobile: '9333444555', plan: PLANS.sampoornaSuraksha, amount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-22T15:00:00Z' },
-  { _id: 's-t4', policyId: 'POL-2026-04-0190', seller: { _id: 'hcc-002', name: 'Arjun Reddy', memberId: 'CB-HCC-3002' }, customerName: 'Pankaj Jain', customerMobile: '9444555666', plan: PLANS.superSuraksha, amount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-20T09:45:00Z' },
-  { _id: 's-t5', policyId: 'POL-2026-04-0185', seller: { _id: 'hcc-003', name: 'Kavita Singh', memberId: 'CB-HCC-3003' }, customerName: 'Suresh Prabhu', customerMobile: '9555666777', plan: PLANS.sampoornaSuper, amount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-18T14:20:00Z' },
-  { _id: 's-t6', policyId: 'POL-2026-04-0170', seller: { _id: 'hcc-004', name: 'Vikash Gupta', memberId: 'CB-HCC-3004' }, customerName: 'Geeta Iyer', customerMobile: '9666777888', plan: PLANS.sampoornaSuraksha, amount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-15T10:00:00Z' },
-  { _id: 's-t7', policyId: 'POL-2026-04-0162', seller: { _id: 'hcc-004', name: 'Vikash Gupta', memberId: 'CB-HCC-3004' }, customerName: 'Mohan Das', customerMobile: '9777888999', plan: PLANS.superSuraksha, amount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-12T16:30:00Z' },
-  { _id: 's-t8', policyId: 'POL-2026-04-0155', seller: { _id: 'hcc-005', name: 'Rohit Verma', memberId: 'CB-HCC-3005' }, customerName: 'Lakshmi Narayan', customerMobile: '9888999000', plan: PLANS.sampoornaPremium, amount: 499900, businessVolume: 499900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-08T12:15:00Z' },
-  { _id: 's-t9', policyId: 'POL-2026-04-0148', seller: { _id: 'hcc-007', name: 'Deepak Mishra', memberId: 'CB-HCC-3007' }, customerName: 'Vinod Sharma', customerMobile: '9999000111', plan: PLANS.sampoornaSuper, amount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-05T11:00:00Z' },
-  { _id: 's-t10', policyId: 'POL-2026-04-0140', seller: { _id: 'hcc-007', name: 'Deepak Mishra', memberId: 'CB-HCC-3007' }, customerName: 'Usha Devi', customerMobile: '9000111222', plan: PLANS.superSuraksha, amount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-02T14:30:00Z' },
+  { _id: 's-t1', policyId: 'POL-2026-04-0210', seller: { _id: 'hcc-001', name: 'Meera Nair', memberId: 'CB-HCC-3001' }, customerName: 'Ajay Bhatt', customerMobile: '9111222333', plan: PLANS.sampoornaPremium, saleAmount: 499900, businessVolume: 499900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-27T10:00:00Z' },
+  { _id: 's-t2', policyId: 'POL-2026-04-0205', seller: { _id: 'hcc-001', name: 'Meera Nair', memberId: 'CB-HCC-3001' }, customerName: 'Nisha Kapoor', customerMobile: '9222333444', plan: PLANS.sampoornaSuper, saleAmount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: false, cycleMonth: '2026-04', createdAt: '2026-04-24T11:30:00Z' },
+  { _id: 's-t3', policyId: 'POL-2026-04-0198', seller: { _id: 'hcc-002', name: 'Arjun Reddy', memberId: 'CB-HCC-3002' }, customerName: 'Kiran Rao', customerMobile: '9333444555', plan: PLANS.sampoornaSuraksha, saleAmount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-22T15:00:00Z' },
+  { _id: 's-t4', policyId: 'POL-2026-04-0190', seller: { _id: 'hcc-002', name: 'Arjun Reddy', memberId: 'CB-HCC-3002' }, customerName: 'Pankaj Jain', customerMobile: '9444555666', plan: PLANS.superSuraksha, saleAmount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-20T09:45:00Z' },
+  { _id: 's-t5', policyId: 'POL-2026-04-0185', seller: { _id: 'hcc-003', name: 'Kavita Singh', memberId: 'CB-HCC-3003' }, customerName: 'Suresh Prabhu', customerMobile: '9555666777', plan: PLANS.sampoornaSuper, saleAmount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-18T14:20:00Z' },
+  { _id: 's-t6', policyId: 'POL-2026-04-0170', seller: { _id: 'hcc-004', name: 'Vikash Gupta', memberId: 'CB-HCC-3004' }, customerName: 'Geeta Iyer', customerMobile: '9666777888', plan: PLANS.sampoornaSuraksha, saleAmount: 299900, businessVolume: 299900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-15T10:00:00Z' },
+  { _id: 's-t7', policyId: 'POL-2026-04-0162', seller: { _id: 'hcc-004', name: 'Vikash Gupta', memberId: 'CB-HCC-3004' }, customerName: 'Mohan Das', customerMobile: '9777888999', plan: PLANS.superSuraksha, saleAmount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-12T16:30:00Z' },
+  { _id: 's-t8', policyId: 'POL-2026-04-0155', seller: { _id: 'hcc-005', name: 'Rohit Verma', memberId: 'CB-HCC-3005' }, customerName: 'Lakshmi Narayan', customerMobile: '9888999000', plan: PLANS.sampoornaPremium, saleAmount: 499900, businessVolume: 499900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-08T12:15:00Z' },
+  { _id: 's-t9', policyId: 'POL-2026-04-0148', seller: { _id: 'hcc-007', name: 'Deepak Mishra', memberId: 'CB-HCC-3007' }, customerName: 'Vinod Sharma', customerMobile: '9999000111', plan: PLANS.sampoornaSuper, saleAmount: 399900, businessVolume: 399900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-05T11:00:00Z' },
+  { _id: 's-t10', policyId: 'POL-2026-04-0140', seller: { _id: 'hcc-007', name: 'Deepak Mishra', memberId: 'CB-HCC-3007' }, customerName: 'Usha Devi', customerMobile: '9000111222', plan: PLANS.superSuraksha, saleAmount: 199900, businessVolume: 199900, status: 'completed', commissionProcessed: true, cycleMonth: '2026-04', createdAt: '2026-04-02T14:30:00Z' },
 ];
 
 // ─── Monthly Performance Data (for charts) ──────────────────────────────────

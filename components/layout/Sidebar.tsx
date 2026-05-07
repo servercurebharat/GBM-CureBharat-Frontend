@@ -70,11 +70,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     },
     {
       label: 'Network', items: [
-        { label: 'Enroll Member', href: '/sh?enroll=true', icon: 'plus-circle' },
-        { label: 'Network Tree', href: '/sh/state-tree', icon: 'git-branch' },
-        { label: 'Direct Team', href: '/sh/direct-team', icon: 'users' },
-        { label: 'Team Performance', href: '/sh/team-performance', icon: 'bar-chart' },
-        { label: 'Members', href: '/sh/members', icon: 'list' },
+        { label: 'Team Management', href: '/sh/team', icon: 'users' },
       ]
     },
     {
@@ -107,9 +103,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     },
     {
       label: 'Network Management', items: [
-        { label: 'Enroll Member', href: '/hba?enroll=true', icon: 'plus-circle' },
-        { label: 'My HCB Tree', href: '/hba/network', icon: 'git-branch' },
-        { label: 'Team Performance', href: '/hba/team-performance', icon: 'bar-chart' },
+        { label: 'Team Management', href: '/hba/team', icon: 'users' },
       ]
     },
     {
@@ -139,9 +133,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     },
     {
       label: 'Network', items: [
-        { label: 'Enroll Member', href: '/hcm?enroll=true', icon: 'plus-circle' },
-        { label: 'My Tree', href: '/hcm/network', icon: 'git-branch' },
-        { label: 'Team Monitor', href: '/hcm/team-monitor', icon: 'activity' },
+        { label: 'Team Management', href: '/hcm/team', icon: 'users' },
       ]
     },
     {
@@ -171,7 +163,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     },
     {
       label: 'My Business', items: [
-        { label: 'Team', href: '/hcc/team', icon: 'users' },
+        { label: 'Team Management', href: '/hcc/team', icon: 'users' },
         { label: 'Rank Progress', href: '/hcc/rank-progress', icon: 'target' },
       ]
     },
