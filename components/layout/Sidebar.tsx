@@ -43,7 +43,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     },
     {
       label: 'Administration', items: [
-        { label: 'Role & Permissions', href: '/admin/role-manager', icon: 'users-cog' },
         { label: 'State Performance', href: '/admin/state-performance', icon: 'map' },
         { label: 'Audit Trail', href: '/admin/audit-trail', icon: 'clipboard' },
       ]
@@ -117,11 +116,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
         { label: 'My Sales', href: '/hba/sales/history', icon: 'list' },
       ]
     },
-    {
-      label: 'Inventory Control', items: [
-        { label: 'Bulk E-Pins', href: '/hba/bulk-pins', icon: 'key' },
-      ]
-    },
   ],
   hcm: [
     {
@@ -146,11 +140,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       label: 'Sales', items: [
         { label: 'New Sale', href: '/hcm/sales/new', icon: 'plus-circle' },
         { label: 'My Sales', href: '/hcm/sales/history', icon: 'list' },
-      ]
-    },
-    {
-      label: 'E-Pin', items: [
-        { label: 'Push Pins', href: '/hcm/push-pins', icon: 'key' },
       ]
     },
   ],
@@ -179,12 +168,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       ]
     },
     {
-      label: 'E-Pin', items: [
-        { label: 'My Pin Wallet', href: '/hcc/epins', icon: 'key' },
-        { label: 'Use Pin to Register', href: '/hcc/register-pin', icon: 'plus-circle' },
-      ]
-    },
-    {
       label: 'Documents', items: [
         { label: 'My KYC Status', href: '/hcc/kyc', icon: 'shield' },
         { label: 'Policy Certificates', href: '/hcc/certificates', icon: 'award' },
@@ -203,7 +186,7 @@ export default function Sidebar({ role, user, isOpen, setIsOpen }: { role: Role;
   const pathname = usePathname();
   const { logout } = useAuth();
   const sections = NAV_CONFIG[role];
-  const color = ROLE_COLORS[role];
+  const color = role === 'admin' ? '#8b7cf8' : '#49D2B5'; // Default to Brand Teal for others or use specific role colors if preferred. But let's use Brand Teal for consistency.
 
   return (
     <>
@@ -216,31 +199,31 @@ export default function Sidebar({ role, user, isOpen, setIsOpen }: { role: Role;
       )}
 
       <aside className={`fixed lg:static inset-y-0 left-0 w-[264px] min-h-screen flex flex-col flex-shrink-0 z-50 transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`} style={{ background: 'linear-gradient(180deg, #131241 0%, #0d0f14 100%)' }}>
-        <div className="absolute top-0 left-0 right-0 h-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, ${color}12 0%, transparent 70%)` }} />
+        <div className="absolute top-0 left-0 right-0 h-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, #49D2B512 0%, transparent 70%)` }} />
 
-        <div className="h-[90px] px-6 flex items-center gap-3 relative border-b border-white/5 flex-shrink-0">
-          <div className="w-11 h-11 flex items-center justify-center flex-shrink-0 relative transition-all hover:scale-105 active:scale-95">
-            <Image
-              src="/image.png"
-              alt="CureBharat Logo"
-              width={44}
-              height={44}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <div>
-            <div className="font-display text-[15px] font-black text-white tracking-[0.15em] leading-none uppercase">
-              CURE<span className="text-[#60A5FA]">BHARAT</span>
+        <div className="h-[90px] px-5 flex items-center gap-3.5 relative border-b border-white/5 flex-shrink-0">
+          {/* Logo — raw image, no container */}
+          <Image
+            src="/image.png"
+            alt="CureBharat Logo"
+            width={54}
+            height={54}
+            className="object-contain flex-shrink-0 self-center -mt-1"
+            priority
+          />
+          {/* Brand Text */}
+          <div className="flex flex-col justify-center leading-none gap-[5px]">
+            <div className="font-display text-[14px] font-black text-white tracking-[0.12em] uppercase leading-none">
+              CURE<span className="text-[#49D2B5]">BHARAT</span>
             </div>
-            <div className="text-[7px] font-black text-white/20 tracking-[0.2em] uppercase mt-1.5 leading-tight">
+            <div className="text-[7px] font-bold text-white/25 tracking-[0.18em] uppercase leading-none">
               Wellness Private Ltd.
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pb-6 relative">
+        <nav className="flex-1 overflow-y-auto no-scrollbar sidebar-scroll px-3 pb-6 relative">
           {sections.map((section) => (
             <div key={section.label} className="mb-5">
               <div className="text-[9px] font-bold uppercase px-4 mb-2 text-white/20 tracking-widest">{section.label}</div>

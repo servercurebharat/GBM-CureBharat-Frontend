@@ -69,7 +69,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {!hideTopbar && <Topbar pageTitle={pageTitle} user={user} setSidebarOpen={setSidebarOpen} />}
 
-        <main className="flex-1 overflow-y-auto bg-white relative">
+        <main className="flex-1 overflow-y-auto no-scrollbar bg-white relative">
           <div className="max-w-[1440px] mx-auto px-6 md:px-8 py-6 md:py-8 relative animate-in fade-in slide-in-from-bottom-4 duration-700">
             {children}
           </div>

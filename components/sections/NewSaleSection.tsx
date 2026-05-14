@@ -13,8 +13,7 @@ export default function NewSaleSection({ user }: { user: IUser }) {
   const [formData, setFormData] = useState({
     customerName: '',
     customerMobile: '',
-    planId: '',
-    ePinCode: ''
+    planId: ''
   });
 
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function NewSaleSection({ user }: { user: IUser }) {
       const res = await salesAPI.create(formData);
       if (res.data.success) {
         toast.success('Sale recorded successfully!');
-        setFormData({ customerName: '', customerMobile: '', planId: '', ePinCode: '' });
+        setFormData({ customerName: '', customerMobile: '', planId: '' });
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to record sale');
@@ -118,16 +117,7 @@ export default function NewSaleSection({ user }: { user: IUser }) {
                     </div>
                   </div>
                </div>
-               <div className="space-y-3">
-                  <label className="text-[10px] font-black text-[#B5B8BD] uppercase tracking-[0.2em] pl-1">E-Pin Code (Optional)</label>
-                  <input 
-                    type="text" 
-                    value={formData.ePinCode}
-                    onChange={(e) => setFormData({...formData, ePinCode: e.target.value.toUpperCase()})}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-emerald-400 placeholder:text-white/10 outline-none focus:border-emerald-500/40 transition-all shadow-inner uppercase font-mono"
-                    placeholder="CB-XXXXXX (Optional)"
-                  />
-               </div>
+               {/* E-Pin logic removed */}
             </div>
 
             <div className="pt-10 border-t border-white/5">

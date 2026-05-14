@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { exportToCSV } from '@/lib/utils/export';
 
 const AUDIT_LOGS = [
   { id: 'LOG-001', actor: 'Vikram Admin', action: 'KYC Approved', target: 'Arjun Mehra (CB-9281)', ip: '192.168.1.10', timestamp: '2026-04-28T14:32:00Z', severity: 'info', icon: 'check' },
@@ -14,6 +15,21 @@ const AUDIT_LOGS = [
 export default function AdminAuditTrailPage() {
   const [filter, setFilter] = useState('All Events');
 
+  const handleExport = () => {
+    const headers = ['Log ID', 'Actor', 'Action', 'Target/Description', 'IP Address', 'Timestamp', 'Severity'];
+    const rows = AUDIT_LOGS.map(log => [
+      log.id,
+      log.actor,
+      log.action,
+      log.target,
+      log.ip,
+      new Date(log.timestamp).toLocaleString(),
+      log.severity.toUpperCase()
+    ]);
+
+    exportToCSV(headers, rows, 'CureBharat_Audit_Trail');
+  };
+
   return (
     <DashboardLayout pageTitle="Audit Trail">
       <div className="space-y-6 pb-20">
@@ -23,9 +39,12 @@ export default function AdminAuditTrailPage() {
               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">CUREBHARAT / ADMIN / AUDIT TRAIL</p>
               <h1 className="text-3xl font-bold text-[#000000] font-display">Audit Trail</h1>
            </div>
-           <button className="bg-[#1c2030] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/5 flex items-center gap-2">
+           <button 
+             onClick={handleExport}
+             className="bg-[#1c2030] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest border border-white/5 flex items-center gap-2"
+           >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Export Logs
+              Export CSV
            </button>
         </div>
 

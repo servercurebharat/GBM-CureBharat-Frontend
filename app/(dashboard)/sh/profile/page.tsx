@@ -47,7 +47,7 @@ export default function ProfilePage() {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0
-    }).format(amount / 100);
+    }).format(amount);
   };
 
   return (

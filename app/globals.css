@@ -18,6 +18,16 @@
   --hba: #fbbf24;
   --hcm: #f87171;
   --hcc: #60a5fa;
+  --brand-teal: #49D2B5;
+  --brand-navy: #131241;
+}
+
+.cb-gradient {
+  background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-teal) 100%);
+}
+
+.cb-teal-glow {
+  box-shadow: 0 0 20px rgba(73, 210, 181, 0.2);
 }
 
 ::selection {
@@ -152,4 +162,24 @@ textarea:focus {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(99, 102, 241, 0.15);
   border-radius: 99px;
+}
+
+/* ─── Hide scrollbars globally but keep functionality ─── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Apply hidden scrollbar to body and sidebar */
+html, body, .sidebar-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar, .sidebar-scroll::-webkit-scrollbar {
+  display: none;
 }

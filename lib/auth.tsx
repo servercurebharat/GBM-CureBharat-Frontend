@@ -7,12 +7,18 @@ import { IUser } from '../types';
 interface AuthContextType {
   user: IUser | null;
   loading: boolean;
-  login: (mobile: string, otp: string) => Promise<void>;
+  login: (mobile: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+// Helper: wipe all auth cookies instantly
+const clearAuthCookies = () => {
+  document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+  document.cookie = 'user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IUser | null>(null);
@@ -25,58 +31,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     try {
       const res = await authAPI.getMe();
-      const userData = res.data.data || res.data.user;
+      // Backend now consistently returns { success, data }
+      const userData = res.data.data;
       if (res.data.success && userData) {
         setUser(userData);
-        // Set role cookie for middleware
-        document.cookie = `user_role=${userData.role}; path=/; max-age=604800`;
+        document.cookie = `user_role=${userData.role}; path=/; max-age=604800; SameSite=Lax`;
       } else {
         setUser(null);
       }
-    } catch {
+    } catch (err: any) {
       setUser(null);
+      // ─── THE LOOP FIX ──────────────────────────────────────────────────────
+      // If the server says "not authorized", the JWT is expired/invalid.
+      // We MUST clear the cookies here — otherwise the Next.js middleware
+      // will see the old cookies, think the user is logged in, and keep
+      // redirecting back to the dashboard, creating an infinite loop.
+      if (err?.response?.status === 401) {
+        clearAuthCookies();
+      }
+      // ───────────────────────────────────────────────────────────────────────
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (mobile: string, otp: string) => {
+  const login = async (mobile: string, password: string) => {
     try {
-      const res = await authAPI.verifyOTP(mobile, otp);
-      console.log('Raw Login Response:', res.data); // TEMP DEBUG LOG
+      const res = await authAPI.login(mobile, password);
 
-      if (res.data.success) {
-        // Handle inconsistent backend (some endpoints use .data, some use .user)
-        const user = res.data.data || (res.data as any).user;
-        
-        if (user) {
-          document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
-          await refreshUser();
-          window.location.href = `/${user.role}`;
-        } else {
-          console.error('Login Error: No user object found in response. Response keys:', Object.keys(res.data));
-          throw new Error('Login failed: Server response missing user data');
-        }
-      } else if (res.data.message) {
-        throw new Error(res.data.message);
+      if (res.data.success && res.data.data) {
+        const userData = res.data.data;
+        // Set role cookie so middleware knows where to route
+        document.cookie = `user_role=${userData.role}; path=/; max-age=604800; SameSite=Lax`;
+        // Refresh full user profile from DB
+        await refreshUser();
+        // Navigate to the correct dashboard
+        window.location.href = `/${userData.role}`;
+      } else {
+        throw new Error(res.data.message || 'Login failed');
       }
     } catch (error: any) {
-      console.error('--- LOGIN ERROR DETAIL ---');
-      console.error('Status:', error.response?.status);
-      console.error('Response Data:', error.response?.data);
-      console.error('Config URL:', error.config?.url);
-      
-      const serverMessage = error.response?.data?.message || error.response?.data?.error || error.message;
+      console.error('[LOGIN ERROR]', error.response?.status, error.response?.data);
       throw error;
     }
   };
 
   const logout = async () => {
-    // Clear cookies
-    document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "user_role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    setUser(null);
-    window.location.href = '/login';
+    try {
+      // MUST call backend first — auth_token is httpOnly, JS cannot clear it.
+      // Only the server can clear it via Set-Cookie with maxAge=0.
+      await authAPI.logout();
+    } catch (_) {
+      // Even if the backend call fails, proceed with client-side cleanup
+    } finally {
+      clearAuthCookies();
+      setUser(null);
+      window.location.href = '/login';
+    }
   };
 
   return (
@@ -93,4 +104,3 @@ export const useAuth = () => {
 };
 
 export const getDashboardRoute = (role: string) => `/${role.toLowerCase()}`;
-

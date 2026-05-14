@@ -35,21 +35,29 @@ api.interceptors.response.use(
 
 // AUTH
 export const authAPI = {
-  sendOTP: (mobile: string) =>
-    api.post('/auth/send-otp', { mobile }),
-  verifyOTP: (mobile: string, otp: string) =>
-    api.post<ApiResponse<IUser>>('/auth/verify-otp', { mobile, otp }),
+  login: (mobile: string, password: string) =>
+    api.post<ApiResponse<IUser>>('/auth/login', { mobile, password }),
   register: (data: RegisterData) =>
     api.post('/auth/register', data),
   getMe: () =>
     api.get<ApiResponse<IUser>>('/auth/me'),
   logout: () =>
-    api.post('/auth/logout'), // Note: Backend needs to implement this or just clear cookie on client
+    api.post('/auth/logout'),
+};
+
+// PUBLIC SALES (REFERRAL LINKS)
+export const publicAPI = {
+  getSeller: (memberId: string) =>
+    api.get(`/public/seller/${memberId}`),
+  createOrder: (data: { planId: string, refCode: string }) =>
+    api.post('/public/create-order', data),
+  verifyPayment: (data: any) =>
+    api.post('/public/verify-payment', data),
 };
 
 // USERS
 export const usersAPI = {
-  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string; state?: string; refer?: string }) =>
     api.get<PaginatedResponse<IUser>>('/users', { params }),
   getStats: () =>
     api.get<ApiResponse<any>>('/users/stats'),
@@ -125,22 +133,30 @@ export const adminAPI = {
     api.post<ApiResponse<any>>('/wallet/payout-cycle', { cycleMonth }),
   getAllProvisional: () =>
     api.get<ApiResponse<{ wallets: any[]; summary: any }>>('/wallet/all-provisional'),
+  getGlobalLedger: (params?: { page?: number; limit?: number; type?: string }) =>
+    api.get<PaginatedResponse<any>>('/wallet/global-ledger', { params }),
   getTree: () =>
     api.get<ApiResponse<any>>('/admin/tree'),
+  createManualAdjustment: (data: { memberId: string, amount: number, type: 'credit' | 'debit', reason: string }) =>
+    api.post<ApiResponse<any>>('/admin/manual-adjustment', data),
+  getAdjustmentHistory: (params?: { page?: number; limit?: number }) =>
+    api.get<PaginatedResponse<any>>('/wallet/global-ledger', { params: { ...params, type: 'manual' } }),
+  getStatePerformance: () =>
+    api.get<ApiResponse<any[]>>('/admin/state-performance'),
 };
 
 // TEAM
 export const teamAPI = {
   getStats: () =>
     api.get<ApiResponse<any>>('/team/stats'),
-  getMembers: (params?: { role?: string; search?: string; page?: number; limit?: number }) =>
+  getMembers: (params?: { role?: string; search?: string; page?: number; limit?: number; parentId?: string }) =>
     api.get<PaginatedResponse<any>>('/team/members', { params }),
 };
 
 // DASHBOARD
 export const dashboardAPI = {
-  getSummary: () =>
-    api.get<ApiResponse<any>>('/dashboard/summary'),
+  getSummary: (params?: { period?: string; state?: string }) =>
+    api.get<ApiResponse<any>>('/dashboard/summary', { params }),
   getLeaders: () =>
     api.get<ApiResponse<any>>('/dashboard/leaders'),
 };

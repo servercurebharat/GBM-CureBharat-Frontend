@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { salesAPI } from '@/lib/api';
 import { ISale, IUser } from '@/types';
 import { ROLE_COLORS } from '@/lib/constants';
+import { exportToCSV } from '@/lib/utils/export';
 
 export default function SalesHistorySection({ user }: { user: IUser }) {
   const [sales, setSales] = useState<ISale[]>([]);
@@ -29,6 +30,23 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
     };
     fetchSales();
   }, [page]);
+
+  const handleExport = () => {
+    if (!sales || sales.length === 0) return;
+    
+    const headers = ['Policy ID', 'Date', 'Customer Name', 'Mobile', 'Plan', 'Amount', 'Status'];
+    const rows = sales.map(s => [
+      s.policyId,
+      new Date(s.createdAt).toLocaleDateString(),
+      s.customerName,
+      s.customerMobile,
+      (s.plan as any)?.name || 'Health Plan',
+      s.saleAmount / 100,
+      s.status.toUpperCase()
+    ]);
+
+    exportToCSV(headers, rows, 'CureBharat_Sales_History');
+  };
 
   const color = ROLE_COLORS[user.role] || '#60A5FA';
 
@@ -61,7 +79,12 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
               <p className="text-[9px] text-[#B5B8BD] font-bold uppercase tracking-widest mt-1 opacity-50">Authorized Sales History</p>
            </div>
            <div className="flex gap-4">
-              <button className="px-6 py-2.5 rounded-xl border border-white/10 text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/5 transition-all">Export CSV</button>
+              <button 
+                onClick={handleExport}
+                className="px-6 py-2.5 rounded-xl border border-white/10 text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/5 transition-all"
+              >
+                Export CSV
+              </button>
            </div>
         </div>
         
@@ -108,7 +131,7 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
                                <div>
                                   <p className="text-xs font-bold text-white">{sale.customerName}</p>
                                   <p className="text-[9px] text-[#64748B] font-bold mt-0.5 tracking-tighter">+91 {sale.customerMobile}</p>
-                               </div>
+                                </div>
                             </div>
                          </td>
                          <td className="px-8 py-6">

@@ -20,7 +20,6 @@ function RegisterForm() {
     email: '',
     password: '',
     referrerId: '',
-    ePinCode: '',
     state: '',
     role: 'hcc'
   });
@@ -40,7 +39,7 @@ function RegisterForm() {
             setFormData(prev => ({ 
               ...prev, 
               referrerId: user.memberId || '',
-              role: role === 'sh' ? 'hcb' : 'hcc'
+              role: role === 'sh' ? 'hba' : 'hcc'
             }));
           } else {
              // Admin defaults to adding State Head

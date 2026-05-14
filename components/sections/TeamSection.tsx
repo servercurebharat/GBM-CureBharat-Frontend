@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import { IUser } from '@/types';
 import toast from 'react-hot-toast';
 import AddMemberModal from '../dashboard/AddMemberModal';
+import { exportToCSV } from '@/lib/utils/export';
 
 interface TeamMember extends IUser {
   directCount?: number;
@@ -58,6 +59,22 @@ export default function TeamSection({ user }: { user: IUser }) {
     fetchStats();
     fetchMembers();
   }, [roleFilter, search]);
+
+  const handleExport = () => {
+    if (!members || members.length === 0) return;
+    
+    const headers = ['Name', 'Member ID', 'State', 'Role', 'Team Sales', 'Total Income'];
+    const rows = members.map(m => [
+      m.name,
+      m.memberId,
+      m.state,
+      m.role.toUpperCase(),
+      (m.teamSalesValue || 0) / 100,
+      ((m.teamSalesValue || 0) * 0.02) / 100
+    ]);
+
+    exportToCSV(headers, rows, 'CureBharat_Team_Network');
+  };
 
   const setMemberExpanded = (targetId: string, isExpanded: boolean) => {
     setMembers(prev => prev.map(m => m._id === targetId ? { ...m, isExpanded } : m));
@@ -152,19 +169,17 @@ export default function TeamSection({ user }: { user: IUser }) {
                        <td className="px-8 py-4 text-right text-[10px] font-black text-white/60">{formatCurrency(child.teamSalesValue || 0)}</td>
                        <td className="px-8 py-4 text-right text-[10px] font-black text-blue-400/60">{formatCurrency((child.teamSalesValue || 0) * 0.02)}</td>
                        <td className="px-8 py-4 text-center">
-                          {child.role !== 'hcc' && (
-                            <button 
-                              onClick={() => toggleNodeExpand(child)}
-                              className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
-                                child.isExpanded 
-                                ? 'bg-blue-600/10 text-blue-400 border border-blue-400/20' 
-                                : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-                              }`}
-                            >
-                               {loadingChildren[child._id as string] ? 'Loading...' : child.isExpanded ? 'Hide' : `View ${getNextRole(child.role)}s`}
-                               <svg className={`transition-transform duration-300 ${child.isExpanded ? 'rotate-180' : ''}`} width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
-                            </button>
-                          )}
+                           <button 
+                                onClick={() => toggleNodeExpand(child)}
+                                className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
+                                  child.isExpanded 
+                                  ? 'bg-blue-600/10 text-blue-400 border border-blue-400/20' 
+                                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                                }`}
+                             >
+                                {loadingChildren[child._id as string] ? 'Loading...' : child.isExpanded ? 'Hide' : `View Downline`}
+                                <svg className={`transition-transform duration-300 ${child.isExpanded ? 'rotate-180' : ''}`} width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
+                             </button>
                        </td>
                     </tr>
                     {child.isExpanded && renderChildren(child._id as string, level + 1)}
@@ -196,9 +211,12 @@ export default function TeamSection({ user }: { user: IUser }) {
               Enroll Member
             </button>
           )}
-          <button className="px-8 py-3 bg-[#131241] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#1e1c5c] transition-all flex items-center gap-2 shadow-xl shadow-blue-900/20">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export Network
+          <button 
+            onClick={handleExport}
+            className="px-8 py-3 bg-[#131241] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#1e1c5c] transition-all flex items-center gap-2 shadow-xl shadow-blue-900/20"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
           </button>
         </div>
       </div>

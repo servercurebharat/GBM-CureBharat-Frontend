@@ -13,8 +13,10 @@ export default function WithdrawalPage() {
 
   useEffect(() => {
     authAPI.getMe().then((r) => {
-      setUser(r.data.data || {});
-      walletAPI.getMyWallet().then((wr) => setWallet(wr.data.data || {}));
+      if (r.data.success && r.data.data) setUser(r.data.data);
+      walletAPI.getMyWallet().then((wr) => {
+        if (wr.data.success && wr.data.data) setWallet(wr.data.data);
+      });
     });
   }, []);
 
@@ -22,7 +24,7 @@ export default function WithdrawalPage() {
     e.preventDefault();
     setLoading(true); setMsg('');
     try {
-      await walletAPI.requestWithdrawal(parseFloat(amount));
+      await walletAPI.requestWithdrawal(parseFloat(amount) * 100);
       setMsg('✅ Withdrawal request submitted! It will be processed in the next cycle.');
       setAmount('');
     } catch (err: any) {

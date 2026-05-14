@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { walletAPI } from '@/lib/api';
 import { IUser } from '@/types';
 import { ROLE_TAGS } from '@/lib/constants';
+import { exportToCSV } from '@/lib/utils/export';
 import toast from 'react-hot-toast';
 
 export default function FinanceHubSection({ user }: { user: IUser }) {
@@ -33,6 +34,22 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleExport = () => {
+    const ledger = data?.ledger;
+    if (!ledger || ledger.length === 0) return;
+    
+    const headers = ['Description', 'Type', 'Date', 'Amount', 'Status'];
+    const rows = ledger.map((entry: any) => [
+      entry.description,
+      entry.type.toUpperCase(),
+      new Date(entry.date).toLocaleDateString(),
+      entry.amount / 100,
+      entry.status.toUpperCase()
+    ]);
+
+    exportToCSV(headers, rows, 'CureBharat_Finance_Ledger');
+  };
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,9 +101,12 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
           <h2 className="text-3xl font-black text-[#1E293B] tracking-tight">Finance & Payouts</h2>
         </div>
         <div className="flex items-center gap-3">
-           <button className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Export Ledger
+           <button 
+             onClick={handleExport}
+             className="px-6 py-3 bg-white border border-slate-200 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+           >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export CSV
            </button>
            <button 
              onClick={() => setShowWithdrawModal(true)}

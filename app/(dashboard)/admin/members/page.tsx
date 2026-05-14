@@ -6,6 +6,7 @@ import { usersAPI } from '@/lib/api';
 import { IUser } from '@/types';
 import { useAuth } from '@/lib/auth';
 import AddMemberModal from '@/components/dashboard/AddMemberModal';
+import { exportToCSV } from '@/lib/utils/export';
 
 export default function AdminMembers() {
   const { user } = useAuth();
@@ -16,8 +17,10 @@ export default function AdminMembers() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('ALL ROLES');
   const [stats, setStats] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [stateFilter, setStateFilter] = useState('');
+  const [referredBy, setReferredBy] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchStats() {
@@ -43,7 +46,14 @@ export default function AdminMembers() {
         else if (activeTab === 'HCM') roleFilter = 'hcm';
         else if (activeTab === 'HCC') roleFilter = 'hcc';
 
-        const res = await usersAPI.getAll({ page, limit: 10, search, role: roleFilter });
+        const res = await usersAPI.getAll({ 
+          page, 
+          limit: 10, 
+          search, 
+          role: roleFilter,
+          state: stateFilter !== 'All States' ? stateFilter : undefined,
+          refer: referredBy || undefined
+        });
         if (res.data.success) {
           setMembers(res.data.data || []);
           setTotal(res.data.pagination.total);
@@ -55,7 +65,24 @@ export default function AdminMembers() {
       }
     }
     fetchMembers();
-  }, [page, search, activeTab, refreshKey]);
+  }, [page, search, activeTab, stateFilter, referredBy, refreshKey]);
+
+  const handleExport = () => {
+    if (!members || members.length === 0) return;
+    
+    const headers = ['Member ID', 'Name', 'Email', 'Sponsor', 'State', 'Role', 'Status'];
+    const rows = members.map(m => [
+      m.memberId,
+      m.name,
+      `${m.name.toLowerCase().replace(' ', '.')}@enterprise.com`,
+      m.referrerId ? (m.referrerId as any).name : 'Direct',
+      m.state || 'Maharashtra',
+      m.role.toUpperCase(),
+      m.status.toUpperCase()
+    ]);
+
+    exportToCSV(headers, rows, 'CureBharat_Members');
+  };
 
   const tabs = ['ALL ROLES', 'STATE HEAD', 'HBA', 'HCM', 'HCC'];
 
@@ -110,24 +137,40 @@ export default function AdminMembers() {
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input
                   type="text"
-                  placeholder="Search by ID, Name or Sponsor..."
+                  placeholder="Search by ID, Name..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-white/[0.05] border border-white/[0.05] rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-[#6029F1] transition-all"
                 />
               </div>
-              <div className="flex gap-3">
-                <select className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-1 focus:ring-[#6029F1] min-w-[120px]">
+              <div className="relative w-full md:w-48">
+                <input
+                  type="text"
+                  placeholder="Referred By..."
+                  value={referredBy}
+                  onChange={(e) => setReferredBy(e.target.value)}
+                  className="w-full bg-white/[0.05] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-[#6029F1] transition-all"
+                />
+              </div>
+              <div className="flex gap-3 w-full md:w-auto">
+                <select 
+                  value={stateFilter}
+                  onChange={(e) => setStateFilter(e.target.value)}
+                  className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-1 focus:ring-[#6029F1] min-w-[120px] flex-1 md:flex-none"
+                >
                   <option>All States</option>
+                  <option>Maharashtra</option>
+                  <option>Gujarat</option>
+                  <option>Delhi</option>
+                  <option>Karnataka</option>
+                  <option>Tamil Nadu</option>
+                  <option>Uttar Pradesh</option>
                 </select>
-                <select className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-1 focus:ring-[#6029F1] min-w-[150px]">
-                  <option>Sort By: Newest</option>
-                </select>
-                <button className="p-3 rounded-xl bg-white/[0.05] border border-white/[0.05] text-white hover:bg-white/10 transition-all">
+                <button 
+                  onClick={handleExport}
+                  className="p-3 rounded-xl bg-white/[0.05] border border-white/[0.05] text-white hover:bg-white/10 transition-all"
+                >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                </button>
-                <button className="p-3 rounded-xl bg-white/[0.05] border border-white/[0.05] text-white hover:bg-white/10 transition-all">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 </button>
               </div>
             </div>
@@ -176,16 +219,22 @@ export default function AdminMembers() {
                             </div>
                           </td>
                           <td className="px-4 py-5">
-                            <div className="text-xs font-medium text-white/60">Amit Shah (#MLM-102)</div>
+                            <div className="text-xs font-medium text-white/60">
+                               {member.referrerId ? (
+                                  `${(member.referrerId as any).name} (#${(member.referrerId as any).memberId})`
+                               ) : (
+                                  'Direct / System'
+                               )}
+                            </div>
                           </td>
                           <td className="px-4 py-5">
                              <div className="text-xs font-medium text-white/80">{member.state || 'Maharashtra'}</div>
                           </td>
                           <td className="px-4 py-5">
                              <span className={`px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${
-                               member.role === 'hcc' ? 'text-hcc border-hcc/30 bg-hcc/5' :
-                               member.role === 'hcm' ? 'text-hcm border-hcm/30 bg-hcm/5' :
-                               'text-hba border-hba/30 bg-hba/5'
+                                member.role === 'hcc' ? 'text-hcc border-hcc/30 bg-hcc/5' :
+                                member.role === 'hcm' ? 'text-hcm border-hcm/30 bg-hcm/5' :
+                                'text-hba border-hba/30 bg-hba/5'
                              }`}>
                                 {member.role}
                              </span>
@@ -278,7 +327,7 @@ export default function AdminMembers() {
   );
 }
 
-function StatCard({ label, value, sub, trend, trendValue }: any) {
+function StatCard({ label, value, sub, trend }: any) {
   return (
     <div className="bg-[#131241] rounded-2xl p-6 text-white shadow-xl border border-white/[0.03] animate-slide-up">
       <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-3">{label}</div>

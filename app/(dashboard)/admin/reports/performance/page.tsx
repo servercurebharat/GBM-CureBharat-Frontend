@@ -132,8 +132,12 @@ export default function PerformanceReport() {
 function FTDView({ data }: { data: any }) {
   const { metrics, hourlyVelocity, topPerformers } = data;
   
-  // Format currency
-  const formatCur = (v: number) => `₹${(v / 100).toLocaleString('en-IN')}`; // assuming backend stores paise
+  // Format currency - values are stored in rupees directly
+  const formatCur = (v: number) => {
+    if (v >= 10000000) return `₹${(v / 10000000).toFixed(2)} Cr`;
+    if (v >= 100000) return `₹${(v / 100000).toFixed(2)} L`;
+    return `₹${v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   // Find max hourly sales to scale the chart
   const maxHourlySales = Math.max(...hourlyVelocity.map((h: any) => h.sales), 1);
@@ -142,10 +146,10 @@ function FTDView({ data }: { data: any }) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* FTD Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <ReportMetric label="Total Revenue" value={formatCur(metrics.totalRevenue || 0)} change="Today's Volume" color="emerald" />
-          <ReportMetric label="Policies Sold" value={(metrics.totalSales || 0).toLocaleString()} change="Total Transactions" color="blue" />
-          <ReportMetric label="Avg Ticket Size" value={metrics.totalSales > 0 ? formatCur(metrics.totalRevenue / metrics.totalSales) : '₹0'} change="Per policy avg" color="amber" />
-          <ReportMetric label="Active Sellers" value={topPerformers.length.toString()} change="Members logged sales" color="slate" />
+          <ReportMetric label="Total Revenue" value={formatCur(metrics?.totalRevenue || 0)} change="Today's Volume" color="emerald" />
+          <ReportMetric label="Policies Sold" value={(metrics?.totalSales || 0).toLocaleString()} change="Total Transactions" color="blue" />
+          <ReportMetric label="Avg Ticket Size" value={metrics?.totalSales > 0 ? formatCur(metrics.totalRevenue / metrics.totalSales) : '₹0'} change="Per policy avg" color="amber" />
+          <ReportMetric label="Active Sellers" value={(topPerformers?.hcc?.length || 0).toString()} change="Members logged sales" color="slate" />
       </div>
 
       {/* Hourly Trend Chart */}
@@ -157,22 +161,40 @@ function FTDView({ data }: { data: any }) {
                 <div className="flex items-center gap-2 text-[10px] font-bold"><div className="w-2 h-2 rounded-full bg-[#60A5FA]" /> Policies Sold</div>
             </div>
           </div>
-          <div className="h-64 flex items-end gap-1 sm:gap-2 relative">
-            {/* Show only business hours or all hours if there's activity */}
-            {hourlyVelocity.filter((h:any) => h.hour >= 6 && h.hour <= 23).map((h: any) => {
+          
+          <div className="h-64 flex items-end gap-1 sm:gap-2 px-2 border-b border-white/10 pb-8 relative">
+            {/* Y-Axis Grid Lines (Visual only) */}
+            <div className="absolute inset-x-0 top-0 h-[1px] bg-white/5" />
+            <div className="absolute inset-x-0 top-1/2 h-[1px] bg-white/5" />
+            
+            {hourlyVelocity.map((h: any) => {
               const heightPct = (h.sales / maxHourlySales) * 100;
+              const isActive = h.hour >= 6 && h.hour <= 23;
+              if (!isActive && h.sales === 0) return null;
+
               return (
-                <div key={h.hour} className="flex-1 flex flex-col items-center gap-4">
-                    <div className="w-full bg-[#60A5FA]/20 rounded-t-lg transition-all hover:bg-[#60A5FA]/40 group relative" style={{ height: `${Math.max(heightPct, 1)}%` }}>
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-[#131241] text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20 whitespace-nowrap shadow-lg">
-                         {h.sales} Sales<br/>{formatCur(h.revenue)}
+                <div key={h.hour} className="flex-1 h-full flex flex-col justify-end items-center group relative">
+                    <div 
+                      className="w-full bg-[#60A5FA] rounded-t-sm transition-all duration-500 hover:brightness-125 hover:shadow-[0_0_15px_rgba(96,165,250,0.5)] group relative" 
+                      style={{ 
+                        height: h.sales > 0 ? `${Math.max(heightPct, 5)}%` : '2px', 
+                        opacity: h.sales > 0 ? 1 : 0.1 
+                      }}
+                    >
+                      {/* Tooltip */}
+                      <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-[#131241] text-[9px] font-black px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-50 whitespace-nowrap shadow-2xl pointer-events-none transform translate-y-2 group-hover:translate-y-0">
+                         <div className="text-[#60A5FA] mb-0.5">{h.hour}:00</div>
+                         {h.sales} Policies • {formatCur(h.revenue)}
                       </div>
                     </div>
-                    <span className="text-[8px] font-bold text-white/30 uppercase">{h.hour}h</span>
+                    <span className="absolute -bottom-7 text-[8px] font-black text-white/30 uppercase tracking-tighter">
+                      {h.hour}H
+                    </span>
                 </div>
               );
             })}
           </div>
+          <div className="h-8" /> {/* Spacer for absolute labels */}
       </div>
 
       {/* Today's High Performers */}
@@ -190,19 +212,23 @@ function FTDView({ data }: { data: any }) {
                   </tr>
                 </thead>
                 <tbody className="text-sm font-medium">
-                  {topPerformers.length === 0 ? (
+                  {topPerformers?.hcc?.length === 0 ? (
                     <tr><td colSpan={3} className="px-8 py-10 text-center text-slate-400 text-xs font-bold uppercase tracking-widest">No sales recorded today</td></tr>
-                  ) : topPerformers.map((row: any, i: number) => (
-                    <tr key={row._id} className="hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
-                        <td className="px-8 py-5 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black uppercase text-slate-500">{row.name[0]}</div>
-                          <div>
-                            <div className="font-bold text-slate-900">{row.name}</div>
-                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.memberId}</div>
+                  ) : topPerformers?.hcc?.map((row: any, i: number) => (
+                    <tr key={row._id} className="hover:bg-blue-50/30 transition-colors border-b border-slate-100 last:border-0">
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-black uppercase text-white flex-shrink-0" style={{ background: `hsl(${(i * 47 + 210) % 360}, 70%, 50%)` }}>{row.name ? row.name[0] : '?'}</div>
+                            <div>
+                              <div className="font-bold text-slate-900">{row.name}</div>
+                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{row.memberId}</div>
+                            </div>
                           </div>
                         </td>
-                        <td className="px-4 py-5 text-center text-emerald-600 font-bold">{row.sales}</td>
-                        <td className="px-8 py-5 text-right font-black">{formatCur(row.revenue)}</td>
+                        <td className="px-4 py-5 text-center">
+                          <span className="bg-emerald-100 text-emerald-700 font-black text-sm px-3 py-1 rounded-full">{row.sales}</span>
+                        </td>
+                        <td className="px-8 py-5 text-right font-black text-slate-900">{formatCur(row.revenue)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -219,11 +245,15 @@ function FTDView({ data }: { data: any }) {
 function MTDView({ data }: { data: any }) {
   const { metrics, stateBreakdown, newMembersCount } = data;
   
-  const formatCur = (v: number) => `₹${(v / 100).toLocaleString('en-IN')}`;
+  const formatCur = (v: number) => {
+    if (v >= 10000000) return `₹${(v / 10000000).toFixed(2)} Cr`;
+    if (v >= 100000) return `₹${(v / 100000).toFixed(2)} L`;
+    return `₹${v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
   
   // Example Target
   const targetPaise = 2000000000; // 2 Cr
-  const targetPct = Math.min((metrics.totalRevenue / targetPaise) * 100, 100);
+  const targetPct = Math.min(((metrics?.totalRevenue || 0) / targetPaise) * 100, 100);
 
   // For State breakdown colors
   const stateColors = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-indigo-500', 'bg-red-500', 'bg-purple-500'];
@@ -237,7 +267,7 @@ function MTDView({ data }: { data: any }) {
                 <div>
                   <div className="flex justify-between items-end mb-3">
                       <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Monthly Sales Target</h3>
-                      <span className="text-sm font-black text-[#60A5FA]">{formatCur(metrics.totalRevenue)} / ₹2 Cr</span>
+                      <span className="text-sm font-black text-[#60A5FA]">{formatCur(metrics?.totalRevenue || 0)} / ₹2 Cr</span>
                   </div>
                   <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden p-1">
                       <div className="h-full bg-gradient-to-r from-[#60A5FA] to-[#3b82f6] rounded-full shadow-lg transition-all duration-1000" style={{ width: `${targetPct}%` }} />
@@ -246,11 +276,11 @@ function MTDView({ data }: { data: any }) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-slate-50 rounded-2xl">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Policies</p>
-                      <p className="text-xl font-bold text-emerald-600">{metrics.totalSales.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-emerald-600">{(metrics?.totalSales || 0).toLocaleString()}</p>
                   </div>
                   <div className="p-4 bg-slate-50 rounded-2xl">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">New Members</p>
-                      <p className="text-xl font-bold text-slate-900">{newMembersCount.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-slate-900">{(newMembersCount || 0).toLocaleString()}</p>
                   </div>
                 </div>
             </div>
@@ -304,7 +334,7 @@ function MTDView({ data }: { data: any }) {
             <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-xl">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Generated Volume MTD</h3>
                 <div className="flex flex-col items-center">
-                  <div className="text-3xl font-black text-slate-900 mb-1">{formatCur(metrics.totalRevenue)}</div>
+                  <div className="text-3xl font-black text-slate-900 mb-1">{formatCur(metrics?.totalRevenue || 0)}</div>
                   <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Gross Sales</div>
                   <div className="w-full h-1 bg-slate-100 rounded-full mt-6" />
                   <p className="text-[9px] text-slate-400 font-bold uppercase mt-4 text-center leading-relaxed">Revenue calculation is synchronized with real-time sales feed.</p>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { adminAPI } from '@/lib/api';
 import { toast } from 'react-hot-toast';
+import { exportToCSV } from '@/lib/utils/export';
 
 export default function AdminPayouts() {
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,24 @@ export default function AdminPayouts() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleExport = () => {
+    if (!data?.wallets || data.wallets.length === 0) return;
+    
+    const headers = ['Name', 'Member ID', 'Role', 'Rank', 'Provisional', 'TDS (5%)', 'Net Payout', 'KYC Status'];
+    const rows = data.wallets.map(w => [
+      w.user?.name,
+      w.user?.memberId,
+      w.user?.role?.toUpperCase(),
+      w.user?.rank?.toUpperCase() || 'UNRANKED',
+      w.provisionalBalance / 100,
+      (w.provisionalBalance * 0.05) / 100,
+      (w.provisionalBalance * 0.95) / 100,
+      w.user?.kycStatus?.toUpperCase() || 'NOT SUBMITTED'
+    ]);
+
+    exportToCSV(headers, rows, 'CureBharat_Payout_Report');
+  };
 
   const handleRunCycle = async () => {
     const month = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -76,9 +95,12 @@ export default function AdminPayouts() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               Disbursement T+5
            </button>
-           <button className="bg-[#131241] px-6 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10 hover:brightness-110 active:scale-95 transition-all">
+           <button 
+             onClick={handleExport}
+             className="bg-[#131241] px-6 py-4 rounded-2xl text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/10 hover:brightness-110 active:scale-95 transition-all"
+           >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Export Report
+              Export CSV
            </button>
         </div>
 

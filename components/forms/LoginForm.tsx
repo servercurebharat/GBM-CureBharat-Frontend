@@ -1,50 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
 import { getDashboardRoute } from '@/lib/auth';
 
-type Step = 'mobile' | 'otp';
-
 export default function LoginForm() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>('mobile');
   const [mobile, setMobile] = useState('');
-  const [otp, setOtp] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleSendOtp(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await authAPI.sendOTP(mobile);
-      setStep('otp');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send OTP');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const res = await authAPI.verifyOTP(mobile, otp);
-      const apiResponse = res.data;
-      const user = apiResponse.data || (apiResponse as any).user;
-      if (apiResponse.success && user) {
-        document.cookie = `user_role=${user.role}; path=/; max-age=604800`;
-        router.push(getDashboardRoute(user.role));
+      const res = await authAPI.login(mobile, password);
+      const user = res.data.data;
+      if (res.data.success && user) {
+        document.cookie = `user_role=${user.role}; path=/; max-age=604800; SameSite=Lax`;
+        window.location.href = getDashboardRoute(user.role);
       } else {
-        router.push(`/register?mobile=${mobile}`);
+        setError(res.data.message || 'Login failed');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid OTP');
+      setError(err.response?.data?.message || 'Invalid mobile number or password');
     } finally {
       setLoading(false);
     }
@@ -58,74 +38,51 @@ export default function LoginForm() {
         </div>
       )}
 
-      {step === 'mobile' ? (
-        <form onSubmit={handleSendOtp} className="space-y-4">
-          <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">
-              Mobile Number
-            </label>
-            <div className="flex">
-              <span className="flex items-center px-3 bg-slate-800 border border-r-0 border-slate-600 rounded-l-xl text-slate-400 text-sm">
-                +91
-              </span>
-              <input
-                id="login-mobile"
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="9876543210"
-                maxLength={10}
-                pattern="[6-9][0-9]{9}"
-                required
-                className="flex-1 bg-slate-800 border border-slate-600 rounded-r-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-lg shadow-emerald-500/20"
-          >
-            {loading ? 'Sending OTP...' : 'Get OTP'}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifyOtp} className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-slate-300 text-sm font-medium">Enter OTP</label>
-              <button
-                type="button"
-                onClick={() => setStep('mobile')}
-                className="text-emerald-400 text-xs hover:underline"
-              >
-                Change number
-              </button>
-            </div>
-            <p className="text-slate-500 text-xs mb-3">Sent to +91 {mobile}</p>
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div>
+          <label className="block text-slate-300 text-sm font-medium mb-2">
+            Mobile Number
+          </label>
+          <div className="flex">
+            <span className="flex items-center px-3 bg-slate-800 border border-r-0 border-slate-600 rounded-l-xl text-slate-400 text-sm">
+              +91
+            </span>
             <input
-              id="login-otp"
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="6-digit OTP"
-              maxLength={6}
-              pattern="[0-9]{6}"
+              id="login-mobile"
+              type="tel"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+              placeholder="9876543210"
+              maxLength={10}
               required
-              className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-center text-xl tracking-[0.5em] font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+              className="flex-1 bg-slate-800 border border-slate-600 rounded-r-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-lg shadow-emerald-500/20"
-          >
-            {loading ? 'Verifying...' : 'Verify OTP'}
-          </button>
-        </form>
-      )}
+        <div>
+          <label className="block text-slate-300 text-sm font-medium mb-2">
+            Password
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            required
+            className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || mobile.length < 10 || password.length < 4}
+          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-lg shadow-emerald-500/20"
+        >
+          {loading ? 'Signing in...' : 'Sign In'}
+        </button>
+      </form>
 
       <p className="text-center text-slate-500 text-sm mt-4">
         New member?{' '}

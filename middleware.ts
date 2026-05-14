@@ -15,13 +15,10 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
   const userRole = request.cookies.get('user_role')?.value;
 
-  // 1. Allow public routes
+  // 1. Allow public routes — NEVER force-redirect on /login refresh
+  // Users should be able to visit /login even if logged in (to switch accounts).
+  // The login page itself handles redirection after successful login.
   if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
-    if (token && userRole) {
-      // If already logged in, redirect to respective dashboard
-      const target = ROLE_ROUTES[userRole] || '/login';
-      return NextResponse.redirect(new URL(target, request.url));
-    }
     return NextResponse.next();
   }
 
