@@ -18,8 +18,26 @@ export default function LoginPage() {
     if (mobile.length < 10) { setError('Enter a valid 10-digit mobile number'); return; }
     if (password.length < 4) { setError('Enter your password'); return; }
     setLoading(true);
+
+    let locationData: any = null;
     try {
-      await login(mobile, password);
+      // Prompt for location with a 5s timeout
+      const position: any = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { 
+          enableHighAccuracy: true,
+          timeout: 5000 
+        });
+      });
+      locationData = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+    } catch (err) {
+      console.warn('Geolocation permission denied or timed out. Proceeding without location.');
+    }
+
+    try {
+      await login(mobile, password, locationData);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
     } finally {
@@ -400,7 +418,10 @@ export default function LoginPage() {
                   style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }} />
                 <div className="relative flex items-center justify-center gap-3 text-white">
                   {loading ? (
-                    <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
+                      <span className="text-[11px] font-black animate-pulse uppercase tracking-widest">Securing Location...</span>
+                    </div>
                   ) : (
                     <>
                       <span>Access Dashboard</span>

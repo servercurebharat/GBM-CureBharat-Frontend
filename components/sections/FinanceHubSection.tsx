@@ -138,25 +138,41 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Gross <span className="text-emerald-400">↗</span></p>
         </div>
 
-        {/* Cap Amount */}
-        <div className="bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5">
-           <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Cap Amount</p>
-           <h4 className="text-2xl font-black text-white mb-2">{formatCurrency(data?.capAmount || 5000000)}</h4>
-           <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Per Cycle <span className="text-indigo-400">↗</span></p>
+        {/* Total Earnings */}
+        <div className="bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5 col-span-1 md:col-span-2">
+           <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Earnings Breakdown</p>
+           <div className="grid grid-cols-3 gap-4">
+              <div>
+                 <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Direct</p>
+                 <p className="text-lg font-black text-white">{formatCurrency(data?.earningsBreakdown?.direct || 0)}</p>
+              </div>
+              <div>
+                 <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Override</p>
+                 <p className="text-lg font-black text-blue-400">{formatCurrency(data?.earningsBreakdown?.override || 0)}</p>
+              </div>
+              <div>
+                 <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Leadership</p>
+                 <p className="text-lg font-black text-emerald-400">{formatCurrency(data?.earningsBreakdown?.leadership || 0)}</p>
+              </div>
+           </div>
+           <div className="w-full h-1.5 bg-white/5 rounded-full mt-6 flex overflow-hidden">
+              <div className="h-full bg-white transition-all" style={{ width: `${(data?.earningsBreakdown?.direct / data?.totalEarned) * 100 || 0}%` }} />
+              <div className="h-full bg-blue-400 transition-all" style={{ width: `${(data?.earningsBreakdown?.override / data?.totalEarned) * 100 || 0}%` }} />
+              <div className="h-full bg-emerald-400 transition-all" style={{ width: `${(data?.earningsBreakdown?.leadership / data?.totalEarned) * 100 || 0}%` }} />
+           </div>
         </div>
 
-        {/* Wallet (Earned/Cap) */}
-        <div className="bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5">
-           <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Wallet (Earned/Cap)</p>
-           <div className="flex items-baseline gap-1 mb-4">
-              <h4 className="text-2xl font-black text-white">{formatCurrency(currentEarnings)}</h4>
-              <span className="text-[10px] font-black text-slate-600">/ {data?.capAmount / 100000}k</span>
-           </div>
-           <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-blue-500 rounded-full transition-all duration-1000" 
-                style={{ width: `${walletPercentage}%` }}
-              />
+        {/* Net Wallet */}
+        <div className="bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5 col-span-1 md:col-span-2">
+           <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Available for Withdrawal</p>
+           <div className="flex justify-between items-end">
+              <div>
+                 <h4 className="text-3xl font-black text-white">{formatCurrency(data?.finalBalance || 0)}</h4>
+                 <p className="text-[10px] font-bold text-slate-500 mt-2">Provisional: {formatCurrency(data?.provisionalBalance || 0)}</p>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-blue-400">
+                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>
+              </div>
            </div>
         </div>
       </div>

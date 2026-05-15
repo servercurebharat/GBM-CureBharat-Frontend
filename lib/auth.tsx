@@ -7,7 +7,7 @@ import { IUser } from '../types';
 interface AuthContextType {
   user: IUser | null;
   loading: boolean;
-  login: (mobile: string, password: string) => Promise<void>;
+  login: (mobile: string, password: string, location?: { lat: number; lng: number }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (mobile: string, password: string) => {
+  const login = async (mobile: string, password: string, location?: { lat: number; lng: number }) => {
     try {
-      const res = await authAPI.login(mobile, password);
+      const res = await authAPI.login(mobile, password, location);
 
       if (res.data.success && res.data.data) {
         const userData = res.data.data;

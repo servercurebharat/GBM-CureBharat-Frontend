@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { salesAPI } from '@/lib/api';
+import ExportDropdown from '@/components/dashboard/ExportDropdown';
 
 type Scope = 'FTD' | 'MTD';
 
@@ -52,13 +53,38 @@ export default function PerformanceReport() {
     }
   }, [scope, date, month]);
 
+  // Data Preparation for Export
+  const getExportData = () => {
+    if (scope === 'FTD' && ftdData) {
+      const headers = ['Seller Name', 'Member ID', 'Policies Sold', 'Revenue'];
+      const rows = ftdData.topPerformers?.hcc?.map((row: any) => [
+        row.name,
+        row.memberId,
+        row.sales,
+        `Rs. ${row.revenue.toLocaleString()}`
+      ]) || [];
+      return { headers, rows, title: `Daily Performance Report - ${date}`, fileName: `FTD_Report_${date}` };
+    } else if (scope === 'MTD' && mtdData) {
+      const headers = ['Territory', 'Policies Sold', 'Revenue Generated'];
+      const rows = mtdData.stateBreakdown?.map((s: any) => [
+        s._id || 'Unknown',
+        s.sales,
+        `Rs. ${s.revenue.toLocaleString()}`
+      ]) || [];
+      return { headers, rows, title: `Monthly Performance Report - ${displayMonth}`, fileName: `MTD_Report_${month}` };
+    }
+    return { headers: [], rows: [], title: '', fileName: '' };
+  };
+
+  const exportConfig = getExportData();
+
   return (
     <DashboardLayout pageTitle="FTD + MTD Performance Report">
       <div className="space-y-8 pb-20">
         {/* Header & Controls */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div>
-            <p className="text-[10px] font-black text-[#60A5FA] uppercase tracking-widest mb-1">
+            <p className="text-[10px] font-black text-[#10b981] uppercase tracking-widest mb-1">
               REPORTS / {scope === 'FTD' ? 'FOR THE DAY (FTD)' : 'MONTH TO DATE (MTD)'}
             </p>
             <h1 className="text-3xl font-bold text-slate-900 font-display">
@@ -71,13 +97,13 @@ export default function PerformanceReport() {
              <div className="flex bg-slate-50 rounded-xl p-1">
                <button 
                  onClick={() => setScope('FTD')}
-                 className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'FTD' ? 'bg-white shadow text-[#60A5FA]' : 'text-slate-400 hover:text-slate-600'}`}
+                 className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'FTD' ? 'bg-white shadow text-[#10b981]' : 'text-slate-400 hover:text-slate-600'}`}
                >
                  Transaction Date
                </button>
                <button 
                  onClick={() => setScope('MTD')}
-                 className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'MTD' ? 'bg-white shadow text-[#60A5FA]' : 'text-slate-400 hover:text-slate-600'}`}
+                 className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'MTD' ? 'bg-white shadow text-[#10b981]' : 'text-slate-400 hover:text-slate-600'}`}
                >
                  Month
                </button>
@@ -102,17 +128,14 @@ export default function PerformanceReport() {
                />
              )}
 
-             <button className="bg-[#131241] text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-lg shadow-[#131241]/20 ml-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export PDF
-             </button>
+             <ExportDropdown {...exportConfig} />
           </div>
         </div>
 
         {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
-             <div className="w-10 h-10 border-4 border-[#60A5FA] border-t-transparent rounded-full animate-spin mb-4" />
+             <div className="w-10 h-10 border-4 border-[#10b981] border-t-transparent rounded-full animate-spin mb-4" />
              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Report Data...</div>
           </div>
         )}
@@ -154,11 +177,11 @@ function FTDView({ data }: { data: any }) {
 
       {/* Hourly Trend Chart */}
       <div className="bg-[#131241] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#60A5FA]/5 blur-3xl -mr-48 -mt-48" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/5 blur-3xl -mr-48 -mt-48" />
           <div className="relative z-10 flex items-center justify-between mb-10">
             <h3 className="text-sm font-black uppercase tracking-widest">Intraday Sales Velocity</h3>
             <div className="flex gap-2">
-                <div className="flex items-center gap-2 text-[10px] font-bold"><div className="w-2 h-2 rounded-full bg-[#60A5FA]" /> Policies Sold</div>
+                <div className="flex items-center gap-2 text-[10px] font-bold"><div className="w-2 h-2 rounded-full bg-[#10b981]" /> Policies Sold</div>
             </div>
           </div>
           
@@ -175,7 +198,7 @@ function FTDView({ data }: { data: any }) {
               return (
                 <div key={h.hour} className="flex-1 h-full flex flex-col justify-end items-center group relative">
                     <div 
-                      className="w-full bg-[#60A5FA] rounded-t-sm transition-all duration-500 hover:brightness-125 hover:shadow-[0_0_15px_rgba(96,165,250,0.5)] group relative" 
+                      className="w-full bg-[#10b981] rounded-t-sm transition-all duration-500 hover:brightness-125 hover:shadow-[0_0_15px_rgba(96,165,250,0.5)] group relative" 
                       style={{ 
                         height: h.sales > 0 ? `${Math.max(heightPct, 5)}%` : '2px', 
                         opacity: h.sales > 0 ? 1 : 0.1 
@@ -183,7 +206,7 @@ function FTDView({ data }: { data: any }) {
                     >
                       {/* Tooltip */}
                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-[#131241] text-[9px] font-black px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-50 whitespace-nowrap shadow-2xl pointer-events-none transform translate-y-2 group-hover:translate-y-0">
-                         <div className="text-[#60A5FA] mb-0.5">{h.hour}:00</div>
+                         <div className="text-[#10b981] mb-0.5">{h.hour}:00</div>
                          {h.sales} Policies • {formatCur(h.revenue)}
                       </div>
                     </div>
@@ -267,10 +290,10 @@ function MTDView({ data }: { data: any }) {
                 <div>
                   <div className="flex justify-between items-end mb-3">
                       <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Monthly Sales Target</h3>
-                      <span className="text-sm font-black text-[#60A5FA]">{formatCur(metrics?.totalRevenue || 0)} / ₹2 Cr</span>
+                      <span className="text-sm font-black text-[#10b981]">{formatCur(metrics?.totalRevenue || 0)} / ₹2 Cr</span>
                   </div>
                   <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden p-1">
-                      <div className="h-full bg-gradient-to-r from-[#60A5FA] to-[#3b82f6] rounded-full shadow-lg transition-all duration-1000" style={{ width: `${targetPct}%` }} />
+                      <div className="h-full bg-gradient-to-r from-[#10b981] to-[#3b82f6] rounded-full shadow-lg transition-all duration-1000" style={{ width: `${targetPct}%` }} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -325,7 +348,7 @@ function MTDView({ data }: { data: any }) {
                 <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6 text-center">Month Top Performers</h3>
                 <div className="space-y-6">
                   {stateBreakdown.slice(0,3).map((s: any, i: number) => (
-                    <RankStat key={i} label={s._id || 'Unknown Region'} count={`${s.sales} sales`} color={`bg-[#60A5FA]`} />
+                    <RankStat key={i} label={s._id || 'Unknown Region'} count={`${s.sales} sales`} color={`bg-[#10b981]`} />
                   ))}
                   {stateBreakdown.length === 0 && <div className="text-center text-xs text-white/40">No data</div>}
                 </div>

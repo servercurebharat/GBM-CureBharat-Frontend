@@ -60,6 +60,8 @@ export interface IUser {
   personalSalesCount: number;
   personalSalesThisMonth: number;
   teamSize: number;
+  lastLoginIP?: string;
+  lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;
 }

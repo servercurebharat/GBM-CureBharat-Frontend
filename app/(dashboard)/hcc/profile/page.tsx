@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { walletAPI } from '@/lib/api';
+import { walletAPI, usersAPI } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { IWallet } from '@/types';
 import toast from 'react-hot-toast';
@@ -11,6 +11,8 @@ export default function HccProfilePage() {
   const { user } = useAuth();
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const [loadingWallet, setLoadingWallet] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState('');
 
   useEffect(() => {
     const fetchWallet = async () => {
@@ -72,7 +74,36 @@ export default function HccProfilePage() {
 
             <div className="flex-1 space-y-4">
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-3xl font-bold text-white tracking-tight">{user.name}</h2>
+                {isEditing ? (
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="text" 
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="bg-white/10 border border-emerald-400/50 rounded-xl px-4 py-1 text-2xl font-bold text-white focus:outline-none"
+                    />
+                    <button 
+                      onClick={async () => {
+                        try {
+                          await usersAPI.updateProfile(user._id, { name: newName });
+                          toast.success('Name updated');
+                          window.location.reload();
+                        } catch (err) {
+                          toast.error('Failed to update');
+                        }
+                      }}
+                      className="p-2 bg-emerald-500 rounded-xl text-white"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <button onClick={() => setIsEditing(false)} className="p-2 bg-white/5 rounded-xl text-white/40"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                  </div>
+                ) : (
+                  <>
+                    <h2 className="text-3xl font-bold text-white tracking-tight">{user.name}</h2>
+                    <button onClick={() => { setIsEditing(true); setNewName(user.name); }} className="text-white/20 hover:text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  </>
+                )}
                 <span className="text-xs font-bold text-[#B5B8BD] px-3 py-1 bg-white/5 rounded-full border border-white/5">{user.memberId}</span>
               </div>
               

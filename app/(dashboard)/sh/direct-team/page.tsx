@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import ExportDropdown from '@/components/dashboard/ExportDropdown';
 
 export default function DirectTeamPage() {
   const [page, setPage] = useState(1);
@@ -15,7 +16,7 @@ export default function DirectTeamPage() {
   ];
 
   const statusSplit = [
-    { name: 'Active', value: 210, color: '#60A5FA' },
+    { name: 'Active', value: 210, color: '#10b981' },
     { name: 'Pending KYC', value: 25, color: '#64748B' },
     { name: 'Deactivated', value: 13, color: '#f87171' },
   ];
@@ -31,11 +32,22 @@ export default function DirectTeamPage() {
             <p className="text-sm text-[#64748B] font-medium opacity-70">View team structure, track growth, and monitor network performance in real time.</p>
           </div>
           <div className="flex gap-3">
-             <button className="flex items-center gap-2 bg-[#131241] text-white px-5 py-2.5 rounded-xl text-xs font-bold border border-white/5 hover:bg-white/5 transition-all">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                Export CSV
-             </button>
-             <button className="flex items-center gap-2 bg-[#60A5FA] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 hover:bg-blue-600 transition-all">
+             <ExportDropdown 
+                title="Direct Team Report"
+                headers={['Member ID', 'Name', 'Role', 'Sponsor', 'Location', 'Total Sales', 'Commission']}
+                rows={teamData.map(m => [
+                  m.id,
+                  m.name,
+                  m.role,
+                  m.sponsor,
+                  m.location,
+                  m.totalSales,
+                  m.comm
+                ])}
+                fileName="Direct_Team_Report"
+                variant="ghost"
+             />
+             <button className="flex items-center gap-2 bg-[#10b981] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-[#10b981]/20 hover:bg-[#059669] transition-all">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 Send Reminder
              </button>
@@ -83,7 +95,7 @@ export default function DirectTeamPage() {
                        {teamData.map((member, i) => (
                          <tr key={i} className="hover:bg-white/1 transition-colors">
                             <td className="px-6 py-5">
-                               <span className="text-xs font-mono font-bold text-[#60A5FA]">{member.id}</span>
+                               <span className="text-xs font-mono font-bold text-[#10b981]">{member.id}</span>
                             </td>
                             <td className="px-6 py-5">
                                <div className="flex items-center gap-3">
@@ -136,8 +148,8 @@ export default function DirectTeamPage() {
               {/* Team Status Split */}
               <div className="bg-[#131241] rounded-[24px] p-8 shadow-2xl border border-white/5">
                  <div className="flex items-center gap-3 mb-8">
-                    <div className="w-5 h-5 rounded-full border-2 border-dashed border-[#60A5FA] flex items-center justify-center">
-                       <div className="w-1 h-1 rounded-full bg-[#60A5FA]" />
+                    <div className="w-5 h-5 rounded-full border-2 border-dashed border-[#10b981] flex items-center justify-center">
+                       <div className="w-1 h-1 rounded-full bg-[#10b981]" />
                     </div>
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Team Status Split</h3>
                  </div>

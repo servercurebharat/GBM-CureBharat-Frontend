@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { adminAPI, usersAPI } from '@/lib/api';
 import { 
@@ -9,14 +10,25 @@ import {
 } from 'recharts';
 
 export default function AdminHierarchyPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-white">Loading Hierarchy...</div>}>
+      <HierarchyContent />
+    </Suspense>
+  );
+}
+
+function HierarchyContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  
   const [roots, setRoots] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [stateFilter, setStateFilter] = useState('All');
-  const [expandAll, setExpandAll] = useState(false);
+  const [expandAll, setExpandAll] = useState(!!initialSearch);
 
   useEffect(() => {
     async function fetchData() {
@@ -67,13 +79,13 @@ export default function AdminHierarchyPage() {
 
   const distributionData = useMemo(() => {
     if (!stats?.roleDistribution) return [
-      { name: 'Super Head', value: 0, color: '#3b82f6' },
+      { name: 'Super Head', value: 0, color: '#10b981' },
       { name: 'HBA', value: 0, color: '#8b7cf8' },
       { name: 'HCM', value: 0, color: '#f59e0b' },
       { name: 'HCC', value: 0, color: '#06b6d4' },
     ];
     return [
-      { name: 'SH', value: stats.roleDistribution.sh || 0, color: '#3b82f6' },
+      { name: 'SH', value: stats.roleDistribution.sh || 0, color: '#10b981' },
       { name: 'HBA', value: stats.roleDistribution.hba || 0, color: '#8b7cf8' },
       { name: 'HCM', value: stats.roleDistribution.hcm || 0, color: '#f59e0b' },
       { name: 'HCC', value: stats.roleDistribution.hcc || 0, color: '#06b6d4' },
@@ -131,13 +143,13 @@ export default function AdminHierarchyPage() {
                placeholder="Search ID or Name..." 
                value={search}
                onChange={(e) => setSearch(e.target.value)}
-               className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
+               className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-#10b981 transition-all"
              />
           </div>
           <select 
             value={roleFilter} 
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 min-w-[140px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-#10b981/50 min-w-[140px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
           >
             <option value="All" className="bg-[#131241] text-white">Role: All</option>
             <option value="SH" className="bg-[#131241] text-white">SH</option>
@@ -149,7 +161,7 @@ export default function AdminHierarchyPage() {
           <select 
             value={statusFilter} 
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 min-w-[140px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-#10b981/50 min-w-[140px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
           >
             <option value="All" className="bg-[#131241] text-white">Status: All</option>
             <option value="active" className="bg-[#131241] text-white">Active</option>
@@ -159,7 +171,7 @@ export default function AdminHierarchyPage() {
           <select 
             value={stateFilter} 
             onChange={(e) => setStateFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 min-w-[140px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-#10b981/50 min-w-[140px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
           >
             <option value="All" className="bg-[#131241] text-white">State: All</option>
             <option value="Maharashtra" className="bg-[#131241] text-white">Maharashtra</option>
@@ -169,7 +181,7 @@ export default function AdminHierarchyPage() {
           <div className="flex gap-2">
              <button 
                onClick={() => setExpandAll(true)}
-               className="bg-blue-600 px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest hover:bg-blue-500 transition-all"
+               className="bg-#10b981 px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest hover:bg-#10b981 transition-all"
              >
                 Expand All
              </button>
@@ -268,7 +280,7 @@ export default function AdminHierarchyPage() {
                         </div>
                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                            <div 
-                             className="h-full bg-blue-600 rounded-full" 
+                             className="h-full bg-#10b981 rounded-full" 
                              style={{ width: `${stats ? (item.count / stats.totalUsers) * 100 : 0}%` }} 
                            />
                         </div>
@@ -279,17 +291,6 @@ export default function AdminHierarchyPage() {
           </div>
         </div>
 
-        {/* Network Health Box */}
-        <div className="flex justify-center">
-           <div className="bg-blue-600/10 border border-blue-500/20 rounded-[2rem] p-10 max-w-2xl w-full text-center relative overflow-hidden group">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 blur-[60px] rounded-full" />
-              <h4 className="text-xl font-black text-white uppercase tracking-tight mb-4">Network Health</h4>
-              <p className="text-sm text-white/60 font-medium mb-8 leading-relaxed">
-                 Your network has grown by <span className="text-white font-bold">{stats ? Math.round(stats.totalUsers * 0.05) : 0} members</span> in the last 24 hours. The highest density is currently at Level 4.
-              </p>
-              <button className="bg-blue-600 px-8 py-4 rounded-xl text-[10px] font-black text-white uppercase tracking-[0.2em] hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20">View Growth Map</button>
-           </div>
-        </div>
       </div>
     </DashboardLayout>
   );
@@ -333,7 +334,7 @@ function TreeNode({ node, level, forceExpand }: { node: any, level: number, forc
                     onClick={() => setIsExpanded(!isExpanded)}
                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
                       isExpanded 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' 
+                      ? 'bg-#10b981 text-white shadow-lg shadow-#10b981/30' 
                       : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10 border border-white/5'
                     }`}
                   >
@@ -353,7 +354,7 @@ function TreeNode({ node, level, forceExpand }: { node: any, level: number, forc
 
               <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform duration-300">
                  <div className={`w-12 h-12 rounded-2xl p-0.5 border-2 transition-all duration-300 ${
-                   isExpanded ? 'border-blue-500 shadow-lg shadow-blue-500/20 scale-110' : 'border-white/10 group-hover:border-white/20'
+                   isExpanded ? 'border-#10b981 shadow-lg shadow-#10b981/20 scale-110' : 'border-white/10 group-hover:border-white/20'
                  }`}>
                     <div className="w-full h-full rounded-[14px] overflow-hidden bg-[#1a194d]">
                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${node.name}`} alt="avatar" className="w-full h-full object-cover" />
@@ -364,7 +365,7 @@ function TreeNode({ node, level, forceExpand }: { node: any, level: number, forc
                     <div className="flex items-center gap-2 mt-0.5">
                        <span className="text-[9px] font-bold text-white/20 tracking-widest uppercase">ID: {node.memberId}</span>
                        <span className="w-1 h-1 rounded-full bg-white/10" />
-                       <span className="text-[8px] font-black text-blue-500/50 uppercase tracking-tighter">LVL {level}</span>
+                       <span className="text-[8px] font-black text-#10b981/50 uppercase tracking-tighter">LVL {level}</span>
                     </div>
                  </div>
               </div>

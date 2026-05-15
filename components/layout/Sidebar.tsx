@@ -133,7 +133,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     {
       label: 'Finance', items: [
         { label: 'Finance Hub', href: '/hcm/finance', icon: 'wallet' },
-        { label: 'Rank Progress', href: '/hcm/rank-progress', icon: 'target' },
       ]
     },
     {
@@ -153,7 +152,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     {
       label: 'My Business', items: [
         { label: 'Team Management', href: '/hcc/team', icon: 'users' },
-        { label: 'Rank Progress', href: '/hcc/rank-progress', icon: 'target' },
       ]
     },
     {

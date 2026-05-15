@@ -35,14 +35,16 @@ api.interceptors.response.use(
 
 // AUTH
 export const authAPI = {
-  login: (mobile: string, password: string) =>
-    api.post<ApiResponse<IUser>>('/auth/login', { mobile, password }),
+  login: (mobile: string, password: string, location?: { lat: number; lng: number }) =>
+    api.post<ApiResponse<IUser>>('/auth/login', { mobile, password, location }),
   register: (data: RegisterData) =>
     api.post('/auth/register', data),
   getMe: () =>
     api.get<ApiResponse<IUser>>('/auth/me'),
   logout: () =>
     api.post('/auth/logout'),
+  changePassword: (data: any) =>
+    api.post<ApiResponse<any>>('/auth/change-password', data),
 };
 
 // PUBLIC SALES (REFERRAL LINKS)
@@ -65,6 +67,8 @@ export const usersAPI = {
     api.get<ApiResponse<IUser>>(`/users/${id}`),
   updateKYC: (id: string, data: any) =>
     api.put<ApiResponse<any>>(`/users/${id}/kyc`, data),
+  updateProfile: (id: string, data: { name?: string; email?: string; mobile?: string }) =>
+    api.put<ApiResponse<IUser>>(`/users/${id}/profile`, data),
   getDownline: (id: string) =>
     api.get<ApiResponse<ITreeNode>>(`/users/${id}/downline`),
 };
@@ -93,6 +97,22 @@ export const walletAPI = {
     api.get<ApiResponse<any[]>>('/wallet/withdrawals'),
   triggerPayoutCycle: (cycleMonth: string) =>
     api.post('/wallet/payout-cycle', { cycleMonth }),
+};
+
+// NOTIFICATIONS
+export const notificationAPI = {
+  getAll: () =>
+    api.get<ApiResponse<any[]>>('/notifications'),
+  markAsRead: (id: string) =>
+    api.put(`/notifications/${id}/read`),
+  markAllAsRead: () =>
+    api.put('/notifications/read-all'),
+};
+
+// ACTIVITY LOGS
+export const activityAPI = {
+  getAll: (params?: { page?: number; limit?: number; role?: string; category?: string; search?: string }) =>
+    api.get<PaginatedResponse<any>>('/activity', { params }),
 };
 
 // EPINS
@@ -125,6 +145,8 @@ export const adminAPI = {
     api.get<ApiResponse<IUser[]>>('/admin/kyc/pending'),
   updateKYCStatus: (id: string, status: 'approved' | 'rejected') =>
     api.put<ApiResponse<any>>(`/admin/kyc/${id}/status`, { status }),
+  updateUserStatus: (id: string, status: string) =>
+    api.put<ApiResponse<any>>(`/admin/users/${id}/status`, { status }),
   getCommissionConfig: () =>
     api.get<ApiResponse<any>>('/admin/commission-config'),
   updateCommissionConfig: (data: any) =>
@@ -157,8 +179,8 @@ export const teamAPI = {
 export const dashboardAPI = {
   getSummary: (params?: { period?: string; state?: string }) =>
     api.get<ApiResponse<any>>('/dashboard/summary', { params }),
-  getLeaders: () =>
-    api.get<ApiResponse<any>>('/dashboard/leaders'),
+  getLeaders: (params?: { role?: string }) =>
+    api.get<ApiResponse<any>>('/dashboard/leaders', { params }),
 };
 
 export default api;

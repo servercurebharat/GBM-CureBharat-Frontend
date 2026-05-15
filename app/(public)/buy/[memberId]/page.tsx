@@ -67,7 +67,12 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
       
       if (res.data.success) {
         toast.success('Payment Successful!');
-        router.push(`/buy/success?policyId=${res.data.data.policyId}`);
+        const { policyId, newUser } = res.data.data;
+        let successUrl = `/buy/success?policyId=${policyId}`;
+        if (newUser) {
+          successUrl += `&memberId=${newUser.memberId}&password=${newUser.password}`;
+        }
+        router.push(successUrl);
       }
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Payment failed');

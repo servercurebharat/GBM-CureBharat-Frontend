@@ -7,6 +7,8 @@ import Link from 'next/link';
 function SuccessContent() {
   const searchParams = useSearchParams();
   const policyId = searchParams.get('policyId');
+  const memberId = searchParams.get('memberId');
+  const password = searchParams.get('password');
 
   return (
     <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-6 relative overflow-hidden">
@@ -25,9 +27,30 @@ function SuccessContent() {
           Your enrollment has been completed and your wellness policy has been issued.
         </p>
 
-        <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 mb-10">
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Your Policy ID</p>
-           <p className="text-xl font-mono font-bold text-emerald-400">{policyId || 'CB-POL-XXXXXXXX'}</p>
+        <div className="space-y-4 mb-10">
+          <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Your Policy ID</p>
+            <p className="text-xl font-mono font-bold text-emerald-400">{policyId || 'CB-POL-XXXXXXXX'}</p>
+          </div>
+
+          {memberId && (
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-3xl p-6 text-left">
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3">Login Credentials</p>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">Member ID</span>
+                  <span className="text-sm text-white font-black">{memberId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase">Password</span>
+                  <span className="text-sm text-white font-black">{password}</span>
+                </div>
+              </div>
+              <p className="mt-4 text-[8px] font-bold text-blue-400/50 uppercase leading-relaxed italic">
+                * Please use these to login to your dashboard.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">

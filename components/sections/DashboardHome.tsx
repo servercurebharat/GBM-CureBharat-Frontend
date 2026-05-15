@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { dashboardAPI } from '@/lib/api';
 import { IUser } from '@/types';
+import { useRouter } from 'next/navigation';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -11,12 +12,14 @@ import api, { walletAPI } from '@/lib/api';
 import AddMemberModal from '../dashboard/AddMemberModal';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import ExportDropdown from '../dashboard/ExportDropdown';
+import CountUp from '../dashboard/CountUp';
 
 interface DashboardHomeProps {
   user: IUser;
 }
-
 export default function DashboardHome({ user }: DashboardHomeProps) {
+  const router = useRouter();
   const [summary, setSummary] = useState<any>(null);
   const [leaders, setLeaders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +34,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   // Filter States
   const [period, setPeriod] = useState('mtd');
   const [selectedState, setSelectedState] = useState('all');
+  const [leaderRole, setLeaderRole] = useState<string>('');
   const [activeDropdown, setActiveDropdown] = useState<'period' | 'state' | null>(null);
 
   const searchParams = useSearchParams();
@@ -47,7 +51,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
     try {
       const [summaryRes, leadersRes, walletRes] = await Promise.all([
         dashboardAPI.getSummary({ period, state: selectedState }),
-        dashboardAPI.getLeaders(),
+        dashboardAPI.getLeaders({ role: leaderRole || undefined }),
         walletAPI.getMyWallet()
       ]);
       if (summaryRes.data.success) setSummary(summaryRes.data.data);
@@ -62,7 +66,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
 
   useEffect(() => {
     fetchData();
-  }, [period, selectedState]);
+  }, [period, selectedState, leaderRole]);
 
   useEffect(() => {
     if (searchParams.get('enroll') === 'true') setIsModalOpen(true);
@@ -108,7 +112,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
     }).format(amount / 100); // Fixed: prices are in paise
   };
 
-  const COLORS = ['#3b82f6', '#6366f1', '#a855f7', '#06b6d4'];
+  const COLORS = ['#10b981', '#6366f1', '#a855f7', '#06b6d4'];
 
   const roleLabel = (role: string) => {
     switch (role.toLowerCase()) {
@@ -153,7 +157,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   if (loading && !summary) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-#10b981"></div>
       </div>
     );
   }
@@ -184,7 +188,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                     <div 
                       key={p.value}
                       onClick={() => { setPeriod(p.value); setActiveDropdown(null); }}
-                      className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-blue-600 cursor-pointer transition-colors"
+                      className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-#059669 cursor-pointer transition-colors"
                     >
                       {p.label}
                     </div>
@@ -210,7 +214,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                     <div 
                       key={s}
                       onClick={() => { setSelectedState(s); setActiveDropdown(null); }}
-                      className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-blue-600 cursor-pointer transition-colors"
+                      className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-#059669 cursor-pointer transition-colors"
                     >
                       {s === 'all' ? 'All States' : s}
                     </div>
@@ -232,13 +236,20 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
               Enroll Member
            </button>
-           <button 
-             onClick={handleExport}
-             className="px-8 py-3 bg-[#131241] text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-[#1e1c5c] transition-all flex items-center gap-2 shadow-xl shadow-blue-900/20"
-           >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Export
-           </button>
+           <ExportDropdown 
+              title="Top Performance Leaderboard"
+              headers={['Rank', 'Name', 'Member ID', 'State', 'Directs', 'Team Sales', 'Income']}
+              rows={leaders.map((l, i) => [
+                i + 1,
+                l.name,
+                l.memberId,
+                l.state,
+                l.directCount,
+                l.teamSalesValue,
+                l.totalIncome
+              ])}
+              fileName={`Leaders_${new Date().toISOString().split('T')[0]}`}
+           />
         </div>
       </div>
 
@@ -254,34 +265,105 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
         }} 
       />
 
-      
-      {/* Sales Gateway removed from here */}
+      {/* KYC Alert Banner */}
+      {user.kycStatus !== 'approved' && (
+        <div className={`
+          ${user.kycStatus === 'not_submitted' ? 'bg-amber-500/10 border-amber-500/20' : ''}
+          ${user.kycStatus === 'pending' ? 'bg-#10b981/10 border-#10b981/20' : ''}
+          ${user.kycStatus === 'rejected' ? 'bg-rose-500/10 border-rose-500/20' : ''}
+          rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group transition-all duration-500
+        `}>
+           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-3xl -mr-32 -mt-32 group-hover:bg-white/10 transition-all duration-700" />
+           <div className="flex items-center gap-6 relative z-10">
+              <div className={`
+                w-16 h-16 rounded-2xl flex items-center justify-center
+                ${user.kycStatus === 'not_submitted' ? 'bg-amber-500/10 text-amber-500' : ''}
+                ${user.kycStatus === 'pending' ? 'bg-#10b981/10 text-#10b981' : ''}
+                ${user.kycStatus === 'rejected' ? 'bg-rose-500/10 text-rose-500' : ''}
+              `}>
+                 {user.kycStatus === 'pending' ? (
+                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                 ) : (
+                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                 )}
+              </div>
+              <div>
+                 <h4 className={`
+                    text-lg font-black tracking-tight uppercase
+                    ${user.kycStatus === 'not_submitted' ? 'text-amber-500' : ''}
+                    ${user.kycStatus === 'pending' ? 'text-#10b981' : ''}
+                    ${user.kycStatus === 'rejected' ? 'text-rose-500' : ''}
+                 `}>
+                    {user.kycStatus === 'not_submitted' && 'Identity Verification Required'}
+                    {user.kycStatus === 'pending' && 'Verification In Progress'}
+                    {user.kycStatus === 'rejected' && 'Verification Rejected'}
+                 </h4>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1 max-w-md leading-relaxed">
+                    {user.kycStatus === 'not_submitted' && 'Please submit your KYC documents (Aadhaar, PAN, Bank Details) to unlock full account features and payouts.'}
+                    {user.kycStatus === 'pending' && 'Our compliance team is reviewing your documents. This usually takes 24-48 business hours.'}
+                    {user.kycStatus === 'rejected' && 'There was an issue with your documents. Please review the requirements and resubmit your details.'}
+                 </p>
+              </div>
+           </div>
+           
+           <Link 
+             href="/profile" 
+             className={`
+               relative z-10 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl
+               ${user.kycStatus === 'not_submitted' ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20' : ''}
+               ${user.kycStatus === 'pending' ? 'bg-#059669 hover:bg-#10b981 text-white shadow-#10b981/20' : ''}
+               ${user.kycStatus === 'rejected' ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20' : ''}
+             `}
+           >
+              {user.kycStatus === 'not_submitted' && 'Verify Identity Now'}
+              {user.kycStatus === 'pending' && 'View Profile'}
+              {user.kycStatus === 'rejected' && 'Resubmit Documents'}
+           </Link>
+        </div>
+      )}
 
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
          {[
-           { label: 'Total Users', value: summary?.metrics?.totalUsers || 0, icon: 'users', color: 'blue' },
-           { label: 'Active Users', value: summary?.metrics?.activeUsers || 0, icon: 'user-check', color: 'emerald' },
-           { label: 'Inactive Users', value: summary?.metrics?.inactiveUsers || 0, icon: 'user-x', color: 'slate' },
-           { label: 'Total Sales', value: formatCurrency(summary?.metrics?.totalRevenue || 0), icon: 'trending-up', color: 'indigo' },
-           { label: 'FTD Revenue', value: formatCurrency(summary?.metrics?.ftdRevenue || 0), icon: 'zap', color: 'amber', sub: 'Today' },
-           { label: 'MTD Revenue', value: formatCurrency(summary?.metrics?.mtdRevenue || 0), icon: 'calendar', color: 'rose', sub: 'Month' },
+           { label: 'Total Users', value: summary?.metrics?.totalUsers || 0, icon: 'users', color: 'blue', link: '/admin/members' },
+           { label: 'Active Users', value: summary?.metrics?.activeUsers || 0, icon: 'user-check', color: 'emerald', link: '/admin/members' },
+           { label: 'Inactive Users', value: summary?.metrics?.inactiveUsers || 0, icon: 'user-x', color: 'slate', link: '/admin/members' },
+           { label: 'Total Sales', value: formatCurrency(summary?.metrics?.totalRevenue || 0), icon: 'trending-up', color: 'indigo', link: '/admin/wallet-ledger' },
+           { label: 'FTD Revenue', value: formatCurrency(summary?.metrics?.ftdRevenue || 0), icon: 'zap', color: 'amber', sub: 'Today', link: '/admin/wallet-ledger' },
+           { label: 'MTD Revenue', value: formatCurrency(summary?.metrics?.mtdRevenue || 0), icon: 'calendar', color: 'rose', sub: 'Month', link: '/admin/wallet-ledger' },
          ].map((stat, i) => (
-           <div key={i} className="bg-[#131241] rounded-3xl p-6 shadow-2xl border border-white/5 relative overflow-hidden group">
+           <Link 
+             key={i} 
+             href={stat.link}
+             className="bg-[#131241] rounded-3xl p-6 shadow-2xl border border-white/5 relative overflow-hidden group cursor-pointer hover:border-[#10b981]/30 transition-all hover:-translate-y-1"
+           >
               <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 blur-3xl -mr-10 -mt-10 group-hover:bg-white/10 transition-colors" />
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center justify-between">
                 {stat.label}
                 {stat.sub && <span className="bg-white/5 px-2 py-0.5 rounded text-[7px] text-white/40">{stat.sub}</span>}
               </p>
-              <h4 className="text-xl font-black text-white mb-1 truncate">{stat.value}</h4>
+              <h4 className="text-xl font-black text-white mb-1 truncate">
+                 {typeof stat.value === 'number' ? (
+                   <CountUp end={stat.value} />
+                 ) : (
+                   stat.value.includes('₹') ? (
+                     <CountUp 
+                       end={parseInt(stat.value.replace(/[^\d]/g, ''))} 
+                       formatter={(val) => `₹ ${val.toLocaleString('en-IN')}`} 
+                     />
+                   ) : (
+                     stat.value
+                   )
+                 )}
+              </h4>
               <div className={`h-1 w-12 rounded-full ${
-                stat.color === 'blue' ? 'bg-blue-500' :
+                stat.color === 'blue' ? 'bg-#10b981' :
                 stat.color === 'emerald' ? 'bg-emerald-500' :
                 stat.color === 'indigo' ? 'bg-indigo-500' :
                 stat.color === 'amber' ? 'bg-amber-500' :
                 stat.color === 'rose' ? 'bg-rose-500' : 'bg-slate-500'
               } opacity-40 group-hover:opacity-100 transition-opacity`} />
-           </div>
+           </Link>
          ))}
       </div>
 
@@ -339,7 +421,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
         {/* State Contribution */}
         <div className="lg:col-span-3 bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5 flex flex-col">
            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <div className="w-1.5 h-1.5 rounded-full bg-#10b981" />
               State Contribution
            </h5>
            <div className="space-y-8 flex-1">
@@ -351,7 +433,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                    </div>
                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-blue-500 rounded-full transition-all duration-1000" 
+                        className="h-full bg-#10b981 rounded-full transition-all duration-1000" 
                         style={{ width: `${(s.revenue / summary.metrics.mtdRevenue) * 100}%` }} 
                       />
                    </div>
@@ -386,12 +468,12 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                   />
                   <Bar 
                     dataKey="revenue" 
-                    fill="#3b82f6" 
+                    fill="#10b981" 
                     radius={[6, 6, 0, 0]} 
                     barSize={40}
                   >
                     {summary?.revenueTrends?.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={index === 4 ? '#3b82f6' : '#1e293b'} />
+                      <Cell key={`cell-${index}`} fill={index === 4 ? '#10b981' : '#1e293b'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -443,9 +525,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       {/* Activity Pulse & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
          <div className="bg-[#131241] rounded-[40px] p-10 shadow-2xl border border-white/5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all duration-700" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-#10b981/5 blur-3xl -mr-16 -mt-16 group-hover:bg-#10b981/10 transition-all duration-700" />
             <h5 className="text-[10px] font-black text-white uppercase tracking-[0.2em] mb-10 flex items-center gap-3">
-               <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+               <div className="w-1.5 h-1.5 rounded-full bg-#10b981 animate-pulse" />
                Network Activity Pulse
             </h5>
             <div className="space-y-10">
@@ -458,7 +540,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                   </div>
                   <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                      <div 
-                        className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all duration-1000" 
+                        className="h-full bg-gradient-to-r from-#059669 to-blue-400 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all duration-1000" 
                         style={{ width: `${Math.min(100, Math.round(((summary?.metrics?.mtdRevenue || 0) / 10000000) * 100))}%` }} 
                      />
                   </div>
@@ -472,14 +554,14 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                   </div>
                   <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                      <div 
-                        className="h-full bg-gradient-to-r from-indigo-600 to-purple-400 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.4)] transition-all duration-1000" 
+                        className="h-full bg-gradient-to-r from-#059669 to-purple-400 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.4)] transition-all duration-1000" 
                         style={{ width: `${summary?.metrics?.totalUsers > 0 ? Math.round((summary?.metrics?.activeUsers / summary?.metrics?.totalUsers) * 100) : 0}%` }} 
                      />
                   </div>
                </div>
             </div>
             <div className="mt-10 p-5 bg-white/[0.03] border border-white/5 rounded-2xl flex items-center gap-4 group-hover:bg-white/[0.05] transition-all">
-               <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+               <div className="w-10 h-10 rounded-xl bg-#10b981/10 flex items-center justify-center text-blue-400">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                </div>
                <p className="text-[11px] font-bold text-slate-400">Current cycle activity is on track for payout and promotion review.</p>
@@ -502,11 +584,11 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                    href: user.role === 'admin' ? '/admin/customers' : `/${user.role}/sales/new` 
                  },
                  { 
-                   label: 'Wallet Ledger', 
-                   sub: 'Financials', 
-                   icon: 'wallet', 
-                   color: 'indigo', 
-                   href: user.role === 'admin' ? '/admin/wallet-ledger' : `/${user.role}/finance` 
+                   label: user.role === 'admin' ? 'Commission Engine' : 'Wallet Ledger', 
+                   sub: user.role === 'admin' ? 'Finance Config' : 'Financials', 
+                   icon: user.role === 'admin' ? 'zap' : 'wallet', 
+                   color: user.role === 'admin' ? 'emerald' : 'indigo', 
+                   href: user.role === 'admin' ? '/admin/commission-config' : `/${user.role}/finance` 
                  },
                  { 
                    label: 'Team Map', 
@@ -539,7 +621,25 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
             <div>
                <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Top 10 {roleLabel(getNextRole(user.role))}s (By Earnings)</h3>
             </div>
-            <button className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View Rankings</button>
+            {user.role === 'hcm' ? (
+              <div className="flex gap-2 bg-white/5 p-1 rounded-xl">
+                {['hcc', 'hcm', 'hba'].map(r => (
+                  <button 
+                    key={r} 
+                    onClick={() => setLeaderRole(r === leaderRole ? '' : r)}
+                    className={`px-3 py-1.5 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                      leaderRole === r 
+                        ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/20' 
+                        : 'text-white/40 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View Rankings</button>
+            )}
          </div>
 
          <div className="overflow-x-auto">
@@ -561,7 +661,10 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                     const badge = getRankBadge(i);
                     return (
                       <React.Fragment key={leader._id}>
-                        <tr className="hover:bg-white/[0.02] transition-colors group">
+                        <tr 
+                          key={leader._id} 
+                          className="hover:bg-white/[0.02] transition-colors group"
+                        >
                            <td className="px-10 py-8">
                               {badge ? (
                                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center relative shadow-xl scale-90 group-hover:scale-100 transition-transform`}>
@@ -577,10 +680,17 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                 <span className="text-xs font-black text-slate-600 ml-4">{i + 1 < 10 ? `0${i + 1}` : i + 1}</span>
                               )}
                            </td>
-                           <td className="px-10 py-8">
-                              <div className="flex items-center gap-4">
-                                 <div>
-                                    <p className="text-sm font-black text-white group-hover:text-blue-400 transition-colors">{leader.name}</p>
+                           <td 
+                              className={`px-10 py-8 ${user.role === 'admin' ? 'cursor-pointer group/name' : ''}`}
+                              onClick={() => {
+                                if (user.role === 'admin') {
+                                  router.push(`/admin/members/${leader._id}`);
+                                }
+                              }}
+                            >
+                               <div className="flex items-center gap-4">
+                                  <div>
+                                     <p className={`text-sm font-black text-white transition-colors ${user.role === 'admin' ? 'group-hover/name:text-blue-400 underline underline-offset-4 decoration-blue-400/30' : ''}`}>{leader.name}</p>
                                     <div className="flex items-center gap-2 mt-1">
                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{leader.memberId}</span>
                                        {badge && <span className={`bg-gradient-to-r ${badge.color} text-transparent bg-clip-text text-[8px] font-black uppercase tracking-widest`}>{badge.text}</span>}
@@ -608,7 +718,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                 onClick={() => toggleHierarchy(leader._id)}
                                 className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
                                   expandedLeader === leader._id 
-                                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                                  ? 'bg-#059669 text-white shadow-lg shadow-#10b981/20' 
                                   : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
                                 }`}
                               >
@@ -620,9 +730,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                         {expandedLeader === leader._id && (
                           <tr>
                             <td colSpan={8} className="px-6 py-0">
-                               <div className="my-3 bg-[#0d0f1a] border border-blue-500/20 rounded-2xl overflow-hidden">
+                               <div className="my-3 bg-[#0d0f1a] border border-#10b981/20 rounded-2xl overflow-hidden">
                                  {/* Header */}
-                                 <div className="px-6 py-3 bg-blue-500/10 border-b border-blue-500/10 flex items-center gap-2">
+                                 <div className="px-6 py-3 bg-#10b981/10 border-b border-#10b981/10 flex items-center gap-2">
                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
                                    <span className="text-[10px] font-black text-blue-300 uppercase tracking-[0.2em]">
                                      Downline of {leader.name}
@@ -631,7 +741,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                  
                                  {loadingChildren[leader._id] ? (
                                    <div className="flex items-center gap-3 px-6 py-6">
-                                     <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                     <div className="w-5 h-5 border-2 border-#10b981 border-t-transparent rounded-full animate-spin" />
                                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Fetching Hierarchy Data...</p>
                                    </div>
                                  ) : !childrenData[leader._id]?.length ? (
@@ -654,24 +764,24 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                            <tr key={child._id} className="hover:bg-white/[0.03] transition-colors">
                                               <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                  <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center text-[9px] font-black text-blue-300 flex-shrink-0">
+                                                  <div className="w-7 h-7 rounded-lg bg-#10b981/20 flex items-center justify-center text-[9px] font-black text-blue-300 flex-shrink-0">
                                                     {child.name?.[0]?.toUpperCase() || '?'}
                                                   </div>
-                                                  <div>
-                                                     <p className="text-[11px] font-black text-white">{child.name}</p>
+                                                  <div className={`${user.role === 'admin' ? 'cursor-pointer group/down' : ''}`} onClick={() => { if(user.role === 'admin') router.push(`/admin/members/${child._id}`) }}>
+                                                     <p className={`text-[11px] font-black text-white transition-colors ${user.role === 'admin' ? 'group-hover/down:text-blue-400' : ''}`}>{child.name}</p>
                                                      <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{child.memberId}</p>
                                                   </div>
                                                 </div>
                                               </td>
                                               <td className="px-4 py-4">
-                                                <span className="text-[9px] font-black text-blue-300 uppercase bg-blue-500/10 px-2 py-1 rounded-lg">{child.role?.toUpperCase()}</span>
+                                                <span className="text-[9px] font-black text-blue-300 uppercase bg-#10b981/10 px-2 py-1 rounded-lg">{child.role?.toUpperCase()}</span>
                                               </td>
                                               <td className="px-4 py-4 text-[11px] text-slate-400 font-bold">{child.state || '—'}</td>
                                               <td className="px-4 py-4 text-[11px] font-black text-white text-right">{formatCurrency(child.teamSalesValue || 0)}</td>
                                               <td className="px-4 py-4 text-center">
                                                  <button 
                                                    onClick={() => toggleHierarchy(child._id)}
-                                                   className="text-[9px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-all"
+                                                   className="text-[9px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 bg-#10b981/10 hover:bg-#10b981/20 px-3 py-1.5 rounded-lg transition-all"
                                                  >
                                                    Expand
                                                  </button>
@@ -699,7 +809,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
               <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Pending Withdrawals</h3>
               <div className="flex gap-4">
-                 <button className="px-6 py-2 bg-blue-600/20 text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-blue-400/20 hover:bg-blue-600 hover:text-white transition-all">Batch Approve</button>
+                 <button className="px-6 py-2 bg-#059669/20 text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-blue-400/20 hover:bg-#059669 hover:text-white transition-all">Batch Approve</button>
                  <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">View All</button>
               </div>
            </div>
@@ -773,7 +883,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                          </td>
                          <td className="px-10 py-6 text-center">
                             <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-                              entry.status === 'final' ? 'bg-blue-500/10 text-blue-400 border-blue-400/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                              entry.status === 'final' ? 'bg-#10b981/10 text-blue-400 border-blue-400/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                             }`}>
                               {entry.status}
                             </span>
