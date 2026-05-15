@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { usersAPI } from '@/lib/api';
 import { IUser } from '@/types';
@@ -10,7 +10,7 @@ import ExportDropdown from '@/components/dashboard/ExportDropdown';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-export default function AdminMembers() {
+function AdminMembersContent() {
   const { user } = useAuth();
   const [members, setMembers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -339,6 +339,14 @@ export default function AdminMembers() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function AdminMembers() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#060818] flex items-center justify-center text-white/20 font-black uppercase tracking-widest animate-pulse">Initializing Network...</div>}>
+      <AdminMembersContent />
+    </Suspense>
   );
 }
 
