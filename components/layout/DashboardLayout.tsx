@@ -56,7 +56,7 @@ export default function DashboardLayout({
         </div>
         <div className="flex flex-col items-center">
           <div className="w-32 h-32 p-2 mb-6 animate-bounce">
-             <img src="/image.png" alt="CureBharat" className="w-full h-full object-contain" />
+             <img src="/logo.png" alt="CureBharat" className="w-full h-full object-contain" />
           </div>
           <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.4em] animate-pulse">Initialising Core...</p>
         </div>
@@ -68,7 +68,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-bg flex flex-col items-center justify-center gap-4">
         <div className="w-16 h-16 bg-white rounded-2xl p-2 shadow-xl grayscale opacity-20">
-           <img src="/image.png" alt="CureBharat" className="w-full h-full object-contain" />
+           <img src="/logo.png" alt="CureBharat" className="w-full h-full object-contain" />
         </div>
         <p className="text-xs font-bold text-slate uppercase tracking-widest">Access Denied</p>
         <p className="text-[10px] text-muted -mt-2">No active session found. Please login again.</p>

@@ -115,10 +115,9 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
       <div className="relative z-10 max-w-2xl mx-auto px-6 py-12">
         {/* Branding */}
         <div className="flex flex-col items-center mb-12 text-center">
-          <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mb-6 shadow-2xl">
-            <img src="/image.png" alt="CureBharat" className="w-10 h-10 object-contain" />
+          <div className="mb-6">
+            <img src="/logo.png" alt="CureBharat" className="h-16 object-contain" />
           </div>
-          <p className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.4em] mb-2">CureBharat Wellness</p>
           <h1 className="text-3xl font-black text-white tracking-tight mb-2">Enrollment Portal</h1>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

@@ -216,25 +216,16 @@ export default function Sidebar({ role, user, isOpen, setIsOpen }: { role: Role;
       <aside className={`fixed lg:static inset-y-0 left-0 w-[264px] min-h-screen flex flex-col flex-shrink-0 z-50 transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`} style={{ background: 'linear-gradient(180deg, #131241 0%, #0d0f14 100%)' }}>
         <div className="absolute top-0 left-0 right-0 h-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, #49D2B512 0%, transparent 70%)` }} />
 
-        <div className="h-[90px] px-5 flex items-center gap-3.5 relative border-b border-white/5 flex-shrink-0">
+        <div className="h-[90px] px-5 flex items-center justify-center relative border-b border-white/5 flex-shrink-0">
           {/* Logo — raw image, no container */}
           <Image
-            src="/image.png"
+            src="/logo.png"
             alt="CureBharat Logo"
-            width={54}
-            height={54}
-            className="object-contain flex-shrink-0 self-center -mt-1"
+            width={180}
+            height={50}
+            className="object-contain flex-shrink-0 self-center"
             priority
           />
-          {/* Brand Text */}
-          <div className="flex flex-col justify-center leading-none gap-[5px]">
-            <div className="font-display text-[14px] font-black text-white tracking-[0.12em] uppercase leading-none">
-              CURE<span className="text-[#49D2B5]">BHARAT</span>
-            </div>
-            <div className="text-[7px] font-bold text-white/25 tracking-[0.18em] uppercase leading-none">
-              Wellness Private Ltd.
-            </div>
-          </div>
         </div>
 
         {/* Nav */}

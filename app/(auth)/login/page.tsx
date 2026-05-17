@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // OTP States
   const [requiresOTP, setRequiresOTP] = useState(false);
   const [otp, setOtp] = useState('');
@@ -30,9 +30,9 @@ export default function LoginPage() {
     try {
       // Prompt for location with a 5s timeout
       const position: any = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { 
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 5000 
+          timeout: 5000
         });
       });
       locationData = {
@@ -75,9 +75,9 @@ export default function LoginPage() {
             {/* Top accent */}
             <div className="absolute top-0 left-8 right-8 h-[2px] rounded-b-full"
               style={{ background: 'linear-gradient(90deg, transparent, #49D2B5, #6366f1, transparent)' }} />
-            
-            <Image src="/image.png" alt="CureBharat" width={64} height={64} className="object-contain" />
-            
+
+            <Image src="/logo.png" alt="CureBharat" width={64} height={64} className="object-contain" />
+
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4"
                 style={{ background: 'rgba(73,210,181,0.12)', border: '1px solid rgba(73,210,181,0.25)' }}>
@@ -138,22 +138,22 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen w-full flex" style={{ background: '#060818' }}>
+    <div className="min-h-screen w-full flex" style={{ background: 'linear-gradient(135deg, #152347 0%, #1a2d55 40%, #112040 100%)' }}>
 
       {/* ── ANIMATED BACKGROUND ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         {/* Primary teal glow */}
-        <div className="absolute top-[-10%] left-[20%] w-[600px] h-[600px] rounded-full opacity-20 blur-[120px]"
+        <div className="absolute top-[-10%] left-[20%] w-[600px] h-[600px] rounded-full opacity-45 blur-[120px]"
           style={{ background: 'radial-gradient(circle, #49D2B5, transparent 65%)' }} />
         {/* Deep navy glow */}
-        <div className="absolute bottom-[-15%] right-[10%] w-[500px] h-[500px] rounded-full opacity-15 blur-[130px]"
-          style={{ background: 'radial-gradient(circle, #131241, #6366f1 50%, transparent 70%)' }} />
+        <div className="absolute bottom-[-15%] right-[10%] w-[500px] h-[500px] rounded-full opacity-40 blur-[130px]"
+          style={{ background: 'radial-gradient(circle, #3b3fa0, #6366f1 50%, transparent 70%)' }} />
         {/* Small accent glow */}
-        <div className="absolute top-[60%] left-[-5%] w-[300px] h-[300px] rounded-full opacity-10 blur-[100px]"
+        <div className="absolute top-[60%] left-[-5%] w-[300px] h-[300px] rounded-full opacity-30 blur-[100px]"
           style={{ background: 'radial-gradient(circle, #49D2B5, transparent 70%)' }} />
 
         {/* Dot grid */}
-        <div className="absolute inset-0 opacity-[0.035]"
+        <div className="absolute inset-0 opacity-[0.09]"
           style={{ backgroundImage: 'radial-gradient(circle, #49D2B5 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         {/* Animated floating orbs */}
@@ -197,8 +197,8 @@ export default function LoginPage() {
         .anim-delay-4 { animation-delay: 0.4s; }
         .input-field {
           width: 100%;
-          background: rgba(255,255,255,0.14);
-          border: 1px solid rgba(255,255,255,0.22);
+          background: rgba(255,255,255,0.22);
+          border: 1px solid rgba(255,255,255,0.35);
           border-radius: 16px;
           padding: 16px 20px;
           color: #fff;
@@ -207,11 +207,11 @@ export default function LoginPage() {
           transition: all 0.2s ease;
           outline: none;
         }
-        .input-field::placeholder { color: rgba(255,255,255,0.3); }
+        .input-field::placeholder { color: rgba(255,255,255,0.55); }
         .input-field:focus {
           border-color: #49D2B5;
-          background: rgba(255,255,255,0.12);
-          box-shadow: 0 0 0 4px rgba(73,210,181,0.12);
+          background: rgba(255,255,255,0.28);
+          box-shadow: 0 0 0 4px rgba(73,210,181,0.2);
         }
       `}</style>
 
@@ -219,16 +219,8 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-[48%] xl:w-[52%] relative flex-col justify-between p-14 xl:p-16 z-10 anim-left">
 
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          <Image src="/image.png" alt="CureBharat" width={52} height={52} className="object-contain" />
-          <div>
-            <p className="text-white font-black text-xl tracking-wide leading-none">
-              CURE<span style={{ color: '#49D2B5' }}>BHARAT</span>
-            </p>
-            <p className="text-[9px] font-bold uppercase tracking-[0.25em] mt-1" style={{ color: 'rgba(73,210,181,0.6)' }}>
-              Wellness Private Ltd.
-            </p>
-          </div>
+        <div className="flex items-center">
+          <Image src="/logo.png" alt="CureBharat" width={220} height={60} className="object-contain" priority />
         </div>
 
         {/* Hero Content */}
@@ -250,7 +242,7 @@ export default function LoginPage() {
               </span>
               <br />Empire.
             </h1>
-            <p className="mt-5 text-base leading-relaxed max-w-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="mt-5 text-base leading-relaxed max-w-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
               India's most advanced wellness MLM platform. Real-time commissions, preventive healthcare, and a nationwide hospital network.
             </p>
           </div>
@@ -259,9 +251,9 @@ export default function LoginPage() {
           <div className="flex flex-wrap gap-3">
             {features.map((f, i) => (
               <div key={i} className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)' }}>
                 <span className="text-base">{f.icon}</span>
-                <span className="text-[11px] font-bold text-white/60 uppercase tracking-wider">{f.text}</span>
+                <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider">{f.text}</span>
               </div>
             ))}
           </div>
@@ -285,26 +277,18 @@ export default function LoginPage() {
         <div className="w-full max-w-[420px]">
 
           {/* Mobile Logo */}
-          <div className="flex items-center gap-3 mb-8 lg:hidden anim-up">
-            <Image src="/image.png" alt="CureBharat" width={44} height={44} className="object-contain" />
-            <div>
-              <p className="text-white font-black text-lg leading-none">
-                CURE<span style={{ color: '#49D2B5' }}>BHARAT</span>
-              </p>
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] mt-1" style={{ color: 'rgba(73,210,181,0.5)' }}>
-                Partner Portal
-              </p>
-            </div>
+          <div className="flex items-center mb-8 lg:hidden anim-up">
+            <Image src="/logo.png" alt="CureBharat" width={180} height={50} className="object-contain" priority />
           </div>
 
           {/* ── GLASSMORPHISM CARD ── */}
           <div className="rounded-[32px] p-8 sm:p-10 relative overflow-hidden anim-up anim-delay-1"
             style={{
-              background: 'rgba(255,255,255,0.13)',
-              border: '1px solid rgba(255,255,255,0.22)',
-              backdropFilter: 'blur(28px)',
-              WebkitBackdropFilter: 'blur(28px)',
-              boxShadow: '0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.15)',
+              background: 'rgba(255,255,255,0.28)',
+              border: '1px solid rgba(255,255,255,0.42)',
+              backdropFilter: 'blur(36px)',
+              WebkitBackdropFilter: 'blur(36px)',
+              boxShadow: '0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.3)',
             }}>
 
             {/* Top accent line */}
@@ -327,7 +311,7 @@ export default function LoginPage() {
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 Welcome<br />Back
               </h2>
-              <p className="text-sm mt-2 font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              <p className="text-sm mt-2 font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>
                 Sign in to your partner dashboard
               </p>
             </div>
@@ -350,7 +334,7 @@ export default function LoginPage() {
                 <>
                   {/* Mobile Field */}
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
                       Mobile Number
                     </label>
                     <div className="relative flex items-center">
@@ -381,7 +365,7 @@ export default function LoginPage() {
                   {/* Password Field */}
                   <div>
                     <div className="flex justify-between items-center mb-2.5">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>
                         Password
                       </label>
                       <a href="#" className="text-[10px] font-bold transition-colors" style={{ color: '#49D2B5' }}>
@@ -422,10 +406,10 @@ export default function LoginPage() {
                     <label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       Enter Verification Code (OTP)
                     </label>
-                    <button 
-                      type="button" 
-                      onClick={() => { setRequiresOTP(false); setOtp(''); }} 
-                      className="text-[10px] font-bold transition-colors" 
+                    <button
+                      type="button"
+                      onClick={() => { setRequiresOTP(false); setOtp(''); }}
+                      className="text-[10px] font-bold transition-colors"
                       style={{ color: '#49D2B5' }}
                     >
                       Change Account
