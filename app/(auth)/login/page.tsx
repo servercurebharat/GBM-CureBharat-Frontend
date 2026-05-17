@@ -67,10 +67,10 @@ export default function LoginPage() {
         <div className="relative z-10 w-full max-w-md text-center">
           <div className="rounded-[32px] p-10 flex flex-col items-center gap-6"
             style={{
-              background: 'rgba(255,255,255,0.07)',
-              border: '1px solid rgba(255,255,255,0.14)',
+              background: 'rgba(255,255,255,0.13)',
+              border: '1px solid rgba(255,255,255,0.22)',
               backdropFilter: 'blur(28px)',
-              boxShadow: '0 40px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+              boxShadow: '0 40px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
             }}>
             {/* Top accent */}
             <div className="absolute top-0 left-8 right-8 h-[2px] rounded-b-full"
@@ -197,8 +197,8 @@ export default function LoginPage() {
         .anim-delay-4 { animation-delay: 0.4s; }
         .input-field {
           width: 100%;
-          background: rgba(255,255,255,0.09);
-          border: 1px solid rgba(255,255,255,0.15);
+          background: rgba(255,255,255,0.14);
+          border: 1px solid rgba(255,255,255,0.22);
           border-radius: 16px;
           padding: 16px 20px;
           color: #fff;
@@ -300,11 +300,11 @@ export default function LoginPage() {
           {/* ── GLASSMORPHISM CARD ── */}
           <div className="rounded-[32px] p-8 sm:p-10 relative overflow-hidden anim-up anim-delay-1"
             style={{
-              background: 'rgba(255,255,255,0.07)',
-              border: '1px solid rgba(255,255,255,0.14)',
+              background: 'rgba(255,255,255,0.13)',
+              border: '1px solid rgba(255,255,255,0.22)',
               backdropFilter: 'blur(28px)',
               WebkitBackdropFilter: 'blur(28px)',
-              boxShadow: '0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
+              boxShadow: '0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.15)',
             }}>
 
             {/* Top accent line */}
