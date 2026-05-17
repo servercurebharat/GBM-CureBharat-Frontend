@@ -246,7 +246,7 @@ export default function AdminUserDetailsPage() {
                  {/* Audit Trail */}
                  <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
                     <div className="flex justify-between items-center mb-8">
-                       <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">AUDIT TRAIL</h3>
+                       <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">ACTIVITY LOGS</h3>
                        <svg className="text-white/20" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     </div>
                     <div className="space-y-6 mb-8">

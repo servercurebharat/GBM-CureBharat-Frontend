@@ -13,6 +13,11 @@ export default function HccProfilePage() {
   const [loadingWallet, setLoadingWallet] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
+  const [isEditingBank, setIsEditingBank] = useState(false);
+  const [bankData, setBankData] = useState({ bankName: '', accountNumber: '', ifscCode: '' });
+  const [showBankOTP, setShowBankOTP] = useState(false);
+  const [bankOTP, setBankOTP] = useState('');
+  const [bankLoading, setBankLoading] = useState(false);
 
   useEffect(() => {
     const fetchWallet = async () => {
@@ -176,25 +181,210 @@ export default function HccProfilePage() {
 
           {/* Bank Details Section */}
           <div>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-8 h-8 rounded-lg bg-[#60A5FA]/10 flex items-center justify-center text-[#60A5FA]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-              </div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Bank Details</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { label: 'Account Holder', value: user.bankDetails?.accountHolderName || 'N/A' },
-                { label: 'Account Number', value: user.bankDetails?.accountNumber || 'N/A' },
-                { label: 'Bank Name', value: user.bankDetails?.bankName || 'N/A' },
-                { label: 'IFSC Code', value: user.bankDetails?.ifscCode || 'N/A' },
-              ].map((field, i) => (
-                <div key={i} className="space-y-2">
-                  <label className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest pl-1">{field.label}</label>
-                  <div className="bg-white/2 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-inner">{field.value}</div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#60A5FA]/10 flex items-center justify-center text-[#60A5FA]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 </div>
-              ))}
+                <div className="flex items-center gap-3">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">Bank Details</h3>
+                  <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full border tracking-wider uppercase ${
+                    user.bankDetails?.verificationStatus === 'verified' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-400/20' :
+                    user.bankDetails?.verificationStatus === 'rejected' ? 'bg-rose-500/20 text-rose-400 border-rose-400/20' :
+                    'bg-amber-500/20 text-amber-400 border-amber-400/20'
+                  }`}>
+                    {user.bankDetails?.verificationStatus || 'pending'}
+                  </span>
+                </div>
+              </div>
+
+              {!isEditingBank && (
+                <button
+                  onClick={() => {
+                    setIsEditingBank(true);
+                    setBankData({
+                      bankName: user.bankDetails?.bankName || '',
+                      accountNumber: user.bankDetails?.accountNumber || '',
+                      ifscCode: user.bankDetails?.ifscCode || ''
+                    });
+                    setShowBankOTP(false);
+                    setBankOTP('');
+                  }}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-wider border border-white/5 flex items-center gap-1.5 transition-all self-start sm:self-auto"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Update Bank Details
+                </button>
+              )}
             </div>
+
+            {isEditingBank ? (
+              <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest pl-1">Bank Name</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. HDFC Bank"
+                      value={bankData.bankName}
+                      onChange={(e) => setBankData({ ...bankData, bankName: e.target.value })}
+                      disabled={showBankOTP || bankLoading}
+                      className="w-full bg-[#0d0c2b] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-400 transition-all placeholder:text-white/20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest pl-1">Account Number</label>
+                    <input
+                      type="text"
+                      placeholder="Enter Account Number"
+                      value={bankData.accountNumber}
+                      onChange={(e) => setBankData({ ...bankData, accountNumber: e.target.value })}
+                      disabled={showBankOTP || bankLoading}
+                      className="w-full bg-[#0d0c2b] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-400 transition-all placeholder:text-white/20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest pl-1">IFSC Code</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. HDFC0001234"
+                      value={bankData.ifscCode}
+                      onChange={(e) => setBankData({ ...bankData, ifscCode: e.target.value })}
+                      disabled={showBankOTP || bankLoading}
+                      className="w-full bg-[#0d0c2b] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-400 transition-all placeholder:text-white/20"
+                    />
+                  </div>
+                </div>
+
+                {showBankOTP && (
+                  <div className="max-w-md bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 space-y-4 animate-in fade-in duration-300">
+                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Two-Step Security Authorization</p>
+                    <p className="text-xs text-white/70 leading-relaxed">
+                      We have sent a 6-digit authorization code to your registered email <strong>{user.email}</strong>. Please enter the code below to verify your request.
+                    </p>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-white uppercase tracking-widest pl-1">6-Digit OTP Code</label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        placeholder="Enter Code"
+                        value={bankOTP}
+                        onChange={(e) => setBankOTP(e.target.value)}
+                        disabled={bankLoading}
+                        className="w-full bg-[#0d0c2b] border border-blue-400/30 rounded-xl px-4 py-3 text-lg font-black text-center text-white tracking-[0.5em] outline-none focus:border-blue-400 transition-all placeholder:text-white/10 placeholder:tracking-normal"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/5">
+                  {!showBankOTP ? (
+                    <button
+                      onClick={async () => {
+                        if (!bankData.bankName || !bankData.accountNumber || !bankData.ifscCode) {
+                          toast.error('Please enter all bank fields');
+                          return;
+                        }
+                        setBankLoading(true);
+                        try {
+                          await usersAPI.requestBankUpdateOTP(bankData);
+                          toast.success('Verification code sent to your email!');
+                          setShowBankOTP(true);
+                        } catch (err: any) {
+                          toast.error(err.response?.data?.message || 'Failed to send OTP code');
+                        } finally {
+                          setBankLoading(false);
+                        }
+                      }}
+                      disabled={bankLoading}
+                      className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                    >
+                      {bankLoading ? 'Processing...' : 'Send Verification Code'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        if (!bankOTP || bankOTP.length !== 6) {
+                          toast.error('Please enter a valid 6-digit code');
+                          return;
+                        }
+                        setBankLoading(true);
+                        try {
+                          await usersAPI.verifyBankUpdateOTP({ ...bankData, otp: bankOTP });
+                          toast.success('Bank details submitted for approval successfully!');
+                          setIsEditingBank(false);
+                          setShowBankOTP(false);
+                          setBankOTP('');
+                          window.location.reload();
+                        } catch (err: any) {
+                          toast.error(err.response?.data?.message || 'Invalid verification code');
+                        } finally {
+                          setBankLoading(false);
+                        }
+                      }}
+                      disabled={bankLoading}
+                      className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                    >
+                      {bankLoading ? 'Verifying...' : 'Verify & Save Details'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setIsEditingBank(false);
+                      setShowBankOTP(false);
+                      setBankOTP('');
+                    }}
+                    disabled={bankLoading}
+                    className="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 font-bold text-xs uppercase tracking-wider border border-white/5 transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {user.bankDetails?.verificationStatus === 'pending' && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center gap-3 text-amber-400">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-pulse"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <div className="flex-1">
+                      <p className="text-xs font-black uppercase tracking-wider">Under Compliance Review</p>
+                      <p className="text-[10px] text-white/60 mt-0.5 leading-relaxed font-medium">Your updated bank details have been submitted. Our compliance team is verifying these details. You will be notified once approved.</p>
+                    </div>
+                  </div>
+                )}
+                {user.bankDetails?.verificationStatus === 'rejected' && (
+                  <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-center gap-3 text-rose-400">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <div className="flex-1">
+                      <p className="text-xs font-black uppercase tracking-wider">Bank Details Rejected</p>
+                      <p className="text-[10px] text-white/60 mt-0.5 leading-relaxed font-medium">Your bank details update request was rejected by admin. Please check your email for rejection details and update with correct info.</p>
+                    </div>
+                  </div>
+                )}
+                {user.bankDetails?.verificationStatus === 'verified' && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3 text-emerald-400">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <div className="flex-1">
+                      <p className="text-xs font-black uppercase tracking-wider">Verified Bank Account</p>
+                      <p className="text-[10px] text-white/60 mt-0.5 leading-relaxed font-medium">Your bank account is fully verified and active. You are eligible for secure payouts.</p>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { label: 'Account Holder', value: user.bankDetails?.accountHolderName || 'N/A' },
+                    { label: 'Account Number', value: user.bankDetails?.accountNumber || 'N/A' },
+                    { label: 'Bank Name', value: user.bankDetails?.bankName || 'N/A' },
+                    { label: 'IFSC Code', value: user.bankDetails?.ifscCode || 'N/A' },
+                  ].map((field, i) => (
+                    <div key={i} className="space-y-2">
+                      <label className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest pl-1">{field.label}</label>
+                      <div className="bg-white/2 border border-white/5 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-inner">{field.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Nominee Details Section */}

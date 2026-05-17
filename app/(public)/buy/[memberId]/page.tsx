@@ -36,7 +36,15 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
         const res = await publicAPI.getSeller(memberId);
         if (res.data.success) {
           setSeller(res.data.data.seller);
-          setPlans(res.data.data.plans);
+          const activePlans = res.data.data.plans;
+          setPlans(activePlans);
+          
+          // Pre-select plan if planId is in URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const pId = urlParams.get('planId');
+          if (pId && activePlans.some((p: IPlan) => p._id === pId)) {
+            setFormData(prev => ({ ...prev, planId: pId }));
+          }
         }
       } catch (err: any) {
         toast.error(err.response?.data?.message || 'Invalid referral link');
@@ -155,11 +163,12 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
               <button 
                 onClick={() => {
                   if (!formData.customerName || !formData.customerMobile || !formData.nomineeName) return toast.error('Please fill required fields');
-                  setStep(2);
+                  // Skip Step 2 (Plan Selection) if planId is already pre-selected via URL
+                  setStep(formData.planId ? 3 : 2);
                 }}
                 className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#0a0c10] font-black py-4 rounded-2xl transition-all shadow-xl shadow-emerald-500/20 uppercase tracking-widest text-xs mt-6"
               >
-                Choose Your Plan →
+                {formData.planId ? 'Review & Pay →' : 'Choose Your Plan →'}
               </button>
             </div>
           )}

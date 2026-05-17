@@ -9,6 +9,7 @@ import AddMemberModal from '@/components/dashboard/AddMemberModal';
 import ExportDropdown from '@/components/dashboard/ExportDropdown';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import AnnouncementModal from '@/components/modals/AnnouncementModal';
 
 function AdminMembersContent() {
   const { user } = useAuth();
@@ -23,6 +24,8 @@ function AdminMembersContent() {
   const [referredBy, setReferredBy] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [isAnnounceModalOpen, setIsAnnounceModalOpen] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -87,6 +90,15 @@ function AdminMembersContent() {
           onSuccess={() => setRefreshKey(prev => prev + 1)}
         />
       )}
+      <AnnouncementModal
+        isOpen={isAnnounceModalOpen}
+        onClose={() => {
+          setIsAnnounceModalOpen(false);
+          setSelectedUserIds([]);
+        }}
+        selectedUserIds={selectedUserIds}
+        totalMembersCount={total}
+      />
       <div className="space-y-6 pb-10 stagger-children">
         {/* Top KPI Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up stagger-children">
@@ -116,10 +128,21 @@ function AdminMembersContent() {
                   </button>
                 ))}
               </div>
-              <button onClick={() => setIsModalOpen(true)} className="bg-[#10b981] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#10b981]/20 hover:brightness-110 transition-all">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add User
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => setIsModalOpen(true)} className="bg-[#10b981] px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-[#10b981]/20 hover:brightness-110 transition-all">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Add User
+                </button>
+                {(selectedUserIds.length > 0 || total > 0) && (
+                  <button 
+                    onClick={() => setIsAnnounceModalOpen(true)} 
+                    className="bg-blue-600 px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-600/20 hover:brightness-110 transition-all"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    Broadcast Announcement {selectedUserIds.length > 0 ? `(${selectedUserIds.length})` : ''}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Search & Action Bar */}
@@ -182,7 +205,19 @@ function AdminMembersContent() {
                   <thead>
                     <tr className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] border-b border-white/5">
                       <th className="px-8 py-5 w-16">
-                         <div className="w-4 h-4 rounded border border-white/20" />
+                         <button 
+                            onClick={() => {
+                              if (selectedUserIds.length === members.length) setSelectedUserIds([]);
+                              else setSelectedUserIds(members.map(m => m._id));
+                            }}
+                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                              selectedUserIds.length === members.length ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'
+                            }`}
+                          >
+                             {selectedUserIds.length === members.length && (
+                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>
+                             )}
+                          </button>
                       </th>
                       <th className="px-4 py-5">ID</th>
                       <th className="px-4 py-5">MEMBER NAME</th>
@@ -190,6 +225,7 @@ function AdminMembersContent() {
                       <th className="px-4 py-5">STATE</th>
                       <th className="px-4 py-5">ROLE</th>
                       <th className="px-4 py-5">STATUS</th>
+                      <th className="px-4 py-5">ENGAGEMENT</th>
                       <th className="px-8 py-5"></th>
                     </tr>
                   </thead>
@@ -208,7 +244,23 @@ function AdminMembersContent() {
                           className="hover:bg-white/[0.04] transition-colors group cursor-pointer"
                         >
                           <td className="px-8 py-5">
-                             <div className="w-4 h-4 rounded border border-white/20 group-hover:border-[#10b981]" />
+                             <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (selectedUserIds.includes(member._id)) {
+                                    setSelectedUserIds(selectedUserIds.filter(id => id !== member._id));
+                                  } else {
+                                    setSelectedUserIds([...selectedUserIds, member._id]);
+                                  }
+                                }}
+                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                                  selectedUserIds.includes(member._id) ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/30' : 'border-white/20 group-hover:border-emerald-500/50'
+                                }`}
+                              >
+                                 {selectedUserIds.includes(member._id) && (
+                                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>
+                                 )}
+                              </button>
                           </td>
                           <td className="px-4 py-5 text-[#10b981] font-bold text-xs tracking-tight">#{member.memberId}</td>
                           <td className="px-4 py-5">
@@ -248,6 +300,12 @@ function AdminMembersContent() {
                              <div className="flex items-center gap-2">
                                 <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'active' ? 'bg-[#34d399]' : 'bg-[#fbbf24]'}`} />
                                 <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">{member.status}</span>
+                             </div>
+                          </td>
+                          <td className="px-4 py-5">
+                             <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-white/90 uppercase tracking-widest">{formatTimeSpent((member as any).totalTimeSpent || 0)}</span>
+                                <span className="text-[7px] font-bold text-white/20 uppercase tracking-tighter mt-0.5">Total Time</span>
                              </div>
                           </td>
                           <td className="px-8 py-5 text-right">
@@ -323,15 +381,15 @@ function AdminMembersContent() {
                <p className="text-xs text-white/30 leading-relaxed font-medium">Click any row to inspect profile snapshot, activity and hierarchy context</p>
             </div>
 
-            {/* Info Box */}
-            <div className="bg-[#F8F9FE] rounded-xl p-6 border border-borderLight shadow-sm">
-               <div className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#131241]/5 flex items-center justify-center">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#131241" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            {/* Issue #9 fix: Replaced off-brand white bg with dark themed design */}
+            <div className="bg-[#1a195e] rounded-2xl p-6 border border-blue-500/10">
+               <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                   </div>
                   <div>
-                    <h5 className="text-[11px] font-bold text-black uppercase tracking-wider mb-1">Bulk Actions Enabled</h5>
-                    <p className="text-[10px] text-slate font-medium leading-relaxed">Select multiple rows to perform batch KYC approval or status updates.</p>
+                    <h5 className="text-[11px] font-black text-blue-400 uppercase tracking-wider mb-1">Bulk Actions Enabled</h5>
+                    <p className="text-[10px] text-white/30 font-medium leading-relaxed">Select multiple rows to perform batch KYC approval or status updates.</p>
                   </div>
                </div>
             </div>
@@ -386,4 +444,13 @@ function DistributionItem({ label, value, color }: any) {
        <span className="text-xs font-bold text-white">{value}</span>
     </div>
   );
+}
+
+function formatTimeSpent(seconds: number) {
+  if (!seconds || seconds < 1) return '0m';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }

@@ -2,18 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { dashboardAPI } from '@/lib/api';
-import { IUser } from '@/types';
+import { IUser, IPlan } from '@/types';
 import { useRouter } from 'next/navigation';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
-import api, { walletAPI } from '@/lib/api';
+import api, { walletAPI, plansAPI } from '@/lib/api';
 import AddMemberModal from '../dashboard/AddMemberModal';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ExportDropdown from '../dashboard/ExportDropdown';
 import CountUp from '../dashboard/CountUp';
+import toast from 'react-hot-toast';
+/* Issues #4/#10/#12/#13: Import reusable WhatsApp share utility */
+import { shareOnWhatsApp, copyReferralLink } from '@/lib/utils/share';
 
 interface DashboardHomeProps {
   user: IUser;
@@ -36,6 +39,10 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   const [selectedState, setSelectedState] = useState('all');
   const [leaderRole, setLeaderRole] = useState<string>('');
   const [activeDropdown, setActiveDropdown] = useState<'period' | 'state' | null>(null);
+
+  const [plans, setPlans] = useState<IPlan[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [referralType, setReferralType] = useState<'sales' | 'recruiter'>('sales');
 
   const searchParams = useSearchParams();
 
@@ -67,6 +74,14 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   useEffect(() => {
     fetchData();
   }, [period, selectedState, leaderRole]);
+
+  useEffect(() => {
+    plansAPI.getAll().then(res => {
+      if (res.data.success) {
+        setPlans((res.data.data || []).filter((p: IPlan) => p.isActive));
+      }
+    }).catch(err => console.error('Error fetching plans:', err));
+  }, []);
 
   useEffect(() => {
     if (searchParams.get('enroll') === 'true') setIsModalOpen(true);
@@ -103,13 +118,13 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
 
   const formatCurrency = (amount: number) => {
     if (!amount || isNaN(amount)) return '₹0';
-    if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-    if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
+    if (amount >= 1000000000) return `₹ ${(amount / 1000000000).toFixed(2)} Cr`;
+    if (amount >= 10000000) return `₹ ${(amount / 10000000).toFixed(2)} L`;
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0
-    }).format(amount / 100); // Fixed: prices are in paise
+    }).format(amount / 100);
   };
 
   const COLORS = ['#10b981', '#6366f1', '#a855f7', '#06b6d4'];
@@ -307,13 +322,17 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            </div>
            
            <Link 
-             href="/profile" 
-             className={`
-               relative z-10 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl
-               ${user.kycStatus === 'not_submitted' ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20' : ''}
-               ${user.kycStatus === 'pending' ? 'bg-#059669 hover:bg-#10b981 text-white shadow-#10b981/20' : ''}
-               ${user.kycStatus === 'rejected' ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20' : ''}
-             `}
+              href={
+                user.kycStatus === 'pending'
+                  ? `/${user.role.toLowerCase()}/profile`
+                  : `/${user.role.toLowerCase()}/kyc`
+              }
+              className={`
+                relative z-10 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl
+                ${user.kycStatus === 'not_submitted' ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20' : ''}
+                ${user.kycStatus === 'pending' ? 'bg-#059669 hover:bg-#10b981 text-white shadow-#10b981/20' : ''}
+                ${user.kycStatus === 'rejected' ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20' : ''}
+              `}
            >
               {user.kycStatus === 'not_submitted' && 'Verify Identity Now'}
               {user.kycStatus === 'pending' && 'View Profile'}
@@ -328,9 +347,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            { label: 'Total Users', value: summary?.metrics?.totalUsers || 0, icon: 'users', color: 'blue', link: '/admin/members' },
            { label: 'Active Users', value: summary?.metrics?.activeUsers || 0, icon: 'user-check', color: 'emerald', link: '/admin/members' },
            { label: 'Inactive Users', value: summary?.metrics?.inactiveUsers || 0, icon: 'user-x', color: 'slate', link: '/admin/members' },
-           { label: 'Total Sales', value: formatCurrency(summary?.metrics?.totalRevenue || 0), icon: 'trending-up', color: 'indigo', link: '/admin/wallet-ledger' },
-           { label: 'FTD Revenue', value: formatCurrency(summary?.metrics?.ftdRevenue || 0), icon: 'zap', color: 'amber', sub: 'Today', link: '/admin/wallet-ledger' },
-           { label: 'MTD Revenue', value: formatCurrency(summary?.metrics?.mtdRevenue || 0), icon: 'calendar', color: 'rose', sub: 'Month', link: '/admin/wallet-ledger' },
+           { label: 'Total Sales', value: (summary?.metrics?.totalRevenue || 0) / 100, icon: 'trending-up', color: 'indigo', link: '/admin/wallet-ledger', isCurrency: true },
+           { label: 'FTD Revenue', value: (summary?.metrics?.ftdRevenue || 0) / 100, icon: 'zap', color: 'amber', sub: 'Today', link: '/admin/wallet-ledger', isCurrency: true },
+           { label: 'MTD Revenue', value: (summary?.metrics?.mtdRevenue || 0) / 100, icon: 'calendar', color: 'rose', sub: 'Month', link: '/admin/wallet-ledger', isCurrency: true },
          ].map((stat, i) => (
            <Link 
              key={i} 
@@ -343,14 +362,18 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                 {stat.sub && <span className="bg-white/5 px-2 py-0.5 rounded text-[7px] text-white/40">{stat.sub}</span>}
               </p>
               <h4 className="text-xl font-black text-white mb-1 truncate">
-                 {typeof stat.value === 'number' ? (
-                   <CountUp end={stat.value} />
+                 {stat.isCurrency ? (
+                   <CountUp 
+                     end={stat.value} 
+                     formatter={(val) => {
+                       if (val >= 10000000) return `₹ ${(val / 10000000).toFixed(2)} Cr`;
+                       if (val >= 100000) return `₹ ${(val / 100000).toFixed(2)} L`;
+                       return `₹ ${val.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+                     }} 
+                   />
                  ) : (
-                   stat.value.includes('₹') ? (
-                     <CountUp 
-                       end={parseInt(stat.value.replace(/[^\d]/g, ''))} 
-                       formatter={(val) => `₹ ${val.toLocaleString('en-IN')}`} 
-                     />
+                   typeof stat.value === 'number' ? (
+                     <CountUp end={stat.value} />
                    ) : (
                      stat.value
                    )
@@ -366,55 +389,129 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            </Link>
          ))}
       </div>
-
-      {/* Dynamic Sales Gateway Hub - Balanced Position */}
+            {/* Dynamic Sales Gateway Hub - Balanced Position */}
       <div className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-[#131241] to-[#49D2B5] rounded-[32px] blur-lg opacity-10 group-hover:opacity-30 transition duration-1000"></div>
           <div className="relative bg-[#131241] rounded-[32px] p-8 shadow-2xl border border-white/5 overflow-hidden">
              <div className="absolute top-0 right-0 w-80 h-80 bg-[#49D2B5]/5 blur-[100px] -mr-40 -mt-40" />
              
-             <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-                <div className="flex items-center gap-6">
-                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#131241] to-[#49D2B5] flex items-center justify-center shadow-lg shadow-[#49D2B5]/20">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+             <div className="space-y-6 relative z-10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-white/5 pb-6">
+                   <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#131241] to-[#49D2B5] flex items-center justify-center shadow-lg shadow-[#49D2B5]/20">
+                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      </div>
+                      <div>
+                         <h3 className="text-lg font-black text-white tracking-tight">Your Referral Gateway</h3>
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
+                            {referralType === 'sales' 
+                               ? 'Share Wellness Plans & Earn 40% Direct Commission' 
+                               : 'Invite New Partners & Grow Your Downline Network'}
+                         </p>
+                      </div>
                    </div>
-                  <div>
-                     <h3 className="text-xl font-black text-white tracking-tight">Your Referral Gateway</h3>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Unlock 40% Commission on Direct Referrals</p>
-                  </div>
-               </div>
 
-               <div className="flex-1 max-w-2xl w-full flex flex-col sm:flex-row items-center gap-3">
-                  <div className="flex-1 w-full px-6 py-4 bg-black/40 rounded-xl border border-white/5 flex items-center overflow-hidden">
-                     <code className="text-[#49D2B5] font-bold text-xs truncate flex-1">
-                        {typeof window !== 'undefined' ? `${window.location.origin}/buy/${user.memberId}` : `buy/${user.memberId}`}
-                     </code>
-                     <button 
-                        onClick={() => {
-                           const link = `${window.location.origin}/buy/${user.memberId}`;
-                           navigator.clipboard.writeText(link);
-                        }}
-                        className="ml-4 text-slate-500 hover:text-[#49D2B5] transition-colors"
-                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                     </button>
-                  </div>
-                  <button 
-                     onClick={() => {
-                        const link = `${window.location.origin}/buy/${user.memberId}`;
-                        const text = `Hi! Check out CureBharat Wellness: ${link}`;
-                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-                     }}
-                     className="w-full sm:w-auto px-10 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10"
-                  >
-                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.672 1.433 5.657 1.435h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-                     Share Link
-                  </button>
-               </div>
-            </div>
-         </div>
+                   {/* Mode Pill Toggle */}
+                   <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 self-start sm:self-center">
+                      <button
+                         onClick={() => setReferralType('sales')}
+                         className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                            referralType === 'sales'
+                               ? 'bg-[#49D2B5] text-[#0d0f14] shadow-md shadow-[#49D2B5]/10'
+                               : 'text-white/40 hover:text-white'
+                         }`}
+                      >
+                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                         Sales Link
+                      </button>
+                      <button
+                         onClick={() => setReferralType('recruiter')}
+                         className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                            referralType === 'recruiter'
+                               ? 'bg-[#49D2B5] text-[#0d0f14] shadow-md shadow-[#49D2B5]/10'
+                               : 'text-white/40 hover:text-white'
+                         }`}
+                      >
+                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                         Recruiter Link
+                      </button>
+                   </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                   {referralType === 'sales' && (
+                      <div className="w-full lg:w-auto relative min-w-[260px]">
+                         <select
+                            value={selectedPlanId}
+                            onChange={(e) => setSelectedPlanId(e.target.value)}
+                            className="w-full bg-black/40 border border-white/5 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:border-[#49D2B5]/40 transition-all shadow-inner pr-10"
+                         >
+                            <option value="" className="bg-[#131241]">Global Sale Link (All Plans)</option>
+                            {plans.map(p => (
+                               <option key={p._id} value={p._id} className="bg-[#131241]">
+                                  {p.name} (₹{(p.price / 100).toLocaleString()})
+                               </option>
+                            ))}
+                         </select>
+                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9"/></svg>
+                         </div>
+                      </div>
+                   )}
+
+                   <div className="flex-1 w-full flex flex-col sm:flex-row items-center gap-3">
+                      <div className="flex-1 w-full px-6 py-4 bg-black/40 rounded-xl border border-white/5 flex items-center overflow-hidden">
+                         <code className="text-[#49D2B5] font-bold text-xs truncate flex-1">
+                            {referralType === 'sales'
+                               ? (selectedPlanId 
+                                    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/buy/${user.memberId}?planId=${selectedPlanId}`
+                                    : `${typeof window !== 'undefined' ? window.location.origin : ''}/buy/${user.memberId}`)
+                               : `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.memberId}`
+                            }
+                         </code>
+                         <button
+                            onClick={async () => {
+                              const activeLink = referralType === 'sales'
+                                 ? (selectedPlanId
+                                      ? `${window.location.origin}/buy/${user.memberId}?planId=${selectedPlanId}`
+                                      : `${window.location.origin}/buy/${user.memberId}`)
+                                 : `${window.location.origin}/register?ref=${user.memberId}`;
+                              try {
+                                 await navigator.clipboard.writeText(activeLink);
+                                 toast.success('Referral link copied!');
+                              } catch {
+                                 toast.error('Failed to copy');
+                              }
+                            }}
+                            className="ml-4 text-slate-500 hover:text-[#49D2B5] transition-colors"
+                            title="Copy link"
+                         >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                         </button>
+                      </div>
+                      <button
+                         onClick={() => {
+                            const activeLink = referralType === 'sales'
+                               ? (selectedPlanId
+                                    ? `${window.location.origin}/buy/${user.memberId}?planId=${selectedPlanId}`
+                                    : `${window.location.origin}/buy/${user.memberId}`)
+                               : `${window.location.origin}/register?ref=${user.memberId}`;
+                            const shareText = referralType === 'sales'
+                               ? `🌟 Preventative healthcare plans & 10,000+ network hospitals with CureBharat Wellness!\n\nBuy wellness plan now 👇\n${activeLink}`
+                               : `🌟 Join CureBharat Wellness as a Partner! Build your own downline network and unlock real-time overrides and commissions.\n\nRegister now under me 👇\n${activeLink}`;
+                            const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                            window.open(waUrl, '_blank', 'noopener,noreferrer');
+                         }}
+                         className="w-full sm:w-auto px-10 py-4 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10"
+                      >
+                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.672 1.433 5.657 1.435h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                         Share Link
+                      </button>
+                   </div>
+                </div>
+             </div>
+          </div>
       </div>
-
 
       {/* Analytics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -487,28 +584,49 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
               <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
               Role Distribution
            </h5>
-           <div className="h-[200px] w-full relative">
+           <div className="h-[220px] w-full relative group/chart">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={summary?.roleDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={8}
-                    dataKey="count"
-                  >
-                    {summary?.roleDistribution?.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
+                 <PieChart>
+                   <Pie
+                     data={summary?.roleDistribution}
+                     cx="50%"
+                     cy="50%"
+                     innerRadius="72%"
+                     outerRadius="90%"
+                     paddingAngle={8}
+                     dataKey="count"
+                     stroke="none"
+                   >
+                     {summary?.roleDistribution?.map((entry: any, index: number) => (
+                       <Cell 
+                        key={`cell-${index}`} 
+                        fill={COLORS[index % COLORS.length]} 
+                        className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
+                       />
+                     ))}
+                   </Pie>
+                   <Tooltip 
+                     wrapperStyle={{ zIndex: 100 }}
+                     content={({ active, payload }: any) => {
+                        if (active && payload && payload.length) {
+                           return (
+                              <div className="bg-[#131241]/95 backdrop-blur-xl border border-white/10 px-4 py-2 rounded-xl shadow-2xl animate-in fade-in zoom-in duration-200">
+                                 <p className="text-[10px] font-black text-white uppercase tracking-widest">
+                                    {payload[0].name} • <span className="text-[#10b981]">{payload[0].value} Users</span>
+                                 </p>
+                              </div>
+                           );
+                        }
+                        return null;
+                     }}
+                   />
+                 </PieChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Total</p>
-                 <h6 className="text-2xl font-black text-white">{summary?.metrics?.totalUsers}</h6>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1.5">Total</p>
+                 <h6 className="text-3xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                    {summary?.metrics?.totalUsers}
+                 </h6>
               </div>
            </div>
            <div className="mt-4 grid grid-cols-2 gap-4">

@@ -70,6 +70,15 @@ export default function Topbar({ pageTitle, user, setSidebarOpen }: TopbarProps)
     }
   };
 
+  const handleClearAll = async () => {
+    try {
+      await notificationAPI.clearAll();
+      fetchNotifications();
+    } catch (err) {
+      console.error('Failed to clear notifications', err);
+    }
+  };
+
   // Handle Search Suggestion Logic
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -231,6 +240,12 @@ export default function Topbar({ pageTitle, user, setSidebarOpen }: TopbarProps)
                   <div className="flex items-center gap-3">
                     {unreadCount > 0 && (
                       <button onClick={handleMarkAllAsRead} className="text-[8px] font-black text-[#10b981] uppercase tracking-widest hover:text-white transition-colors">Mark all read</button>
+                    )}
+                    {notifications.length > 0 && (
+                      <>
+                        {unreadCount > 0 && <span className="text-[8px] text-white/20">|</span>}
+                        <button onClick={handleClearAll} className="text-[8px] font-black text-rose-500 uppercase tracking-widest hover:text-white transition-colors">Clear</button>
+                      </>
                     )}
                     <button onClick={() => setShowNotifications(false)} className="text-white/20 hover:text-white transition-colors">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>

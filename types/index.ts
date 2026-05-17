@@ -38,6 +38,7 @@ export interface IUser {
     bankName?: string;
     ifscCode?: string;
     branchName?: string;
+    verificationStatus?: string;
   };
   nomineeDetails?: {
     name?: string;

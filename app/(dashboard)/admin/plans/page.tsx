@@ -123,10 +123,11 @@ export default function AdminPlansPage() {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
-            <select 
+            {/* Issue #7 fix: was plain white bg, now themed to match app dark palette */}
+            <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#6029F1] shadow-sm"
+              className="bg-[#131241] text-white border border-white/10 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#6029F1]/60 shadow-sm appearance-none cursor-pointer hover:border-white/20 transition-all"
             >
               <option value="all">All Categories</option>
               <option value="onboarding">Onboarding</option>
@@ -224,12 +225,13 @@ export default function AdminPlansPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Plan Name</label>
+                  {/* Issue #8 fix: text color was too light. Using slate-900 for legibility */}
                   <input 
                     type="text" 
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-[#6029F1] focus:bg-white transition-all"
+                    className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#6029F1] focus:ring-2 focus:ring-[#6029F1]/10 focus:bg-white transition-all"
                     placeholder="e.g. Super Suraksha"
                   />
                 </div>
@@ -246,12 +248,13 @@ export default function AdminPlansPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price (₹)</label>
+                  {/* Issue #8 fix: numeric inputs also need dark text */}
                   <input 
                     type="number" 
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-[#6029F1] focus:bg-white transition-all"
+                    className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 outline-none focus:border-[#6029F1] focus:ring-2 focus:ring-[#6029F1]/10 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">

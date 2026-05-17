@@ -23,11 +23,12 @@ export default function NotificationsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h2 className="text-2xl font-bold text-[#1E293B] tracking-tight">Notification</h2>
           <div className="flex gap-3">
-             <button className="bg-[#131241] text-white px-5 py-2.5 rounded-xl text-xs font-bold border border-white/5 hover:bg-white/5 transition-all flex items-center gap-2">
+             {/* Issue #2 fix: was hover:bg-white/5 which renders white on light bg */}
+             <button className="bg-[#131241] text-white px-5 py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-[#1e1c5c] hover:border-white/20 transition-all flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Export Report
              </button>
-             <button className="bg-[#60A5FA] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-blue-200 hover:bg-blue-600 transition-all flex items-center gap-2">
+             <button className="bg-[#60A5FA] text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                 Run Projection
              </button>
@@ -72,9 +73,10 @@ export default function NotificationsPage() {
                  <option>Action Required</option>
               </select>
            </div>
-           <div className="md:col-span-2">
-              <button className="w-full bg-[#131241] text-white px-4 py-3 rounded-xl text-xs font-bold border border-white/5 hover:bg-white/5 transition-all">Mark All Seen</button>
-           </div>
+            <div className="md:col-span-2">
+               {/* Issue #2 fix: Mark All Seen button hover */}
+               <button className="w-full bg-[#131241] text-white px-4 py-3 rounded-xl text-xs font-bold border border-white/10 hover:bg-[#1e1c5c] hover:border-white/20 transition-all">Mark All Seen</button>
+            </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

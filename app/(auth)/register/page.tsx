@@ -64,8 +64,8 @@ function RegisterForm() {
     e.preventDefault();
     setError('');
     
-    if (!formData.name || !formData.mobile || !formData.state || !formData.password) {
-      setError('Name, mobile, password, and state are required');
+    if (!formData.name || !formData.mobile || !formData.email || !formData.state || !formData.password) {
+      setError('Name, mobile, email, password, and state are required');
       return;
     }
 
@@ -218,6 +218,16 @@ function RegisterForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Email Address</label>
+                    <input
+                      required
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Referrer ID</label>
                     <input
                       type="text"
@@ -226,6 +236,9 @@ function RegisterForm() {
                       className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-blue-400 outline-none focus:border-blue-500/50 uppercase"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">State</label>
                     <select
@@ -238,9 +251,7 @@ function RegisterForm() {
                       {states.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
-                </div>
-
-                <div className="space-y-2">
+                  <div className="space-y-2">
                     <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Account Password</label>
                     <input
                       required
@@ -249,6 +260,7 @@ function RegisterForm() {
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50"
                     />
+                  </div>
                 </div>
 
                 <button

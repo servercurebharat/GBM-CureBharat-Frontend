@@ -7,7 +7,7 @@ import { IUser } from '../types';
 interface AuthContextType {
   user: IUser | null;
   loading: boolean;
-  login: (mobile: string, password: string, location?: { lat: number; lng: number }) => Promise<void>;
+  login: (mobile: string, password: string, location?: { lat: number; lng: number }, otp?: string) => Promise<{ requiresOTP?: boolean; email?: string } | void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -55,12 +55,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (mobile: string, password: string, location?: { lat: number; lng: number }) => {
+  const login = async (mobile: string, password: string, location?: { lat: number; lng: number }, otp?: string): Promise<{ requiresOTP?: boolean; email?: string } | void> => {
     try {
-      const res = await authAPI.login(mobile, password, location);
+      const res = await authAPI.login(mobile, password, location, otp);
+      const resData = res.data as any;
 
-      if (res.data.success && res.data.data) {
-        const userData = res.data.data;
+      if (resData.requiresOTP) {
+        return { requiresOTP: true, email: resData.email };
+      }
+
+      if (resData.success && resData.data) {
+        const userData = resData.data;
         // Set role cookie so middleware knows where to route
         document.cookie = `user_role=${userData.role}; path=/; max-age=604800; SameSite=Lax`;
         // Refresh full user profile from DB
@@ -68,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Navigate to the correct dashboard
         window.location.href = `/${userData.role}`;
       } else {
-        throw new Error(res.data.message || 'Login failed');
+        throw new Error(resData.message || 'Login failed');
       }
     } catch (error: any) {
       console.error('[LOGIN ERROR]', error.response?.status, error.response?.data);

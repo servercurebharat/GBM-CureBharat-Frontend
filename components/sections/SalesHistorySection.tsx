@@ -96,6 +96,7 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
                     <th className="px-8 py-5">Customer Details</th>
                     <th className="px-8 py-5">Plan Detail</th>
                     <th className="px-8 py-5 text-right">Premium Paid</th>
+                    <th className="px-8 py-5 text-right text-emerald-400">Commission</th>
                     <th className="px-8 py-5 text-center">Status</th>
                  </tr>
               </thead>
@@ -143,6 +144,10 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
                             <p className="text-sm font-black text-white">₹{(sale.saleAmount / 100).toLocaleString('en-IN')}</p>
                             <p className="text-[8px] text-emerald-400 font-bold uppercase tracking-tighter mt-0.5">INCL. GST</p>
                          </td>
+                         <td className="px-8 py-6 text-right">
+                            <p className="text-sm font-black text-emerald-400">₹{calculateCommission(sale, user.role).toLocaleString('en-IN')}</p>
+                            <p className="text-[7px] text-emerald-500/40 font-black uppercase tracking-widest mt-0.5">{getCommissionLabel(user.role)}</p>
+                         </td>
                          <td className="px-8 py-6 text-center">
                             <span className={`text-[9px] font-black px-3 py-1 rounded-md uppercase tracking-widest ${
                               sale.status === 'active' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
@@ -185,4 +190,25 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
       </div>
     </div>
   );
+}
+
+function calculateCommission(sale: ISale, role: string): number {
+  const bv = sale.businessVolume / 100; // in Rupees
+  switch (role.toLowerCase()) {
+    case 'hcc': return Math.round(bv * 0.40);
+    case 'hcm': return Math.round(bv * 0.40 * 0.40);
+    case 'hba': return Math.round(bv * 0.40 * 0.40 * 0.40);
+    case 'sh':  return Math.round(bv * 0.02);
+    default: return 0;
+  }
+}
+
+function getCommissionLabel(role: string): string {
+  switch (role.toLowerCase()) {
+    case 'hcc': return '40% DIRECT';
+    case 'hcm': return '16% OVERRIDE';
+    case 'hba': return '6.4% OVERRIDE';
+    case 'sh':  return '2% LEADERSHIP';
+    default: return 'EARNINGS';
+  }
 }

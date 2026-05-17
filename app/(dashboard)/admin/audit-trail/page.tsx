@@ -1,5 +1,14 @@
 'use client';
 
+function formatTimeSpent(seconds: number) {
+  if (!seconds || seconds < 1) return '0m';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { activityAPI } from '@/lib/api';
@@ -45,30 +54,31 @@ export default function AuditTrailPage() {
   };
 
   return (
-    <DashboardLayout pageTitle="Audit Trail">
+    <DashboardLayout pageTitle="Activity Logs">
       <div className="space-y-8 pb-20">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
            <div>
               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">CureBharat System Oversight</p>
-              <h1 className="text-4xl font-black text-white tracking-tighter uppercase">Activity Audit Trail</h1>
+              <h1 className="text-4xl font-black text-white tracking-tighter uppercase">Activity Logs</h1>
            </div>
            
            <div className="flex items-center gap-4">
               <ExportDropdown 
                 title="System Activity Log"
-                headers={['Timestamp', 'Actor', 'Role', 'Action', 'Category', 'Details', 'IP Address', 'Location']}
+                headers={['Timestamp', 'Actor', 'Role', 'Engagement/Session', 'Action', 'Category', 'Details', 'IP Address', 'Location']}
                 rows={logs.map(l => [
                   new Date(l.createdAt).toLocaleString(),
                   l.userName,
                   l.userRole.toUpperCase(),
+                  l.action === 'LOGIN' ? formatTimeSpent(l.sessionDuration || 0) : formatTimeSpent((l.userId as any)?.totalTimeSpent || 0),
                   l.action,
                   l.category.toUpperCase(),
                   l.details,
                   l.ipAddress || 'N/A',
                   l.location ? `${l.location.lat.toFixed(6)}, ${l.location.lng.toFixed(6)}` : 'N/A'
                 ])}
-                fileName="CureBharat_Audit_Trail"
+                fileName="CureBharat_Activity_Logs"
                 variant="primary"
               />
            </div>
@@ -101,52 +111,54 @@ export default function AuditTrailPage() {
            </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className="bg-[#131241] p-4 rounded-[2rem] shadow-xl border border-white/5 flex flex-wrap items-center gap-4">
-           <form onSubmit={handleSearch} className="relative flex-1 min-w-[300px]">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        {/* Action Bar */}
+        <div className="bg-[#131241] p-6 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col md:flex-row gap-6 items-center">
+           <form onSubmit={handleSearch} className="relative flex-1 group w-full">
+              <svg className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#10b981] transition-colors" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               <input 
                 type="text" 
-                placeholder="Search Action, Member Name or Details..." 
+                placeholder="Search actor, action or event details..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 transition-all"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-[1.5rem] pl-16 pr-6 py-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:bg-white/[0.05] transition-all"
               />
            </form>
 
-           <div className="flex gap-4">
-              <div className="relative group">
+           <div className="flex items-center gap-4 w-full md:w-auto">
+              <div className="flex-1 md:flex-none relative group min-w-[160px]">
+                 <label className="absolute -top-2 left-4 px-2 bg-[#131241] text-[8px] font-black text-white/30 uppercase tracking-widest z-10">Role Filter</label>
                  <select 
-                   value={roleFilter} 
-                   onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-                   className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs font-black text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 min-w-[180px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
+                   value={roleFilter}
+                   onChange={(e) => setRoleFilter(e.target.value)}
+                   className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:ring-1 focus:ring-[#10b981]/30 transition-all"
                  >
-                   <option value="All" className="bg-[#131241] text-white">All Roles</option>
-                   <option value="Admin" className="bg-[#131241] text-white">Admin Only</option>
-                   <option value="SH" className="bg-[#131241] text-white">Super Head</option>
-                   <option value="HBA" className="bg-[#131241] text-white">HBA Partner</option>
-                   <option value="HCM" className="bg-[#131241] text-white">HCM Manager</option>
-                   <option value="HCC" className="bg-[#131241] text-white">HCC Member</option>
+                    <option value="All">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="sh">State Head</option>
+                    <option value="hba">HBA</option>
+                    <option value="hcm">HCM</option>
+                    <option value="hcc">HCC</option>
                  </select>
-                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 group-hover:text-[#10b981] transition-colors">
+                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
                  </div>
               </div>
 
-              <div className="relative group">
+              <div className="flex-1 md:flex-none relative group min-w-[160px]">
+                 <label className="absolute -top-2 left-4 px-2 bg-[#131241] text-[8px] font-black text-white/30 uppercase tracking-widest z-10">Category</label>
                  <select 
-                   value={categoryFilter} 
-                   onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
-                   className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-xs font-black text-white uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-[#10b981]/20 min-w-[200px] appearance-none cursor-pointer hover:bg-white/10 transition-all"
+                   value={categoryFilter}
+                   onChange={(e) => setCategoryFilter(e.target.value)}
+                   className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:ring-1 focus:ring-[#10b981]/30 transition-all"
                  >
-                   <option value="All" className="bg-[#131241] text-white">All Categories</option>
-                   <option value="auth" className="bg-[#131241] text-white">Authentication</option>
-                   <option value="financial" className="bg-[#131241] text-white">Financial Actions</option>
-                   <option value="network" className="bg-[#131241] text-white">Network Updates</option>
-                   <option value="system" className="bg-[#131241] text-white">System Events</option>
-                   <option value="kyc" className="bg-[#131241] text-white">KYC Management</option>
+                    <option value="All">All Events</option>
+                    <option value="auth">Authentication</option>
+                    <option value="financial">Financial</option>
+                    <option value="network">Network</option>
+                    <option value="system">System</option>
+                    <option value="kyc">KYC</option>
                  </select>
-                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 group-hover:text-[#10b981] transition-colors">
+                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
                  </div>
               </div>
@@ -162,6 +174,7 @@ export default function AuditTrailPage() {
                        <th className="px-10 py-8">TIMESTAMP</th>
                        <th className="px-6 py-8">ACTOR IDENTITY</th>
                        <th className="px-6 py-8">ROLE</th>
+                       <th className="px-6 py-8">ENGAGEMENT</th>
                        <th className="px-6 py-8">OPERATION</th>
                        <th className="px-6 py-8">CATEGORY</th>
                        <th className="px-6 py-8">EVENT DETAILS</th>
@@ -172,12 +185,12 @@ export default function AuditTrailPage() {
                     {loading ? (
                       Array(8).fill(0).map((_, i) => (
                         <tr key={i} className="animate-pulse">
-                           <td colSpan={7} className="px-10 py-8"><div className="h-6 bg-white/5 rounded-xl w-full" /></td>
+                           <td colSpan={8} className="px-10 py-8"><div className="h-6 bg-white/5 rounded-xl w-full" /></td>
                         </tr>
                       ))
                     ) : logs.length === 0 ? (
                       <tr>
-                         <td colSpan={7} className="px-10 py-32 text-center">
+                         <td colSpan={8} className="px-10 py-32 text-center">
                             <div className="flex flex-col items-center gap-4 opacity-20">
                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                                <span className="text-xs font-black uppercase tracking-[0.3em]">No activity logs discovered</span>
@@ -209,6 +222,16 @@ export default function AuditTrailPage() {
                             }`}>
                                {log.userRole}
                             </span>
+                         </td>
+                         <td className="px-6 py-6">
+                            <div className="flex flex-col">
+                               <span className="text-[11px] font-black text-white/90 uppercase tracking-widest">
+                                  {log.action === 'LOGIN' ? formatTimeSpent(log.sessionDuration || 0) : formatTimeSpent((log.userId as any)?.totalTimeSpent || 0)}
+                               </span>
+                               <span className="text-[8px] font-bold text-[#10b981] uppercase tracking-tighter mt-0.5">
+                                  {log.action === 'LOGIN' ? 'Session Duration' : 'Total Engagement'}
+                               </span>
+                            </div>
                          </td>
                          <td className="px-6 py-6">
                             <div className="flex items-center gap-2">
@@ -255,29 +278,30 @@ export default function AuditTrailPage() {
            </div>
 
            {/* Pagination */}
-           {pagination && pagination.pages > 1 && (
-             <div className="p-10 border-t border-white/5 flex items-center justify-between bg-[#0d0f14]/20">
-                <p className="text-[11px] font-black text-white/20 uppercase tracking-[0.2em]">
-                   Showing Segment <span className="text-white/60">{pagination.page}</span> of <span className="text-white/60">{pagination.pages}</span>
-                </p>
-                <div className="flex gap-4">
-                   <button 
-                     onClick={() => setPage(p => Math.max(1, p - 1))}
-                     disabled={page === 1}
-                     className="px-8 py-3 rounded-2xl bg-white/5 text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/10 disabled:opacity-20 transition-all border border-white/5 hover:border-[#10b981]/50"
-                   >
-                      Previous Shift
-                   </button>
-                   <button 
-                     onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}
-                     disabled={page === pagination.pages}
-                     className="px-8 py-3 rounded-2xl bg-[#10b981]/10 text-[10px] font-black text-[#10b981] uppercase tracking-widest hover:bg-[#10b981] hover:text-white disabled:opacity-20 transition-all border border-[#10b981]/20 shadow-lg shadow-emerald-900/10"
-                   >
-                      Next Segment
-                   </button>
-                </div>
-             </div>
-           )}
+           <div className="px-10 py-8 border-t border-white/5 flex items-center justify-between bg-white/[0.01]">
+              <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
+                 Showing page {page} of {pagination?.pages || 1} • {pagination?.total || 0} event logs
+              </div>
+              <div className="flex items-center gap-2">
+                 <button 
+                   onClick={() => setPage(p => Math.max(1, p - 1))}
+                   disabled={page === 1}
+                   className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:bg-white/10 disabled:opacity-20 transition-all"
+                 >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                 </button>
+                 <div className="px-4 py-2 rounded-xl bg-white/5 text-[10px] font-black text-white tabular-nums tracking-widest border border-white/5">
+                    {page} / {pagination?.pages || 1}
+                 </div>
+                 <button 
+                   onClick={() => setPage(p => Math.min(pagination?.pages || 1, p + 1))}
+                   disabled={page === (pagination?.pages || 1)}
+                   className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:bg-white/10 disabled:opacity-20 transition-all"
+                 >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                 </button>
+              </div>
+           </div>
         </div>
       </div>
     </DashboardLayout>

@@ -18,6 +18,13 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       ]
     },
     {
+      label: 'Sales & Marketing', items: [
+        { label: 'Product Catalog', href: '/admin/catalog', icon: 'package' },
+        { label: 'New Sale', href: '/admin/sales/new', icon: 'plus-circle' },
+        { label: 'My Sales', href: '/admin/sales/history', icon: 'list' },
+      ]
+    },
+    {
       label: 'Network Management', items: [
         { label: 'Member List', href: '/admin/members', icon: 'users' },
         { label: 'Customer Database', href: '/admin/customers', icon: 'user-search' },
@@ -44,7 +51,7 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     {
       label: 'Administration', items: [
         { label: 'State Performance', href: '/admin/state-performance', icon: 'map' },
-        { label: 'Audit Trail', href: '/admin/audit-trail', icon: 'clipboard' },
+        { label: 'Activity Logs', href: '/admin/audit-trail', icon: 'clipboard' },
       ]
     },
     {
@@ -56,6 +63,12 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     {
       label: 'Network Hierarchy', items: [
         { label: 'Genealogy Tree', href: '/admin/hierarchy', icon: 'git-branch' },
+      ]
+    },
+    {
+      /* Issue #15: Customer complaint management added to admin nav */
+      label: 'Customer Support', items: [
+        { label: 'Complaint Management', href: '/admin/complaints', icon: 'message-circle' },
       ]
     },
   ],
@@ -73,7 +86,8 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       ]
     },
     {
-      label: 'Sales', items: [
+      label: 'Sales & Marketing', items: [
+        { label: 'Product Catalog', href: '/sh/catalog', icon: 'package' },
         { label: 'New Sale', href: '/sh/sales/new', icon: 'plus-circle' },
         { label: 'My Sales', href: '/sh/sales/history', icon: 'list' },
       ]
@@ -111,7 +125,8 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       ]
     },
     {
-      label: 'Sales', items: [
+      label: 'Sales & Marketing', items: [
+        { label: 'Product Catalog', href: '/hba/catalog', icon: 'package' },
         { label: 'New Sale', href: '/hba/sales/new', icon: 'plus-circle' },
         { label: 'My Sales', href: '/hba/sales/history', icon: 'list' },
       ]
@@ -136,7 +151,8 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       ]
     },
     {
-      label: 'Sales', items: [
+      label: 'Sales & Marketing', items: [
+        { label: 'Product Catalog', href: '/hcm/catalog', icon: 'package' },
         { label: 'New Sale', href: '/hcm/sales/new', icon: 'plus-circle' },
         { label: 'My Sales', href: '/hcm/sales/history', icon: 'list' },
       ]
@@ -155,7 +171,8 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
       ]
     },
     {
-      label: 'Sales', items: [
+      label: 'Sales & Marketing', items: [
+        { label: 'Product Catalog', href: '/hcc/catalog', icon: 'package' },
         { label: 'New Sale', href: '/hcc/sales/new', icon: 'plus-circle' },
         { label: 'My Sales', href: '/hcc/sales/history', icon: 'list' },
       ]
@@ -291,7 +308,9 @@ function getIcon(name: string, color: string = 'currentColor'): React.ReactNode 
     tag: <svg {...s}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>,
     clipboard: <svg {...s}><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>,
     'users-cog': <svg {...s}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><circle cx="19" cy="11" r="2"></circle><path d="M23 11h-2M19 9V7M17.5 9.5l1-1M17.5 12.5l1 1M21 13v-2M22.5 9.5l-1-1M22.5 12.5l-1 1"></path></svg>,
-    map: <svg {...s}><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+    map: <svg {...s}><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>,
+    /* Issue #15: Added message-circle icon for Complaint Management nav item */
+    'message-circle': <svg {...s}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
   };
   return icons[name] || icons.grid;
 }

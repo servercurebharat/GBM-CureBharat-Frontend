@@ -6,6 +6,7 @@ import Topbar from './Topbar';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROLE_COLORS } from '@/lib/constants';
+import { usersAPI } from '@/lib/api';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -31,6 +32,20 @@ export default function DashboardLayout({
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  // Heartbeat for time tracking
+  useEffect(() => {
+    if (!user) return;
+
+    // Send first heartbeat immediately
+    usersAPI.trackHeartbeat().catch(() => {});
+
+    const interval = setInterval(() => {
+      usersAPI.trackHeartbeat().catch(() => {});
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   if (loading) {
     return (

@@ -244,7 +244,7 @@ export default function AdminManualAdjustmentsPage() {
               </div>
               
               <div className="p-8 text-center bg-white/[0.01]">
-                 <button className="text-[10px] font-black text-[#60A5FA] uppercase tracking-widest hover:underline">View Full Audit Trail</button>
+                 <button className="text-[10px] font-black text-[#60A5FA] uppercase tracking-widest hover:underline">View Full Activity Logs</button>
               </div>
            </div>
         </div>

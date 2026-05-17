@@ -28,6 +28,7 @@ export default function TeamSection({ user }: { user: IUser }) {
   const [loadingChildren, setLoadingChildren] = useState<Record<string, boolean>>({});
   const [isAllExpanded, setIsAllExpanded] = useState(false);
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<'role' | null>(null);
 
   const fetchStats = async () => {
     try {
@@ -171,11 +172,11 @@ export default function TeamSection({ user }: { user: IUser }) {
                        <td className="px-8 py-4 text-center">
                            <button 
                                 onClick={() => toggleNodeExpand(child)}
-                                className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
-                                  child.isExpanded 
-                                  ? 'bg-blue-600/10 text-blue-400 border border-blue-400/20' 
-                                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-                                }`}
+                                 className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
+                                   child.isExpanded 
+                                   ? 'bg-blue-600/10 text-blue-400 border border-blue-400/20' 
+                                   : 'bg-white/5 text-slate-400 hover:text-blue-400 hover:bg-blue-600/10 hover:border hover:border-blue-400/20 border border-transparent'
+                                 }`}
                              >
                                 {loadingChildren[child._id as string] ? 'Loading...' : child.isExpanded ? 'Hide' : `View Downline`}
                                 <svg className={`transition-transform duration-300 ${child.isExpanded ? 'rotate-180' : ''}`} width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
@@ -327,12 +328,29 @@ export default function TeamSection({ user }: { user: IUser }) {
                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             </div>
          </div>
-         {['Role'].map((filter) => (
-           <div key={filter} className="bg-[#131241] border border-white/5 rounded-2xl px-6 py-4 flex items-center gap-3 cursor-pointer hover:bg-white/[0.02] transition-all group">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{filter}: <span className="text-white">All</span></span>
-              <svg className="text-slate-600 group-hover:text-white transition-colors" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
+         <div className="relative">
+           <div 
+             onClick={() => setActiveDropdown(activeDropdown === 'role' ? null : 'role')}
+             className="bg-[#131241] border border-white/5 rounded-2xl px-6 py-4 flex items-center gap-3 cursor-pointer hover:bg-blue-600/10 hover:border-blue-500/30 transition-all group"
+           >
+              <span className="text-[10px] font-black text-slate-500 group-hover:text-blue-400 uppercase tracking-widest transition-colors">Role: <span className="text-white">{roleFilter}</span></span>
+               <svg className={`text-slate-600 group-hover:text-blue-400 transition-all ${activeDropdown === 'role' ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
            </div>
-         ))}
+
+           {activeDropdown === 'role' && (
+             <div className="absolute top-full mt-2 left-0 w-48 bg-[#131241] rounded-2xl shadow-2xl border border-white/10 z-50 overflow-hidden animate-fade-in">
+                {['All', 'SH', 'HBA', 'HCM', 'HCC'].map((r) => (
+                  <div 
+                    key={r}
+                    onClick={() => { setRoleFilter(r); setActiveDropdown(null); }}
+                    className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-blue-600/10 hover:text-blue-400 cursor-pointer transition-colors"
+                  >
+                    {r === 'All' ? 'All Roles' : r}
+                  </div>
+                ))}
+             </div>
+           )}
+         </div>
          <div className="flex bg-[#131241] p-1 rounded-2xl border border-white/5 ml-auto">
             <button 
               onClick={expandAll} 
@@ -420,10 +438,10 @@ export default function TeamSection({ user }: { user: IUser }) {
                                 <button 
                                   onClick={() => toggleNodeExpand(m)}
                                   className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
-                                    m.isExpanded 
-                                    ? 'bg-blue-600/10 text-blue-400 border border-blue-400/20' 
-                                    : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
-                                  }`}
+                                     m.isExpanded 
+                                     ? 'bg-blue-600/10 text-blue-400 border border-blue-400/20' 
+                                     : 'bg-white/5 text-slate-400 hover:text-blue-400 hover:bg-blue-600/10 hover:border hover:border-blue-400/20 border border-transparent'
+                                   }`}
                                 >
                                    {loadingChildren[m._id as string] ? 'Loading...' : m.isExpanded ? 'Hide Hierarchy' : `View ${getNextRole(m.role)}s`}
                                    <svg className={`transition-transform duration-300 ${m.isExpanded ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>

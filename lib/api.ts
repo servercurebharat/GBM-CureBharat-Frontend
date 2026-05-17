@@ -35,8 +35,8 @@ api.interceptors.response.use(
 
 // AUTH
 export const authAPI = {
-  login: (mobile: string, password: string, location?: { lat: number; lng: number }) =>
-    api.post<ApiResponse<IUser>>('/auth/login', { mobile, password, location }),
+  login: (mobile: string, password: string, location?: { lat: number; lng: number }, otp?: string) =>
+    api.post<ApiResponse<IUser>>('/auth/login', { mobile, password, location, otp }),
   register: (data: RegisterData) =>
     api.post('/auth/register', data),
   getMe: () =>
@@ -67,10 +67,16 @@ export const usersAPI = {
     api.get<ApiResponse<IUser>>(`/users/${id}`),
   updateKYC: (id: string, data: any) =>
     api.put<ApiResponse<any>>(`/users/${id}/kyc`, data),
-  updateProfile: (id: string, data: { name?: string; email?: string; mobile?: string }) =>
+  updateProfile: (id: string, data: { name?: string; email?: string; mobile?: string; bankDetails?: any; nomineeDetails?: any }) =>
     api.put<ApiResponse<IUser>>(`/users/${id}/profile`, data),
   getDownline: (id: string) =>
     api.get<ApiResponse<ITreeNode>>(`/users/${id}/downline`),
+  trackHeartbeat: () =>
+    api.post('/users/heartbeat'),
+  requestBankUpdateOTP: (data: { bankName: string; accountNumber: string; ifscCode: string }) =>
+    api.post<ApiResponse<any>>('/users/bank-update/request', data),
+  verifyBankUpdateOTP: (data: { bankName: string; accountNumber: string; ifscCode: string; otp: string }) =>
+    api.post<ApiResponse<any>>('/users/bank-update/verify', data),
 };
 
 // SALES
@@ -107,6 +113,8 @@ export const notificationAPI = {
     api.put(`/notifications/${id}/read`),
   markAllAsRead: () =>
     api.put('/notifications/read-all'),
+  clearAll: () =>
+    api.delete('/notifications/clear'),
 };
 
 // ACTIVITY LOGS
@@ -143,8 +151,12 @@ export const plansAPI = {
 export const adminAPI = {
   getPendingKYC: () =>
     api.get<ApiResponse<IUser[]>>('/admin/kyc/pending'),
+  getPendingBankUpdates: () =>
+    api.get<ApiResponse<IUser[]>>('/admin/bank-updates/pending'),
   updateKYCStatus: (id: string, status: 'approved' | 'rejected') =>
     api.put<ApiResponse<any>>(`/admin/kyc/${id}/status`, { status }),
+  verifyBankDetails: (id: string, status: 'verified' | 'rejected') =>
+    api.put<ApiResponse<any>>(`/admin/users/${id}/bank-verify`, { status }),
   updateUserStatus: (id: string, status: string) =>
     api.put<ApiResponse<any>>(`/admin/users/${id}/status`, { status }),
   getCommissionConfig: () =>
@@ -165,6 +177,8 @@ export const adminAPI = {
     api.get<PaginatedResponse<any>>('/wallet/global-ledger', { params: { ...params, type: 'manual' } }),
   getStatePerformance: () =>
     api.get<ApiResponse<any[]>>('/admin/state-performance'),
+  sendAnnouncement: (data: { userIds?: string[], title: string, message: string, type: string, sendToAll?: boolean }) =>
+    api.post<ApiResponse<any>>('/admin/announcements', data),
 };
 
 // TEAM

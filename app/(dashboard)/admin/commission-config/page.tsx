@@ -209,13 +209,18 @@ function ConfigInput({ label, value, onChange, description }: { label: string, v
     <div className="space-y-4">
       <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] pl-1">{label}</label>
       <div className="relative group">
-        <input 
+        {/* Issue #5/#6 fix: hide native number spinners, add right padding to avoid overlap */}
+        <input
           type="number"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 text-sm font-black text-white outline-none focus:border-[#10b981]/50 focus:bg-white/[0.05] transition-all tabular-nums"
+          min="0"
+          max="100"
+          step="0.01"
+          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 pr-20 text-sm font-black text-white outline-none focus:border-[#10b981]/50 focus:bg-white/[0.05] transition-all tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/10 group-focus-within:text-[#10b981] transition-colors tracking-widest">
+        {/* Badge floats clear of the input value */}
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black text-white/20 group-focus-within:text-[#10b981] transition-colors tracking-widest pointer-events-none bg-white/5 px-2 py-1 rounded-lg border border-white/5">
           VAL
         </div>
       </div>

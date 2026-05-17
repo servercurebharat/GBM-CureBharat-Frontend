@@ -11,10 +11,17 @@ export default function HcmRankProgressPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authAPI.getMe().then(res => {
-      if (res.data.success && res.data.data) setUser(res.data.data);
-      setLoading(false);
-    });
+    const init = async () => {
+      try {
+        const res = await authAPI.getMe();
+        if (res.data.success && res.data.data) setUser(res.data.data);
+      } catch (err) {
+        console.error('Profile fetch failed:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
   }, []);
 
   // HCM → HBA promotion criteria

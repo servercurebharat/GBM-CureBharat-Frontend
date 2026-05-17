@@ -10,6 +10,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // OTP States
+  const [requiresOTP, setRequiresOTP] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
+
   const { login, logout, user, loading: authLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,6 +23,7 @@ export default function LoginPage() {
     setError('');
     if (mobile.length < 10) { setError('Enter a valid 10-digit mobile number'); return; }
     if (password.length < 4) { setError('Enter your password'); return; }
+    if (requiresOTP && otp.length < 6) { setError('Enter the 6-digit verification code'); return; }
     setLoading(true);
 
     let locationData: any = null;
@@ -37,9 +44,13 @@ export default function LoginPage() {
     }
 
     try {
-      await login(mobile, password, locationData);
+      const res = await login(mobile, password, locationData, requiresOTP ? otp : undefined);
+      if (res && res.requiresOTP) {
+        setRequiresOTP(true);
+        setMaskedEmail(res.email || '');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -335,77 +346,112 @@ export default function LoginPage() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
 
-              {/* Mobile Field */}
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Mobile Number
-                </label>
-                <div className="relative flex items-center">
-                  <div className="absolute left-0 w-16 flex items-center justify-center h-full"
-                    style={{ borderRight: '1px solid rgba(255,255,255,0.15)' }}>
-                    <span className="text-sm font-black" style={{ color: '#49D2B5' }}>+91</span>
-                  </div>
-                  <input
-                    type="tel"
-                    maxLength={10}
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                    placeholder="98765 43210"
-                    className="input-field"
-                    style={{ paddingLeft: '72px', paddingRight: mobile.length === 10 ? '48px' : '20px' }}
-                  />
-                  {mobile.length === 10 && (
-                    <div className="absolute right-4 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ background: '#49D2B5' }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
+              {!requiresOTP ? (
+                <>
+                  {/* Mobile Field */}
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      Mobile Number
+                    </label>
+                    <div className="relative flex items-center">
+                      <div className="absolute left-0 w-16 flex items-center justify-center h-full"
+                        style={{ borderRight: '1px solid rgba(255,255,255,0.15)' }}>
+                        <span className="text-sm font-black" style={{ color: '#49D2B5' }}>+91</span>
+                      </div>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={mobile}
+                        onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                        placeholder="98765 43210"
+                        className="input-field"
+                        style={{ paddingLeft: '72px', paddingRight: mobile.length === 10 ? '48px' : '20px' }}
+                      />
+                      {mobile.length === 10 && (
+                        <div className="absolute right-4 w-6 h-6 rounded-full flex items-center justify-center"
+                          style={{ background: '#49D2B5' }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              {/* Password Field */}
-              <div>
-                <div className="flex justify-between items-center mb-2.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    Password
-                  </label>
-                  <a href="#" className="text-[10px] font-bold transition-colors" style={{ color: '#49D2B5' }}>
-                    Forgot?
-                  </a>
+                  {/* Password Field */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2.5">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        Password
+                      </label>
+                      <a href="#" className="text-[10px] font-bold transition-colors" style={{ color: '#49D2B5' }}>
+                        Forgot?
+                      </a>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="input-field"
+                        style={{ paddingRight: '52px' }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 transition-opacity hover:opacity-100"
+                        style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        {showPassword ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                            <line x1="1" y1="1" x2="23" y2="23" />
+                          </svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* OTP Verification Field */
+                <div>
+                  <div className="flex justify-between items-center mb-2.5">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      Enter Verification Code (OTP)
+                    </label>
+                    <button 
+                      type="button" 
+                      onClick={() => { setRequiresOTP(false); setOtp(''); }} 
+                      className="text-[10px] font-bold transition-colors" 
+                      style={{ color: '#49D2B5' }}
+                    >
+                      Change Account
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      placeholder="Enter 6-digit OTP"
+                      className="input-field text-center font-black tracking-[0.25em]"
+                      style={{ fontSize: '18px' }}
+                    />
+                  </div>
+                  <p className="text-[10px] font-medium text-slate-400 mt-3 text-center uppercase tracking-wider">
+                    Sent to registered email: <span className="font-bold text-white">{maskedEmail}</span>
+                  </p>
                 </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="input-field"
-                    style={{ paddingRight: '52px' }}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 transition-opacity hover:opacity-100"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    {showPassword ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                      </svg>
-                    ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || mobile.length < 10 || password.length < 4}
+                disabled={loading || mobile.length < 10 || password.length < 4 || (requiresOTP && otp.length < 6)}
                 className="w-full relative py-4 rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] overflow-hidden transition-all duration-300 mt-2 group disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98]"
                 style={{
                   background: 'linear-gradient(135deg, #49D2B5 0%, #1e1b6e 60%, #131241 100%)',
@@ -420,11 +466,13 @@ export default function LoginPage() {
                   {loading ? (
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
-                      <span className="text-[11px] font-black animate-pulse uppercase tracking-widest">Securing Location...</span>
+                      <span className="text-[11px] font-black animate-pulse uppercase tracking-widest">
+                        {requiresOTP ? 'Verifying OTP...' : 'Securing Location...'}
+                      </span>
                     </div>
                   ) : (
                     <>
-                      <span>Access Dashboard</span>
+                      <span>{requiresOTP ? 'Verify & Access' : 'Access Dashboard'}</span>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                         className="group-hover:translate-x-1 transition-transform">
                         <path d="M5 12h14M12 5l7 7-7 7" />

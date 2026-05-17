@@ -168,7 +168,15 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
            <div className="flex justify-between items-end">
               <div>
                  <h4 className="text-3xl font-black text-white">{formatCurrency(data?.finalBalance || 0)}</h4>
-                 <p className="text-[10px] font-bold text-slate-500 mt-2">Provisional: {formatCurrency(data?.provisionalBalance || 0)}</p>
+                  <div className="flex items-center gap-1.5 mt-2">
+                     <p className="text-[10px] font-bold text-slate-500">Provisional: {formatCurrency(data?.provisionalBalance || 0)}</p>
+                     <div className="group relative">
+                        <svg className="text-slate-500 hover:text-slate-300 cursor-help transition-colors" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-[#131241] border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 text-[9px] font-medium text-slate-300 leading-normal text-left">
+                           Commissions remain provisional during the active cycle. Settled and moved to Available Balance on the 5th of every month.
+                        </div>
+                     </div>
+                  </div>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-blue-400">
                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>
@@ -342,13 +350,24 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
                       type="number"
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all shadow-inner"
-                      placeholder="Enter amount"
+                      disabled={(data?.finalBalance || 0) <= 0}
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all shadow-inner disabled:opacity-50"
+                      placeholder={(data?.finalBalance || 0) <= 0 ? "No withdrawable balance" : "Enter amount"}
                     />
                     <div className="flex justify-between items-center px-1">
                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Final Balance: {formatCurrency(data?.finalBalance || 0)}</span>
                     </div>
                  </div>
+
+                 {(data?.finalBalance || 0) <= 0 && (
+                    <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5 text-amber-400">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      <p className="text-[9px] font-semibold leading-relaxed text-slate-300">
+                        <strong className="text-amber-400 block mb-0.5 uppercase font-black tracking-wider">Settlement Cycle Pending</strong>
+                        Your commissions are currently <span className="text-white font-black">Provisional</span>. The next settlement cycle runs on the <span className="text-amber-400 font-black">5th of the month</span>, transferring them to your withdrawable Final Balance.
+                      </p>
+                    </div>
+                 )}
 
                  {withdrawAmount && (
                    <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
@@ -373,7 +392,8 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
                     </button>
                     <button 
                       type="submit"
-                      className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-500 transition-all"
+                      disabled={(data?.finalBalance || 0) <= 0}
+                      className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-500 transition-all disabled:opacity-30 disabled:hover:bg-blue-600"
                     >
                        Confirm
                     </button>
