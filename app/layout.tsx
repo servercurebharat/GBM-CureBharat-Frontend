@@ -14,6 +14,9 @@ const questrial = Questrial({
 export const metadata: Metadata = {
   title: 'CureBharat MLM Platform',
   description: 'Premium wellness insurance MLM management system',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

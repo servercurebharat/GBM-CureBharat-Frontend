@@ -47,7 +47,16 @@ export default function LoginPage() {
       const res = await login(mobile, password, locationData, requiresOTP ? otp : undefined);
       if (res && res.requiresOTP) {
         setRequiresOTP(true);
-        setMaskedEmail(res.email || '');
+        const emailStr = res.email || '';
+        const [name, domain] = emailStr.split('@');
+        let masked = emailStr;
+        if (name && domain) {
+          const maskedName = name.length > 2 
+            ? name.substring(0, 2) + '*'.repeat(Math.max(name.length - 3, 3)) + name.charAt(name.length - 1)
+            : name.charAt(0) + '*';
+          masked = `${maskedName}@${domain}`;
+        }
+        setMaskedEmail(masked);
       }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Invalid credentials. Please try again.');
