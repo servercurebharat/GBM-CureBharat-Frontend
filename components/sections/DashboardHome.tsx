@@ -42,6 +42,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
 
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [selectedRecruitRole, setSelectedRecruitRole] = useState<string>('');
   const [referralType, setReferralType] = useState<'sales' | 'recruiter'>('sales');
 
   const searchParams = useSearchParams();
@@ -137,6 +138,29 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       case 'hcc': return 'Consultant';
       default: return role;
     }
+  };
+
+  const getRecruitRoles = () => {
+    const role = user.role?.toLowerCase();
+    if (role === 'admin') return [
+      { id: 'sh', label: 'State Head (SH)' },
+      { id: 'hcb', label: 'HCB' },
+      { id: 'hcm', label: 'HCM' },
+      { id: 'hcc', label: 'HCC' }
+    ];
+    if (role === 'sh') return [
+      { id: 'hcb', label: 'HCB' },
+      { id: 'hcc', label: 'HCC' }
+    ];
+    if (role === 'hcb' || role === 'hba') return [
+      { id: 'hcm', label: 'HCM' },
+      { id: 'hcc', label: 'HCC' }
+    ];
+    if (role === 'hcm') return [
+      { id: 'hcm', label: 'HCM' },
+      { id: 'hcc', label: 'HCC' }
+    ];
+    return [{ id: 'hcc', label: 'HCC' }];
   };
 
   const handleExport = () => {
@@ -459,6 +483,26 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                       </div>
                    )}
 
+                   {referralType === 'recruiter' && (
+                      <div className="w-full lg:w-auto relative min-w-[260px]">
+                         <select
+                            value={selectedRecruitRole}
+                            onChange={(e) => setSelectedRecruitRole(e.target.value)}
+                            className="w-full bg-black/40 border border-white/5 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:border-[#49D2B5]/40 transition-all shadow-inner pr-10"
+                         >
+                            <option value="" className="bg-[#131241]">Generic Recruiter Link</option>
+                            {getRecruitRoles().map(r => (
+                               <option key={r.id} value={r.id} className="bg-[#131241]">
+                                  Recruit {r.label}
+                               </option>
+                            ))}
+                         </select>
+                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9"/></svg>
+                         </div>
+                      </div>
+                   )}
+
                    <div className="flex-1 w-full flex flex-col sm:flex-row items-center gap-3">
                       <div className="flex-1 w-full px-6 py-4 bg-black/40 rounded-xl border border-white/5 flex items-center overflow-hidden">
                          <code className="text-[#49D2B5] font-bold text-xs truncate flex-1">
@@ -466,7 +510,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                ? (selectedPlanId 
                                     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/buy/${user.memberId}?planId=${selectedPlanId}`
                                     : `${typeof window !== 'undefined' ? window.location.origin : ''}/buy/${user.memberId}`)
-                               : `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.memberId}`
+                               : (selectedRecruitRole
+                                    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.memberId}&role=${selectedRecruitRole}`
+                                    : `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.memberId}`)
                             }
                          </code>
                          <button
@@ -475,7 +521,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                  ? (selectedPlanId
                                       ? `${window.location.origin}/buy/${user.memberId}?planId=${selectedPlanId}`
                                       : `${window.location.origin}/buy/${user.memberId}`)
-                                 : `${window.location.origin}/register?ref=${user.memberId}`;
+                                 : (selectedRecruitRole
+                                      ? `${window.location.origin}/register?ref=${user.memberId}&role=${selectedRecruitRole}`
+                                      : `${window.location.origin}/register?ref=${user.memberId}`);
                               try {
                                  await navigator.clipboard.writeText(activeLink);
                                  toast.success('Referral link copied!');
@@ -495,7 +543,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                                ? (selectedPlanId
                                     ? `${window.location.origin}/buy/${user.memberId}?planId=${selectedPlanId}`
                                     : `${window.location.origin}/buy/${user.memberId}`)
-                               : `${window.location.origin}/register?ref=${user.memberId}`;
+                               : (selectedRecruitRole
+                                    ? `${window.location.origin}/register?ref=${user.memberId}&role=${selectedRecruitRole}`
+                                    : `${window.location.origin}/register?ref=${user.memberId}`);
                             const shareText = referralType === 'sales'
                                ? `🌟 Preventative healthcare plans & 10,000+ network hospitals with CureBharat Wellness!\n\nBuy wellness plan now 👇\n${activeLink}`
                                : `🌟 Join CureBharat Wellness as a Partner! Build your own downline network and unlock real-time overrides and commissions.\n\nRegister now under me 👇\n${activeLink}`;

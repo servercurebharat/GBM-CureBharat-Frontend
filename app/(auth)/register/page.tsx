@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authAPI } from '@/lib/api';
 import { IUser } from '@/types';
+import Image from 'next/image';
 
 function RegisterForm() {
   const router = useRouter();
@@ -13,6 +14,7 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [initializing, setInitializing] = useState(true);
+  const [isReferrerDisabled, setIsReferrerDisabled] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -57,6 +59,11 @@ function RegisterForm() {
     const ref = searchParams.get('ref');
     if (ref) {
       setFormData(prev => ({ ...prev, referrerId: ref.toUpperCase() }));
+      setIsReferrerDisabled(true);
+    }
+    const roleParam = searchParams.get('role');
+    if (roleParam) {
+      setFormData(prev => ({ ...prev, role: roleParam.toLowerCase() }));
     }
   }, [searchParams]);
 
@@ -92,7 +99,20 @@ function RegisterForm() {
   const states = ['Maharashtra', 'Delhi', 'Karnataka', 'Gujarat', 'Uttar Pradesh', 'West Bengal', 'Tamil Nadu', 'Rajasthan', 'Madhya Pradesh', 'Bihar'];
   
   const getAllowedRoles = () => {
-    if (!currentUser || !currentUser.role) return [{ id: 'hcc', label: 'HCC Member' }];
+    if (!currentUser || !currentUser.role) {
+      const rParam = searchParams.get('role')?.toLowerCase();
+      if (rParam) {
+        const labels: Record<string, string> = {
+          sh: 'State Head (SH)',
+          hba: 'HCB',
+          hcb: 'HCB',
+          hcm: 'HCM',
+          hcc: 'HCC'
+        };
+        return [{ id: rParam, label: labels[rParam] || rParam.toUpperCase() }];
+      }
+      return [{ id: 'hcc', label: 'HCC Member' }];
+    }
     const role = currentUser.role.toLowerCase();
     
     // Admin can add ANY rank
@@ -135,45 +155,82 @@ function RegisterForm() {
   const allowedRoles = getAllowedRoles();
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden z-10" style={{ background: 'linear-gradient(135deg, #152347 0%, #1a2d55 40%, #112040 100%)' }}>
+      
+      {/* ── ANIMATED BACKGROUND ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Primary teal glow */}
+        <div className="absolute top-[-10%] left-[20%] w-[600px] h-[600px] rounded-full opacity-45 blur-[120px]"
+          style={{ background: 'radial-gradient(circle, #49D2B5, transparent 65%)' }} />
+        {/* Deep navy glow */}
+        <div className="absolute bottom-[-15%] right-[10%] w-[500px] h-[500px] rounded-full opacity-40 blur-[130px]"
+          style={{ background: 'radial-gradient(circle, #3b3fa0, #6366f1 50%, transparent 70%)' }} />
+        {/* Small accent glow */}
+        <div className="absolute top-[60%] left-[-5%] w-[300px] h-[300px] rounded-full opacity-30 blur-[100px]"
+          style={{ background: 'radial-gradient(circle, #49D2B5, transparent 70%)' }} />
 
-      <div className="w-full max-w-[550px] relative z-10">
-        <div className="text-center mb-8">
-          <div className="font-display text-3xl font-extrabold text-white tracking-tighter mb-1">
-            Cure<span className="text-blue-500">Bharat</span>
-          </div>
-          <div className="text-[10px] text-muted font-bold uppercase tracking-[0.3em] opacity-60">
-            {currentUser ? `ENROLLING AS ${currentUser.role.toUpperCase()}` : 'Membership Application'}
-          </div>
+        {/* Dot grid */}
+        <div className="absolute inset-0 opacity-[0.09]"
+          style={{ backgroundImage: 'radial-gradient(circle, #49D2B5 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      </div>
+
+      <div className="w-full max-w-[550px] relative z-10 my-10">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <Image src="/logo.png" alt="CureBharat" width={220} height={60} className="object-contain" priority />
         </div>
 
-        <div className="bg-[#111420]/80 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 md:p-10 shadow-2xl">
+        {/* Glassmorphism card container */}
+        <div className="rounded-[32px] p-8 md:p-10 relative overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.28)',
+            border: '1px solid rgba(255,255,255,0.42)',
+            backdropFilter: 'blur(36px)',
+            WebkitBackdropFilter: 'blur(36px)',
+            boxShadow: '0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.3)',
+          }}>
+
+          {/* Top accent line */}
+          <div className="absolute top-0 left-8 right-8 h-[2px] rounded-b-full"
+            style={{ background: 'linear-gradient(90deg, transparent, #49D2B5, #6366f1, transparent)' }} />
+
           {success ? (
-            <div className="text-center py-10 animate-in fade-in zoom-in duration-500">
+            <div className="text-center py-10">
               <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 text-4xl mx-auto mb-6">✓</div>
-              <h2 className="font-display text-2xl font-bold text-white mb-2">Registration Success!</h2>
-              <p className="text-sm text-muted font-medium mb-8">Member has been added to the hierarchy. Returning to dashboard...</p>
+              <h2 className="font-display text-2xl font-black text-white mb-2">Registration Success!</h2>
+              <p className="text-sm text-slate-300 font-medium mb-8">Member has been added to the hierarchy. Returning to dashboard...</p>
             </div>
           ) : (
             <>
               <div className="mb-8">
-                <h2 className="font-display text-2xl font-bold text-white mb-2">
-                  {currentUser ? 'Enroll New Member' : 'Create Account'}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4"
+                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.18)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#49D2B5' }} />
+                  <span className="text-[9px] font-black uppercase tracking-[0.25em]" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    {currentUser ? `ENROLLING AS ${currentUser.role.toUpperCase()}` : 'Membership Application'}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
+                  {currentUser ? 'Enroll Member' : 'Create Account'}
                 </h2>
-                <p className="text-sm text-muted font-medium">Join the CureBharat Network</p>
+                <p className="text-sm mt-1.5 font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  Join the CureBharat Wellness network
+                </p>
               </div>
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-[11px] font-bold px-4 py-3 rounded-2xl mb-8">
-                  ⚠️ {error}
+                <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl mb-6 relative z-10"
+                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5">
+                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <p className="text-[12px] font-bold text-red-400">{error}</p>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                   <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Select Member Rank</label>
+                <div className="space-y-2.5">
+                   <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>Select Member Rank</label>
                    <div className="grid grid-cols-2 gap-3">
                       {allowedRoles.map(role => (
                         <button
@@ -182,9 +239,13 @@ function RegisterForm() {
                           onClick={() => setFormData({...formData, role: role.id})}
                           className={`py-4 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${
                             formData.role === role.id 
-                            ? 'bg-blue-500 border-blue-400 text-[#0d0f14] shadow-lg' 
-                            : 'bg-white/5 border-white/10 text-white/40'
+                            ? 'border-[#49D2B5] text-white shadow-lg' 
+                            : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10'
                           }`}
+                          style={formData.role === role.id ? {
+                            background: 'linear-gradient(135deg, #49D2B5 0%, #1e1b6e 60%)',
+                            boxShadow: '0 4px 15px -3px rgba(73,210,181,0.3)',
+                          } : {}}
                         >
                           {role.label}
                         </button>
@@ -192,73 +253,87 @@ function RegisterForm() {
                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Full Name</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>Full Name</label>
                     <input
                       required
                       type="text"
+                      placeholder="John Doe"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/20 border border-white/30 rounded-2xl px-5 py-4 text-sm font-semibold text-white outline-none placeholder-white/50 focus:border-[#49D2B5] focus:bg-white/25 focus:ring-4 focus:ring-[#49D2B5]/20 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Mobile Number</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>Mobile Number</label>
                     <input
                       required
                       type="tel"
                       maxLength={10}
+                      placeholder="98765 43210"
                       value={formData.mobile}
                       onChange={(e) => setFormData({...formData, mobile: e.target.value.replace(/\D/g, '')})}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/20 border border-white/30 rounded-2xl px-5 py-4 text-sm font-semibold text-white outline-none placeholder-white/50 focus:border-[#49D2B5] focus:bg-white/25 focus:ring-4 focus:ring-[#49D2B5]/20 transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Email Address</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>Email Address</label>
                     <input
                       required
                       type="email"
+                      placeholder="john@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/20 border border-white/30 rounded-2xl px-5 py-4 text-sm font-semibold text-white outline-none placeholder-white/50 focus:border-[#49D2B5] focus:bg-white/25 focus:ring-4 focus:ring-[#49D2B5]/20 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Referrer ID</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>Referrer ID</label>
                     <input
                       type="text"
+                      disabled={isReferrerDisabled}
+                      placeholder="CB-ADMIN-0001"
                       value={formData.referrerId}
                       onChange={(e) => setFormData({...formData, referrerId: e.target.value.toUpperCase()})}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-blue-400 outline-none focus:border-blue-500/50 uppercase"
+                      className={`w-full bg-white/20 border border-white/30 rounded-2xl px-5 py-4 text-sm font-bold text-[#49D2B5] outline-none placeholder-[#49D2B5]/40 focus:border-[#49D2B5] focus:bg-white/25 focus:ring-4 focus:ring-[#49D2B5]/20 transition-all uppercase ${
+                        isReferrerDisabled ? 'opacity-50 cursor-not-allowed select-none' : ''
+                      }`}
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">State</label>
-                    <select
-                      required
-                      value={formData.state}
-                      onChange={(e) => setFormData({...formData, state: e.target.value})}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50 appearance-none"
-                    >
-                      <option value="">Select State</option>
-                      {states.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>State</label>
+                    <div className="relative">
+                      <select
+                        required
+                        value={formData.state}
+                        onChange={(e) => setFormData({...formData, state: e.target.value})}
+                        className="w-full bg-white/20 border border-white/30 rounded-2xl px-5 py-4 text-sm font-semibold text-white outline-none focus:border-[#49D2B5] focus:bg-white/25 focus:ring-4 focus:ring-[#49D2B5]/20 transition-all appearance-none cursor-pointer"
+                        style={{ color: formData.state ? '#fff' : 'rgba(255,255,255,0.55)' }}
+                      >
+                        <option value="" className="bg-[#152347] text-white/50">Select State</option>
+                        {states.map(s => <option key={s} value={s} className="bg-[#152347] text-white font-semibold">{s}</option>)}
+                      </select>
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9"/></svg>
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Account Password</label>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.7)' }}>Account Password</label>
                     <input
                       required
                       type="password"
+                      placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50"
+                      className="w-full bg-white/20 border border-white/30 rounded-2xl px-5 py-4 text-sm font-semibold text-white outline-none placeholder-white/50 focus:border-[#49D2B5] focus:bg-white/25 focus:ring-4 focus:ring-[#49D2B5]/20 transition-all"
                     />
                   </div>
                 </div>
@@ -266,9 +341,19 @@ function RegisterForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-5 rounded-2xl bg-blue-500 text-[#0d0f14] font-black text-sm uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-20"
+                  className="w-full relative py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] overflow-hidden transition-all duration-300 group disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] mt-4"
+                  style={{
+                    background: 'linear-gradient(135deg, #49D2B5 0%, #1e1b6e 60%, #131241 100%)',
+                    boxShadow: '0 10px 30px -5px rgba(73,210,181,0.35), inset 0 1px 0 rgba(255,255,255,0.25)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                  }}
                 >
-                  {loading ? 'Processing...' : `Confirm Enrollment`}
+                  {/* Shimmer sweep */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }} />
+                  <span className="relative z-10 text-white">
+                    {loading ? 'Processing Enrollment...' : `Confirm Enrollment`}
+                  </span>
                 </button>
               </form>
             </>
