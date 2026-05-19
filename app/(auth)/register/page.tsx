@@ -104,12 +104,13 @@ function RegisterForm() {
       if (rParam) {
         const labels: Record<string, string> = {
           sh: 'State Head (SH)',
-          hba: 'HCB',
-          hcb: 'HCB',
+          hba: 'HBA',
+          hcb: 'HBA',
           hcm: 'HCM',
           hcc: 'HCC'
         };
-        return [{ id: rParam, label: labels[rParam] || rParam.toUpperCase() }];
+        const mappedParam = rParam === 'hcb' ? 'hba' : rParam;
+        return [{ id: mappedParam, label: labels[mappedParam] || mappedParam.toUpperCase() }];
       }
       return [{ id: 'hcc', label: 'HCC Member' }];
     }
@@ -118,19 +119,19 @@ function RegisterForm() {
     // Admin can add ANY rank
     if (role === 'admin') return [
       { id: 'sh', label: 'State Head (SH)' },
-      { id: 'hcb', label: 'HCB' },
+      { id: 'hba', label: 'HBA' },
       { id: 'hcm', label: 'HCM' },
       { id: 'hcc', label: 'HCC' }
     ];
     
-    // State Head adds HCB/HCC
+    // State Head adds HBA/HCC
     if (role === 'sh') return [
-      { id: 'hcb', label: 'HCB' },
+      { id: 'hba', label: 'HBA' },
       { id: 'hcc', label: 'HCC' }
     ];
     
-    // HCB adds HCM/HCC
-    if (role === 'hcb' || role === 'hba') return [
+    // HBA adds HCM/HCC
+    if (role === 'hba') return [
       { id: 'hcm', label: 'HCM' },
       { id: 'hcc', label: 'HCC' }
     ];

@@ -144,15 +144,15 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
     const role = user.role?.toLowerCase();
     if (role === 'admin') return [
       { id: 'sh', label: 'State Head (SH)' },
-      { id: 'hcb', label: 'HCB' },
+      { id: 'hba', label: 'HBA' },
       { id: 'hcm', label: 'HCM' },
       { id: 'hcc', label: 'HCC' }
     ];
     if (role === 'sh') return [
-      { id: 'hcb', label: 'HCB' },
+      { id: 'hba', label: 'HBA' },
       { id: 'hcc', label: 'HCC' }
     ];
-    if (role === 'hcb' || role === 'hba') return [
+    if (role === 'hba') return [
       { id: 'hcm', label: 'HCM' },
       { id: 'hcc', label: 'HCC' }
     ];

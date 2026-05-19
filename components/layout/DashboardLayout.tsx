@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/auth';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import ChatbotWidget from '../ChatbotWidget';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ROLE_COLORS } from '@/lib/constants';
@@ -90,6 +91,8 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
+
+      <ChatbotWidget />
     </div>
   );
 }

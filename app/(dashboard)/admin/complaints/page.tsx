@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import toast from 'react-hot-toast';
+import { complaintsAPI } from '@/lib/api';
 
 /* ─────────── Types ─────────── */
 type ComplaintStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -83,14 +84,59 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export default function AdminComplaintsPage() {
-  const [complaints, setComplaints] = useState<Complaint[]>(MOCK_COMPLAINTS);
-  const [selected, setSelected] = useState<Complaint | null>(complaints[0]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [selected, setSelected] = useState<Complaint | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | ComplaintStatus>('all');
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+
+  const fetchComplaints = async () => {
+    try {
+      const res = await complaintsAPI.getAll();
+      if (res.data.success && res.data.data) {
+        const fetched = res.data.data.map((c: any) => ({
+          id: c._id,
+          ticketId: c.ticketId,
+          subject: c.subject,
+          category: c.category,
+          priority: c.priority,
+          status: c.status,
+          submittedBy: c.submittedBy,
+          memberId: c.memberId,
+          createdAt: c.createdAt,
+          description: c.description,
+          replies: c.replies || [],
+          timeline: c.timeline || []
+        }));
+        setComplaints(fetched.length > 0 ? fetched : MOCK_COMPLAINTS);
+        if (fetched.length > 0) {
+          setSelected((prev) => {
+            if (prev) {
+              const matched = fetched.find((x: any) => x.id === prev.id);
+              return matched || fetched[0];
+            }
+            return fetched[0];
+          });
+        } else {
+          setSelected(MOCK_COMPLAINTS[0]);
+        }
+      } else {
+        setComplaints(MOCK_COMPLAINTS);
+        setSelected(MOCK_COMPLAINTS[0]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch complaints', err);
+      setComplaints(MOCK_COMPLAINTS);
+      setSelected(MOCK_COMPLAINTS[0]);
+    }
+  };
+
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
 
   /* Derived: filtered list */
   const filtered = complaints.filter((c) => {
@@ -99,32 +145,31 @@ export default function AdminComplaintsPage() {
     return matchSearch && matchStatus;
   });
 
-  const updateStatus = (id: string, status: ComplaintStatus) => {
-    setComplaints((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? { ...c, status, timeline: [...c.timeline, { time: new Date().toLocaleString('en-IN'), actor: 'Admin', note: `Status changed to ${status.replace('_', ' ')}`, type: 'status' }] }
-          : c
-      )
-    );
-    setSelected((prev) => prev?.id === id ? { ...prev, status, timeline: [...(prev?.timeline || []), { time: new Date().toLocaleString('en-IN'), actor: 'Admin', note: `Status changed to ${status.replace('_', ' ')}`, type: 'status' }] } : prev);
-    toast.success('Status updated');
+  const updateStatus = async (id: string, status: ComplaintStatus) => {
+    try {
+      const res = await complaintsAPI.updateStatus(id, status);
+      if (res.data.success) {
+        toast.success('Status updated');
+        await fetchComplaints();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update status');
+    }
   };
 
   const handleSendReply = async () => {
-    if (!replyText.trim() && pendingFiles.length === 0) { toast.error('Enter a message or attach a file'); return; }
+    if (!replyText.trim()) { toast.error('Enter a message'); return; }
     if (!selected) return;
     setSending(true);
     try {
-      const attachments: Attachment[] = pendingFiles.map((f) => ({ name: f.name, url: URL.createObjectURL(f), size: f.size }));
-      const newReply = { author: 'Admin', initials: 'AD', time: new Date().toLocaleString('en-IN'), message: replyText, attachments };
-      const updatedTimeline: TimelineEntry[] = [...selected.timeline, { time: new Date().toLocaleString('en-IN'), actor: 'Admin', note: 'Replied to complaint', type: 'reply' as const }];
-      const updatedComplaint = { ...selected, replies: [...selected.replies, newReply], timeline: updatedTimeline };
-      setComplaints((prev) => prev.map((c) => c.id === selected.id ? updatedComplaint : c));
-      setSelected(updatedComplaint);
-      setReplyText('');
-      setPendingFiles([]);
-      toast.success('Reply sent');
+      const res = await complaintsAPI.reply(selected.id, replyText);
+      if (res.data.success) {
+        toast.success('Reply sent');
+        setReplyText('');
+        await fetchComplaints();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to send reply');
     } finally {
       setSending(false);
     }

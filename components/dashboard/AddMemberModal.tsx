@@ -126,6 +126,11 @@ export default function AddMemberModal({ isOpen, onClose, currentUser, onSuccess
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">Email Address</label>
+                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40" placeholder="e.g. member@email.com" />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-muted uppercase tracking-widest ml-1">State</label>

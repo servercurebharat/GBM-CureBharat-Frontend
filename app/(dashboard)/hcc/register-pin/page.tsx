@@ -16,6 +16,7 @@ export default function RegisterWithPin() {
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
+    email: '',
     password: '',
     ePinCode: '',
     state: 'Maharashtra',
@@ -55,7 +56,7 @@ export default function RegisterWithPin() {
       const res = await authAPI.register(formData);
       if (res.data.success) {
         setSuccess(`Successfully registered ${formData.name}!`);
-        setFormData({ ...formData, name: '', mobile: '', password: '' });
+        setFormData({ ...formData, name: '', mobile: '', email: '', password: '' });
         // Refresh pins
         const pinRes = await epinsAPI.getMyPins();
         if (pinRes.data.data) setPins(pinRes.data.data.unused || []);
@@ -127,6 +128,18 @@ export default function RegisterWithPin() {
                   placeholder="9876543210" 
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Email Address</label>
+              <input 
+                type="email" 
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-[#60A5FA]" 
+                placeholder="member@email.com" 
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

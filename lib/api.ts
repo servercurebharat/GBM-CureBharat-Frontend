@@ -197,4 +197,18 @@ export const dashboardAPI = {
     api.get<ApiResponse<any>>('/dashboard/leaders', { params }),
 };
 
+// COMPLAINTS
+export const complaintsAPI = {
+  create: (data: { subject: string; category: string; priority: string; description: string }) =>
+    api.post<ApiResponse<any>>('/complaints', data),
+  getMy: () =>
+    api.get<ApiResponse<any[]>>('/complaints/my'),
+  getAll: () =>
+    api.get<ApiResponse<any[]>>('/complaints/all'),
+  updateStatus: (id: string, status: string) =>
+    api.put<ApiResponse<any>>(`/complaints/${id}/status`, { status }),
+  reply: (id: string, message: string) =>
+    api.post<ApiResponse<any>>(`/complaints/${id}/reply`, { message }),
+};
+
 export default api;
