@@ -55,7 +55,7 @@ export default function IndividualKYCReview() {
     return (
       <DashboardLayout pageTitle="Review KYC">
         <div className="flex items-center justify-center h-[60vh]">
-          <div className="w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-[#10b981] border-t-transparent rounded-full animate-spin" />
         </div>
       </DashboardLayout>
     );
@@ -64,9 +64,9 @@ export default function IndividualKYCReview() {
   if (!user) {
     return (
       <DashboardLayout pageTitle="Review KYC">
-        <div className="text-center py-20">
-          <h2 className="text-xl font-bold text-slate-800">User Not Found</h2>
-          <button onClick={() => router.back()} className="mt-4 text-blue-500 font-bold underline">Go Back</button>
+        <div className="text-center py-20 bg-[#131241] rounded-[2rem] border border-white/[0.03] max-w-lg mx-auto">
+          <h2 className="text-lg font-bold text-white uppercase tracking-widest mb-4">User Not Found</h2>
+          <button onClick={() => router.back()} className="text-xs font-black text-[#10b981] uppercase tracking-widest underline">Go Back</button>
         </div>
       </DashboardLayout>
     );
@@ -74,52 +74,73 @@ export default function IndividualKYCReview() {
 
   return (
     <DashboardLayout pageTitle={`Review - ${user.name}`}>
-      <div className="max-w-5xl mx-auto space-y-8 pb-20">
+      <div className="max-w-5xl mx-auto space-y-6 pb-20">
         <div className="flex items-center justify-between">
-           <button onClick={() => router.back()} className="text-xs font-bold text-slate-500 uppercase tracking-widest hover:text-slate-800">
+           <button onClick={() => router.back()} className="text-[9px] font-black text-white/40 uppercase tracking-widest hover:text-[#10b981] transition-colors">
              ← Back to KYC List
            </button>
-           <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-             user.kycStatus === 'approved' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+           <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+             user.kycStatus === 'approved' ? 'bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/20' : 'bg-[#fbbf24]/10 text-[#fbbf24] border border-[#fbbf24]/20'
            }`}>{user.kycStatus}</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+           {/* Left Section: Details */}
            <div className="lg:col-span-7 space-y-6">
-              <div className="bg-white rounded-[2rem] p-10 shadow-sm border border-slate-100">
-                 <div className="flex items-center gap-6 mb-10">
-                    <div className="w-20 h-20 rounded-3xl bg-slate-100 flex items-center justify-center text-3xl font-bold text-slate-400">{user.name[0]}</div>
+              {/* Member Card */}
+              <div className="bg-[#131241] rounded-[2rem] p-8 shadow-xl border border-white/[0.03]">
+                 <div className="flex items-center gap-6 mb-8">
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl font-black text-[#10b981]">
+                      {user.name[0]}
+                    </div>
                     <div>
-                       <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{user.name}</h1>
-                       <p className="text-slate-500 font-medium">{user.memberId} · {user.role.toUpperCase()}</p>
+                       <h1 className="text-2xl font-bold text-white font-display tracking-tight leading-none mb-2">{user.name}</h1>
+                       <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{user.memberId} · {user.role.toUpperCase()}</p>
                     </div>
                  </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <InfoBlock label="Mobile" value={user.mobile} />
-                    <InfoBlock label="State" value={user.state || 'N/A'} />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-white/5 pt-6">
+                    <InfoBlock label="Mobile Number" value={user.mobile} />
+                    <InfoBlock label="State / Region" value={user.state || 'N/A'} />
                  </div>
               </div>
 
-              <div className="bg-white rounded-[2rem] p-10 shadow-sm border border-slate-100">
-                 <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-8">Verification Documents & Live Capture</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Document Review Bundle */}
+              <div className="bg-[#131241] rounded-[2rem] p-8 shadow-xl border border-white/[0.03]">
+                 <h3 className="text-xs font-black text-white/40 uppercase tracking-widest mb-6">Verification Documents & Live Capture</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                       <DocCard title="Live Verification Selfie" val="Captured Face" url={user.kycDocuments?.selfieUrl} onPreview={setSelectedImage} />
+                       <DocCard title="Live Verification Selfie" val="Captured Face Identity" url={user.kycDocuments?.selfieUrl} onPreview={setSelectedImage} />
                     </div>
-                    <DocCard title="Aadhaar Front" val={user.kycDocuments?.aadhaarNumber || '---'} url={user.kycDocuments?.aadhaarFrontUrl} onPreview={setSelectedImage} />
-                    <DocCard title="Aadhaar Back" val={user.kycDocuments?.aadhaarNumber || '---'} url={user.kycDocuments?.aadhaarBackUrl} onPreview={setSelectedImage} />
-                    <DocCard title="PAN Card" val={user.kycDocuments?.panNumber || '---'} url={user.kycDocuments?.panUrl} onPreview={setSelectedImage} />
-                    <DocCard title="Bank Proof" val={user.kycDocuments?.bankName || '---'} url={user.kycDocuments?.bankProofUrl} onPreview={setSelectedImage} />
+                    <DocCard title="Aadhaar Front" val={user.kycDocuments?.aadhaarNumber || 'Not Uploaded'} url={user.kycDocuments?.aadhaarFrontUrl} onPreview={setSelectedImage} />
+                    <DocCard title="Aadhaar Back" val={user.kycDocuments?.aadhaarNumber || 'Not Uploaded'} url={user.kycDocuments?.aadhaarBackUrl} onPreview={setSelectedImage} />
+                    <DocCard title="PAN Card" val={user.kycDocuments?.panNumber || 'Not Uploaded'} url={user.kycDocuments?.panUrl} onPreview={setSelectedImage} />
+                    <DocCard title="Bank Proof (Passbook/Cheque)" val={user.kycDocuments?.bankName || 'Not Uploaded'} url={user.kycDocuments?.bankProofUrl} onPreview={setSelectedImage} />
                  </div>
               </div>
            </div>
 
+           {/* Right Section: Decision Actions */}
            <div className="lg:col-span-5 space-y-6">
-              <div className="bg-slate-900 rounded-[2rem] p-10 text-white shadow-2xl">
-                 <h3 className="text-xs font-black text-white/40 uppercase tracking-widest mb-10">Administrative Actions</h3>
-                 <div className="space-y-4">
-                    <button disabled={processing} onClick={() => handleUpdateStatus('approved')} className="w-full py-5 rounded-2xl bg-emerald-500 text-slate-900 font-black text-[11px] uppercase tracking-widest transition-all hover:bg-emerald-400">Approve & Activate</button>
-                    <button disabled={processing} onClick={() => handleUpdateStatus('rejected')} className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-widest hover:bg-white/10">Reject Application</button>
+              <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03] relative overflow-hidden">
+                 {/* Glowing ambient decoration */}
+                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-24 bg-gradient-to-b from-[#10b981]/10 to-transparent blur-2xl pointer-events-none" />
+
+                 <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-6 relative z-10">Administrative Actions</h3>
+                 <div className="space-y-3 relative z-10">
+                    <button 
+                      disabled={processing} 
+                      onClick={() => handleUpdateStatus('approved')} 
+                      className="w-full py-4 rounded-xl bg-gradient-to-r from-[#10b981] to-[#059669] text-white font-black text-[10px] uppercase tracking-widest transition-all hover:brightness-110 shadow-lg shadow-[#10b981]/10 active:scale-[0.98] disabled:opacity-50"
+                    >
+                       {processing ? 'Processing...' : 'Approve & Activate'}
+                    </button>
+                    <button 
+                      disabled={processing} 
+                      onClick={() => handleUpdateStatus('rejected')} 
+                      className="w-full py-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                    >
+                       Reject Application
+                    </button>
                  </div>
               </div>
            </div>
@@ -132,25 +153,25 @@ export default function IndividualKYCReview() {
           className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-10 animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
-          <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl" />
+          <div className="absolute inset-0 bg-[#0b0a24]/90 backdrop-blur-xl" />
           <div 
-            className="relative max-w-5xl w-full h-full flex flex-col items-center justify-center"
+            className="relative max-w-4xl w-full h-full flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             <button 
               onClick={() => setSelectedImage(null)}
-              className="absolute top-0 right-0 m-4 w-12 h-12 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all z-20"
+              className="absolute top-0 right-0 m-4 w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 transition-all z-20"
             >
               ✕
             </button>
-            <div className="relative w-full h-full rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
+            <div className="relative w-full h-full rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl">
               <img 
                 src={selectedImage} 
                 alt="Document Preview" 
-                className="w-full h-full object-contain bg-black/20"
+                className="w-full h-full object-contain bg-black/10"
               />
             </div>
-            <p className="mt-6 text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Click anywhere outside to close preview</p>
+            <p className="mt-4 text-white/30 text-[9px] font-black uppercase tracking-[0.3em]">Click anywhere outside to close preview</p>
           </div>
         </div>
       )}
@@ -161,8 +182,8 @@ export default function IndividualKYCReview() {
 function InfoBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
-       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-       <p className="text-lg font-bold text-slate-800">{value}</p>
+       <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">{label}</p>
+       <p className="text-sm font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -171,19 +192,27 @@ function DocCard({ title, val, url, onPreview }: { title: string; val: string; u
   return (
     <div 
       onClick={() => url && onPreview(url)} 
-      className={`p-4 rounded-2xl border transition-all ${url ? 'bg-slate-50 border-slate-100 hover:border-blue-400 cursor-pointer group' : 'bg-rose-50/30 border-rose-100'}`}
+      className={`p-4 rounded-xl border transition-all ${
+        url 
+          ? 'bg-white/[0.02] border-white/5 hover:border-[#10b981]/40 cursor-pointer group' 
+          : 'bg-rose-500/5 border-rose-500/10'
+      }`}
     >
-      <div className="flex items-center gap-4">
-         <div className="w-16 h-16 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0">
-            {url ? <img src={url} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" /> : <span className="text-rose-400">❌</span>}
-         </div>
-         <div className="min-w-0">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</p>
-            <p className="text-xs font-bold text-slate-800 truncate">{val}</p>
+      <div className="flex items-center gap-3">
+         <div className="w-12 h-12 rounded-lg bg-black/20 border border-white/10 overflow-hidden flex items-center justify-center flex-shrink-0">
             {url ? (
-              <p className="text-[8px] font-black text-blue-500 uppercase mt-1">Click to Preview</p>
+              <img src={url} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
             ) : (
-              <p className="text-[8px] font-black text-rose-500 uppercase mt-1">Image Missing</p>
+              <span className="text-xs">❌</span>
+            )}
+         </div>
+         <div className="min-w-0 flex-1">
+            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">{title}</p>
+            <p className="text-xs font-bold text-white truncate">{val}</p>
+            {url ? (
+              <p className="text-[8px] font-black text-[#60A5FA] uppercase mt-1">Click to Preview</p>
+            ) : (
+              <p className="text-[8px] font-black text-rose-500 uppercase mt-1">Missing</p>
             )}
          </div>
       </div>

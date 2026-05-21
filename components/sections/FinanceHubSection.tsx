@@ -345,6 +345,30 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
               <form onSubmit={handleWithdraw} className="space-y-6">
                  <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest pl-1">Amount to Withdraw (₹)</label>
+                    
+                    {/* Quick Percent Buttons */}
+                    <div className="grid grid-cols-4 gap-2">
+                      {[25, 50, 75, 100].map(pct => {
+                        const pctAmt = ((data?.finalBalance || 0) * pct / 100 / 100).toFixed(2);
+                        const isSelected = withdrawAmount === pctAmt;
+                        return (
+                          <button
+                            key={pct}
+                            type="button"
+                            disabled={(data?.finalBalance || 0) <= 0}
+                            onClick={() => setWithdrawAmount(pctAmt)}
+                            className={`py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                              isSelected
+                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20'
+                                : 'bg-white/[0.03] border-white/10 text-slate-400 hover:border-blue-500/40 hover:text-white'
+                            } disabled:opacity-30`}
+                          >
+                            {pct}%
+                          </button>
+                        );
+                      })}
+                    </div>
+
                     <input 
                       required
                       type="number"
@@ -352,7 +376,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       disabled={(data?.finalBalance || 0) <= 0}
                       className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all shadow-inner disabled:opacity-50"
-                      placeholder={(data?.finalBalance || 0) <= 0 ? "No withdrawable balance" : "Enter amount"}
+                      placeholder={(data?.finalBalance || 0) <= 0 ? "No withdrawable balance" : "Enter amount or pick % above"}
                     />
                     <div className="flex justify-between items-center px-1">
                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Final Balance: {formatCurrency(data?.finalBalance || 0)}</span>

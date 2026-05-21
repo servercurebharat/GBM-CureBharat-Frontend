@@ -30,7 +30,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   const [transactions, setTransactions] = useState<any[]>([]);
   
   // Hierarchy States
-  const [expandedLeader, setExpandedLeader] = useState<string | null>(null);
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [childrenData, setChildrenData] = useState<Record<string, any[]>>({});
   const [loadingChildren, setLoadingChildren] = useState<Record<string, boolean>>({});
 
@@ -88,27 +88,102 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
     if (searchParams.get('enroll') === 'true') setIsModalOpen(true);
   }, [searchParams]);
 
-  const toggleHierarchy = async (leaderId: string) => {
-    if (expandedLeader === leaderId) {
-      setExpandedLeader(null);
-      return;
-    }
-    
-    setExpandedLeader(leaderId);
-    if (!childrenData[leaderId]) {
-      setLoadingChildren(prev => ({ ...prev, [leaderId]: true }));
+  const toggleHierarchy = async (nodeId: string) => {
+    setExpandedNodes(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+
+    if (!childrenData[nodeId]) {
+      setLoadingChildren(prev => ({ ...prev, [nodeId]: true }));
       try {
-        const res = await api.get(`/team/members?parentId=${leaderId}`);
+        const res = await api.get(`/team/members?parentId=${nodeId}`);
         if (res.data.success) {
-          setChildrenData(prev => ({ ...prev, [leaderId]: res.data.data }));
+          setChildrenData(prev => ({ ...prev, [nodeId]: res.data.data }));
         }
       } catch (err) {
         console.error('Hierarchy fetch error:', err);
       } finally {
-        setLoadingChildren(prev => ({ ...prev, [leaderId]: false }));
+        setLoadingChildren(prev => ({ ...prev, [nodeId]: false }));
       }
     }
   };
+
+  const renderDownlineTable = (nodeId: string, parentName: string) => (
+    <div className="my-3 bg-[#0d0f1a] border border-#10b981/20 rounded-2xl overflow-hidden">
+      <div className="px-6 py-3 bg-#10b981/10 border-b border-#10b981/10 flex items-center gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+        <span className="text-[10px] font-black text-blue-300 uppercase tracking-[0.2em]">
+          Downline of {parentName}
+        </span>
+      </div>
+      
+      {loadingChildren[nodeId] ? (
+        <div className="flex items-center gap-3 px-6 py-6">
+          <div className="w-5 h-5 border-2 border-#10b981 border-t-transparent rounded-full animate-spin" />
+          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Fetching Hierarchy Data...</p>
+        </div>
+      ) : !childrenData[nodeId]?.length ? (
+        <div className="px-6 py-8 text-center">
+          <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">No direct downline found</p>
+        </div>
+      ) : (
+        <table className="w-full text-left">
+           <thead>
+              <tr className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-white/5">
+                 <th className="px-6 py-4">Member Name</th>
+                 <th className="px-4 py-4">Role</th>
+                 <th className="px-4 py-4">State</th>
+                 <th className="px-4 py-4 text-right">Team Sales</th>
+                 <th className="px-4 py-4 text-center">Action</th>
+              </tr>
+           </thead>
+           <tbody className="divide-y divide-white/[0.04]">
+              {childrenData[nodeId].map((child: any) => (
+                <tr key={child._id} className="hover:bg-white/[0.03] transition-colors">
+                   <td className="px-6 py-4">
+                     <div className="flex items-center gap-3">
+                       <div className="w-7 h-7 rounded-lg bg-#10b981/20 flex items-center justify-center text-[9px] font-black text-blue-300 flex-shrink-0">
+                         {child.name?.[0]?.toUpperCase() || '?'}
+                       </div>
+                       <div className={`${user.role === 'admin' ? 'cursor-pointer group/down' : ''}`} onClick={() => { if(user.role === 'admin') router.push(`/admin/members/${child._id}`) }}>
+                          <p className={`text-[11px] font-black text-white transition-colors ${user.role === 'admin' ? 'group-hover/down:text-blue-400' : ''}`}>{child.name}</p>
+                          <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{child.memberId}</p>
+                       </div>
+                     </div>
+                   </td>
+                   <td className="px-4 py-4">
+                     <span className="text-[9px] font-black text-blue-300 uppercase bg-#10b981/10 px-2 py-1 rounded-lg">{child.role?.toUpperCase()}</span>
+                   </td>
+                   <td className="px-4 py-4 text-[11px] text-slate-400 font-bold">{child.state || '—'}</td>
+                   <td className="px-4 py-4 text-[11px] font-black text-white text-right">{formatCurrency(child.teamSalesValue || 0)}</td>
+                   <td className="px-4 py-4 text-center">
+                      <button 
+                        onClick={() => toggleHierarchy(child._id)}
+                        className="text-[9px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 bg-#10b981/10 hover:bg-#10b981/20 px-3 py-1.5 rounded-lg transition-all"
+                      >
+                        {expandedNodes.has(child._id) ? 'Hide' : 'Expand'}
+                      </button>
+                   </td>
+                </tr>
+              ))}
+           </tbody>
+        </table>
+      )}
+      {expandedNodes.has(nodeId) && childrenData[nodeId]?.map((child: any) => (
+        expandedNodes.has(child._id) && (
+          <div key={`nested-${child._id}`} className="pl-6">
+            {renderDownlineTable(child._id, child.name)}
+          </div>
+        )
+      ))}
+    </div>
+  );
 
   const getRankBadge = (index: number) => {
     if (index === 0) return { label: '01', color: 'from-amber-400 to-orange-600', text: 'STATE LEADER' };
@@ -161,36 +236,6 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       { id: 'hcc', label: 'HCC' }
     ];
     return [{ id: 'hcc', label: 'HCC' }];
-  };
-
-  const handleExport = () => {
-    if (!leaders || leaders.length === 0) return;
-    
-    const headers = ['Rank', 'Name', 'Member ID', 'State', 'Directs', 'Team Sales', 'Income'];
-    const rows = leaders.map((l, i) => [
-      i + 1,
-      l.name,
-      l.memberId,
-      l.state,
-      l.directCount,
-      l.teamSalesValue,
-      l.totalIncome
-    ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `CureBharat_Leaders_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   if (loading && !summary) {
@@ -885,83 +930,22 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                               <button 
                                 onClick={() => toggleHierarchy(leader._id)}
                                 className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mx-auto ${
-                                  expandedLeader === leader._id 
-                                  ? 'bg-#059669 text-white shadow-lg shadow-#10b981/20' 
+                                  expandedNodes.has(leader._id)
+                                  ? 'bg-emerald-600/20 text-emerald-400 shadow-lg shadow-emerald-500/10 border border-emerald-500/20' 
                                   : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
                                 }`}
                               >
-                                 {expandedLeader === leader._id ? 'Hide Hierarchy' : 'View Hierarchy'}
-                                 <svg className={`transition-transform duration-300 ${expandedLeader === leader._id ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
+                                 {expandedNodes.has(leader._id) ? 'Hide Hierarchy' : 'View Hierarchy'}
+                                 <svg className={`transition-transform duration-300 ${expandedNodes.has(leader._id) ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="6 9 12 15 18 9"/></svg>
                               </button>
                            </td>
                         </tr>
-                        {expandedLeader === leader._id && (
-                          <tr>
-                            <td colSpan={8} className="px-6 py-0">
-                               <div className="my-3 bg-[#0d0f1a] border border-#10b981/20 rounded-2xl overflow-hidden">
-                                 {/* Header */}
-                                 <div className="px-6 py-3 bg-#10b981/10 border-b border-#10b981/10 flex items-center gap-2">
-                                   <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                                   <span className="text-[10px] font-black text-blue-300 uppercase tracking-[0.2em]">
-                                     Downline of {leader.name}
-                                   </span>
-                                 </div>
-                                 
-                                 {loadingChildren[leader._id] ? (
-                                   <div className="flex items-center gap-3 px-6 py-6">
-                                     <div className="w-5 h-5 border-2 border-#10b981 border-t-transparent rounded-full animate-spin" />
-                                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Fetching Hierarchy Data...</p>
-                                   </div>
-                                 ) : !childrenData[leader._id]?.length ? (
-                                   <div className="px-6 py-8 text-center">
-                                     <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">No direct downline found</p>
-                                   </div>
-                                 ) : (
-                                   <table className="w-full text-left">
-                                      <thead>
-                                         <tr className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-white/5">
-                                            <th className="px-6 py-4">Member Name</th>
-                                            <th className="px-4 py-4">Role</th>
-                                            <th className="px-4 py-4">State</th>
-                                            <th className="px-4 py-4 text-right">Team Sales</th>
-                                            <th className="px-4 py-4 text-center">Action</th>
-                                         </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-white/[0.04]">
-                                         {childrenData[leader._id].map((child: any) => (
-                                           <tr key={child._id} className="hover:bg-white/[0.03] transition-colors">
-                                              <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                  <div className="w-7 h-7 rounded-lg bg-#10b981/20 flex items-center justify-center text-[9px] font-black text-blue-300 flex-shrink-0">
-                                                    {child.name?.[0]?.toUpperCase() || '?'}
-                                                  </div>
-                                                  <div className={`${user.role === 'admin' ? 'cursor-pointer group/down' : ''}`} onClick={() => { if(user.role === 'admin') router.push(`/admin/members/${child._id}`) }}>
-                                                     <p className={`text-[11px] font-black text-white transition-colors ${user.role === 'admin' ? 'group-hover/down:text-blue-400' : ''}`}>{child.name}</p>
-                                                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{child.memberId}</p>
-                                                  </div>
-                                                </div>
-                                              </td>
-                                              <td className="px-4 py-4">
-                                                <span className="text-[9px] font-black text-blue-300 uppercase bg-#10b981/10 px-2 py-1 rounded-lg">{child.role?.toUpperCase()}</span>
-                                              </td>
-                                              <td className="px-4 py-4 text-[11px] text-slate-400 font-bold">{child.state || '—'}</td>
-                                              <td className="px-4 py-4 text-[11px] font-black text-white text-right">{formatCurrency(child.teamSalesValue || 0)}</td>
-                                              <td className="px-4 py-4 text-center">
-                                                 <button 
-                                                   onClick={() => toggleHierarchy(child._id)}
-                                                   className="text-[9px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 bg-#10b981/10 hover:bg-#10b981/20 px-3 py-1.5 rounded-lg transition-all"
-                                                 >
-                                                   Expand
-                                                 </button>
-                                              </td>
-                                           </tr>
-                                         ))}
-                                      </tbody>
-                                   </table>
-                                 )}
-                               </div>
-                            </td>
-                          </tr>
+                        {expandedNodes.has(leader._id) && (
+                           <tr>
+                             <td colSpan={8} className="px-6 py-0">
+                                {renderDownlineTable(leader._id, leader.name)}
+                             </td>
+                           </tr>
                         )}
                       </React.Fragment>
                     );

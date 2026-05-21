@@ -103,6 +103,12 @@ export const walletAPI = {
     api.get<ApiResponse<any[]>>('/wallet/withdrawals'),
   triggerPayoutCycle: (cycleMonth: string) =>
     api.post('/wallet/payout-cycle', { cycleMonth }),
+  getAllWithdrawalRequests: (status?: string) =>
+    api.get<ApiResponse<any[]>>('/wallet/withdrawal-requests', { params: { status } }),
+  updateWithdrawalStatus: (id: string, action: 'approve' | 'reject' | 'freeze', remarks?: string) =>
+    api.patch(`/wallet/withdrawal-requests/${id}`, { action, remarks }),
+  unfreezeWallet: (id: string) =>
+    api.patch(`/wallet/${id}/unfreeze`),
 };
 
 // NOTIFICATIONS

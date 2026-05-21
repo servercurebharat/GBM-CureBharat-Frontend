@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { adminAPI } from '@/lib/api';
+import { adminAPI, walletAPI } from '@/lib/api';
 import { toast } from 'react-hot-toast';
 import ExportDropdown from '@/components/dashboard/ExportDropdown';
 import CountUp from '@/components/dashboard/CountUp';
@@ -16,277 +16,394 @@ export default function AdminPayouts() {
 }
 
 function PayoutContent() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<{ wallets: any[]; summary: any } | null>(null);
-  const [search, setSearch] = useState('');
-  const [processing, setProcessing] = useState(false);
+  const [loading, setLoading]           = useState(true);
+  const [data, setData]                 = useState<{ wallets: any[]; summary: any } | null>(null);
+  const [requests, setRequests]         = useState<any[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [search, setSearch]             = useState('');
+  const [activeTab, setActiveTab]       = useState<'requests' | 'provisional' | 'frozen'>('requests');
+  const [processing, setProcessing]     = useState(false);
+  const [actionModal, setActionModal]   = useState<{ id: string; name: string; amount: number; requestId: string } | null>(null);
+  const [actionType, setActionType]     = useState<'approve' | 'reject' | 'freeze'>('approve');
+  const [remarks, setRemarks]           = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchData = async () => {
     try {
       const res = await adminAPI.getAllProvisional();
-      if (res.data.success) {
-        setData(res.data.data || null);
-      }
-    } catch (err) {
-      toast.error('Failed to fetch payout data');
-    } finally {
-      setLoading(false);
-    }
+      if (res.data.success) setData(res.data.data || null);
+    } catch { toast.error('Failed to fetch payout data'); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const fetchRequests = async () => {
+    setRequestsLoading(true);
+    try {
+      const res = await walletAPI.getAllWithdrawalRequests('all');
+      if (res.data.success) setRequests(res.data.data || []);
+    } catch { toast.error('Failed to fetch withdrawal requests'); }
+    finally { setRequestsLoading(false); }
+  };
+
+  useEffect(() => { fetchData(); fetchRequests(); }, []);
 
   const handleRunCycle = async () => {
-    const month = new Date().toISOString().slice(0, 7); // YYYY-MM
-    if (!confirm(`Are you sure you want to run the Payout Cycle for ${month}? This will finalize all provisional commissions.`)) return;
-
+    const month = new Date().toISOString().slice(0, 7);
+    if (!confirm(`Run Payout Cycle for ${month}? This finalizes all provisional commissions.`)) return;
     setProcessing(true);
     try {
       const res = await adminAPI.triggerPayoutCycle(month);
+      if (res.data.success) { toast.success(res.data.message || 'Cycle processed!'); fetchData(); }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Cycle failed');
+    } finally { setProcessing(false); }
+  };
+
+  const openAction = (req: any, type: 'approve' | 'reject' | 'freeze') => {
+    setActionModal({ id: req._id, name: req.user?.name, amount: req.netAmount, requestId: req.requestId });
+    setActionType(type);
+    setRemarks('');
+  };
+
+  const handleAction = async () => {
+    if (!actionModal) return;
+    setActionLoading(true);
+    try {
+      const res = await walletAPI.updateWithdrawalStatus(actionModal.id, actionType, remarks);
       if (res.data.success) {
-        toast.success(res.data.message || 'Payout cycle processed successfully');
-        fetchData();
+        toast.success(`Request ${actionType}d successfully`);
+        setActionModal(null);
+        fetchRequests(); fetchData();
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Cycle processing failed');
+      toast.error(err.response?.data?.message || 'Action failed');
+    } finally { setActionLoading(false); }
+  };
+
+  const handleUnfreeze = async (walletId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to unfreeze the wallet of ${userName}?`)) return;
+    setActionLoading(true);
+    try {
+      const res = await walletAPI.unfreezeWallet(walletId);
+      if (res.data.success) {
+        toast.success(`Account of ${userName} unfrozen successfully`);
+        fetchRequests(); fetchData();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to unfreeze account');
     } finally {
-      setProcessing(false);
+      setActionLoading(false);
     }
   };
 
-  const filteredWallets = data?.wallets.filter(w => 
-    w.user?.name.toLowerCase().includes(search.toLowerCase()) ||
-    w.user?.memberId.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  const pendingRequests = requests.filter(r => r.status === 'pending');
+  const frozenWallets   = data?.wallets.filter(w => (w as any).frozen) || [];
+
+  const filteredWallets = (data?.wallets || []).filter(w =>
+    w.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    w.user?.memberId?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredRequests = requests.filter(r =>
+    r.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    r.user?.memberId?.toLowerCase().includes(search.toLowerCase()) ||
+    r.requestId?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const fmtCurr = (paise: number) =>
+    `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 
   return (
     <DashboardLayout pageTitle="Payout Management">
-      <div className="space-y-8 pb-20">
-        {/* Unified Header & Global Controls */}
-        <div className="bg-[#131241] rounded-[2.5rem] p-10 shadow-2xl border border-white/[0.03] relative group">
-          <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#10b981]/5 blur-[120px] -mr-64 -mt-64 group-hover:bg-[#10b981]/10 transition-all duration-1000" />
+      <div className="space-y-6 pb-20">
+
+        {/* Header */}
+        <div className="bg-[#131241] rounded-[2rem] p-8 shadow-2xl border border-white/[0.03] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 blur-[120px] -mr-48 -mt-48" />
+          <div className="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
+            <div>
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] mb-2">Treasury / Payout / Settlement</p>
+              <h1 className="text-3xl font-black text-white tracking-tight">Payout Command Center</h1>
+              <p className="text-xs text-white/30 mt-2">Approve, reject, or freeze withdrawal requests. Monitor all network liabilities.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={handleRunCycle} disabled={processing}
+                className="px-6 py-3 rounded-2xl bg-emerald-500 text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-emerald-500/20 hover:bg-emerald-400 transition-all disabled:opacity-50">
+                <div className={`w-2 h-2 rounded-full bg-white ${processing ? 'animate-ping' : ''}`} />
+                {processing ? 'Executing...' : 'Run Settlement Cycle'}
+              </button>
+              <ExportDropdown
+                title="Payout Report"
+                headers={['Name', 'Member ID', 'Role', 'Provisional', 'TDS (5%)', 'Net Payout', 'KYC Status']}
+                rows={data?.wallets.map(w => [
+                  w.user?.name, w.user?.memberId, w.user?.role?.toUpperCase(),
+                  `Rs. ${(w.provisionalBalance / 100).toLocaleString()}`,
+                  `Rs. ${((w.provisionalBalance * 0.05) / 100).toLocaleString()}`,
+                  `Rs. ${((w.provisionalBalance * 0.95) / 100).toLocaleString()}`,
+                  w.user?.kycStatus?.toUpperCase() || 'NOT SUBMITTED'
+                ]) || []}
+                fileName={`Payout_Report_${new Date().toISOString().split('T')[0]}`}
+              />
+            </div>
           </div>
-          
-          <div className="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10">
-            <div className="max-w-2xl">
-              <p className="text-[10px] font-black text-[#10b981] uppercase tracking-[0.4em] mb-4">TREASURY / PAYOUT / SETTLEMENT</p>
-              <h1 className="text-5xl font-black text-white font-display tracking-tight leading-[1.1]">Payout Command Center</h1>
-              <p className="text-sm text-white/40 mt-6 leading-relaxed">
-                Centralized gateway for final commission settlement and bank disbursements. Monitor network liabilities 
-                and trigger T+3/T+5 settlement protocols with cryptographic integrity.
+        </div>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Pending Requests', value: pendingRequests.length, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', tab: 'requests' as const },
+            { label: 'Ready for Payout', value: data?.wallets.filter(w => w.user?.kycStatus === 'approved').length || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', tab: 'provisional' as const },
+            { label: 'Wallet Frozen', value: frozenWallets.length, color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20', tab: 'frozen' as const },
+            { label: 'Total Provisional', value: `₹${((data?.summary?.totalProvisional || 0) / 100).toLocaleString('en-IN')}`, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', tab: null },
+          ].map((stat, i) => (
+            <button key={i}
+              onClick={() => stat.tab && setActiveTab(stat.tab)}
+              className={`bg-[#131241] rounded-2xl p-5 border text-left transition-all shadow-xl ${stat.tab ? 'hover:border-white/20 cursor-pointer hover:scale-[1.02]' : 'cursor-default'} ${activeTab === stat.tab ? 'border-white/20 ring-1 ring-white/10' : 'border-white/5'}`}>
+              <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">{stat.label}</p>
+              <p className={`text-2xl font-black tabular-nums ${stat.color}`}>
+                {typeof stat.value === 'number' ? <CountUp end={stat.value} /> : stat.value}
               </p>
+              {stat.tab && <p className="text-[9px] font-bold text-white/20 mt-1">Click to view →</p>}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab + Search */}
+        <div className="bg-[#131241] rounded-[2rem] shadow-2xl border border-white/[0.03] overflow-hidden">
+          <div className="flex items-center justify-between gap-4 p-6 border-b border-white/5 flex-wrap">
+            <div className="flex gap-2">
+              {([
+                { id: 'requests',    label: 'Withdrawal Requests', badge: pendingRequests.length },
+                { id: 'provisional', label: 'Provisional Wallets', badge: null },
+                { id: 'frozen',      label: 'Frozen Accounts',    badge: frozenWallets.length },
+              ] as const).map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+                    activeTab === tab.id ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/60'
+                  }`}>
+                  {tab.label}
+                  {tab.badge != null && tab.badge > 0 && (
+                    <span className="bg-amber-500 text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded-full">{tab.badge}</span>
+                  )}
+                </button>
+              ))}
             </div>
-            
-            <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
-               <button 
-                 onClick={handleRunCycle}
-                 disabled={processing}
-                 className="flex-1 xl:flex-none bg-[#10b981] px-10 py-5 rounded-[22px] text-[11px] font-black text-white uppercase tracking-[0.2em] flex items-center justify-center gap-4 shadow-2xl shadow-[#10b981]/30 hover:bg-[#059669] hover:-translate-y-1 active:scale-95 transition-all duration-300"
-               >
-                  <div className={`w-2 h-2 rounded-full bg-white ${processing ? 'animate-ping' : ''}`} />
-                  {processing ? 'EXECUTING PROTOCOL...' : 'RUN SETTLEMENT CYCLE'}
-               </button>
-               
-               <button className="flex-1 xl:flex-none bg-white/5 border border-white/10 px-10 py-5 rounded-[22px] text-[11px] font-black text-white/60 uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-white/10 hover:text-white transition-all active:scale-95">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                  Disbursement T+5
-               </button>
-               
-               <div className="w-full xl:w-auto">
-                 <ExportDropdown 
-                   title="CureBharat Payout Report"
-                   headers={['Name', 'Member ID', 'Role', 'Rank', 'Provisional', 'TDS (5%)', 'Net Payout', 'KYC Status']}
-                   rows={data?.wallets.map(w => [
-                     w.user?.name,
-                     w.user?.memberId,
-                     w.user?.role?.toUpperCase(),
-                     w.user?.rank?.toUpperCase() || 'UNRANKED',
-                     `Rs. ${(w.provisionalBalance / 100).toLocaleString()}`,
-                     `Rs. ${((w.provisionalBalance * 0.05) / 100).toLocaleString()}`,
-                     `Rs. ${((w.provisionalBalance * 0.95) / 100).toLocaleString()}`,
-                     w.user?.kycStatus?.toUpperCase() || 'NOT SUBMITTED'
-                   ]) || []}
-                   fileName={`Payout_Report_${new Date().toISOString().split('T')[0]}`}
-                 />
-               </div>
+            <div className="relative flex-1 max-w-xs">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Search by name, ID..." value={search} onChange={e => setSearch(e.target.value)}
+                className="w-full bg-white/[0.03] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-emerald-500/40 transition-all" />
             </div>
           </div>
-        </div>
 
-        {/* Intelligence Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-           {/* Settlement Analytics */}
-           <div className="lg:col-span-8 bg-[#131241] rounded-[2.5rem] p-12 text-white shadow-2xl relative overflow-hidden group border border-white/[0.03]">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/5 blur-[100px] -mr-48 -mt-48 group-hover:bg-[#10b981]/10 transition-all duration-700" />
-              <div className="relative z-10 flex flex-col h-full">
-                 <div className="flex justify-between items-center mb-16">
-                    <div className="flex items-center gap-4">
-                       <div className="w-2 h-8 rounded-full bg-[#10b981]" />
-                       <h3 className="text-2xl font-black font-display uppercase tracking-tight">Active Cycle Intelligence</h3>
-                    </div>
-                    <div className="bg-black/30 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] border border-white/5 text-white/40">
-                       BUFFER: {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
-                    </div>
-                 </div>
-                 
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">Total Provisional</p>
-                       <p className="text-3xl font-black tracking-tighter text-white tabular-nums">
-                          ₹<CountUp end={(data?.summary.totalProvisional || 0) / 100} />
-                       </p>
-                    </div>
-                    <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">Pending TDS (5%)</p>
-                       <p className="text-3xl font-black tracking-tighter text-amber-400 tabular-nums">
-                          ₹<CountUp end={(data?.summary.estimatedTDS || 0) / 100} />
-                       </p>
-                    </div>
-                    <div>
-                       <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">Net Disbursement</p>
-                       <p className="text-3xl font-black tracking-tighter text-[#10b981] tabular-nums">
-                          ₹<CountUp end={(data?.summary.netPayout || 0) / 100} />
-                       </p>
-                    </div>
-                 </div>
-
-                 <div className="mt-16 flex items-center gap-4 p-5 bg-white/[0.02] rounded-[20px] border border-white/5 w-fit">
-                    <div className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
-                    <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">
-                       {data?.summary.walletCount || 0} Network Wallets Audit-Locked
-                    </p>
-                 </div>
-              </div>
-           </div>
-
-           {/* Compliance Monitor */}
-           <div className="lg:col-span-4 bg-[#131241] rounded-[2.5rem] p-12 text-white shadow-2xl border border-white/[0.03] relative overflow-hidden group">
-              <h3 className="text-2xl font-black font-display mb-12 uppercase tracking-tight">Compliance Status</h3>
-              <div className="space-y-10">
-                 <div className="flex items-center justify-between group/item">
-                    <div className="flex items-center gap-5">
-                       <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:rotate-3 transition-all">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                       </div>
-                       <div>
-                          <p className="text-[11px] font-black text-white/20 uppercase tracking-widest">VERIFIED KYC</p>
-                          <p className="text-base font-black text-white mt-1">Ready for Payout</p>
-                       </div>
-                    </div>
-                    <span className="text-xl font-black text-emerald-400 tabular-nums">
-                       <CountUp end={data?.wallets.filter(w => w.user?.kycStatus === 'approved').length || 0} />
-                    </span>
-                 </div>
-                 <div className="flex items-center justify-between group/item">
-                    <div className="flex items-center gap-5">
-                       <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:-rotate-3 transition-all">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                       </div>
-                       <div>
-                          <p className="text-[11px] font-black text-white/20 uppercase tracking-widest">PENDING ACTION</p>
-                          <p className="text-base font-black text-white mt-1">Wallet Frozen</p>
-                       </div>
-                    </div>
-                    <span className="text-xl font-black text-amber-400 tabular-nums">
-                       <CountUp end={data?.wallets.filter(w => w.user?.kycStatus !== 'approved').length || 0} />
-                    </span>
-                 </div>
-              </div>
-              <div className="mt-14 p-6 bg-white/[0.03] rounded-[24px] border border-white/5 border-dashed">
-                 <p className="text-[10px] text-white/20 font-black uppercase tracking-[0.2em] text-center leading-relaxed">
-                    Verified identities are prioritized in the T+3 protocol.
-                 </p>
-              </div>
-           </div>
-        </div>
-
-        {/* Member Settlement Ledger */}
-        <div className="bg-[#131241] rounded-[2.5rem] shadow-2xl border border-white/[0.03] overflow-hidden">
-           <div className="p-12 border-b border-white/5 flex flex-col md:flex-row gap-10 items-center bg-white/[0.01]">
-              <div className="relative flex-1 group w-full">
-                 <svg className="absolute left-8 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-[#10b981] transition-colors" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                 <input
-                   type="text"
-                   placeholder="Search Payout Registry by ID, Name or Role..."
-                   value={search}
-                   onChange={(e) => setSearch(e.target.value)}
-                   className="w-full bg-white/[0.03] border border-white/5 rounded-[24px] pl-20 pr-10 py-6 text-base text-white font-bold placeholder:text-white/10 focus:bg-white/[0.05] focus:border-[#10b981]/50 transition-all outline-none"
-                 />
-              </div>
-           </div>
-           
-           <div className="overflow-x-auto">
+          {/* ── TAB: Withdrawal Requests ── */}
+          {activeTab === 'requests' && (
+            <div className="overflow-x-auto">
               <table className="w-full text-left">
-                 <thead>
-                    <tr className="text-[11px] font-black text-white/20 uppercase tracking-[0.3em] border-b border-white/5 bg-white/[0.02]">
-                       <th className="px-12 py-8">MEMBER REGISTRY</th>
-                       <th className="px-8 py-8">RANK / PROTOCOL</th>
-                       <th className="px-8 py-8 text-right">PROVISIONAL</th>
-                       <th className="px-8 py-8 text-right">TDS (5%)</th>
-                       <th className="px-8 py-8 text-right">NET SETTLEMENT</th>
-                       <th className="px-12 py-8 text-center">COMPLIANCE</th>
+                <thead>
+                  <tr className="text-[9px] font-black text-white/20 uppercase tracking-[0.25em] border-b border-white/5 bg-white/[0.02]">
+                    <th className="px-8 py-5">Request ID</th>
+                    <th className="px-6 py-5">Member</th>
+                    <th className="px-6 py-5 text-right">Gross Amount</th>
+                    <th className="px-6 py-5 text-right">TDS (5%)</th>
+                    <th className="px-6 py-5 text-right">Net Payout</th>
+                    <th className="px-6 py-5 text-center">KYC</th>
+                    <th className="px-6 py-5 text-center">Status</th>
+                    <th className="px-6 py-5 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {requestsLoading ? (
+                    Array(4).fill(0).map((_, i) => (
+                      <tr key={i} className="animate-pulse"><td colSpan={8} className="px-8 py-5"><div className="h-8 bg-white/5 rounded-xl w-full" /></td></tr>
+                    ))
+                  ) : filteredRequests.length === 0 ? (
+                    <tr><td colSpan={8} className="px-8 py-20 text-center text-white/20 font-black uppercase tracking-widest text-xs">No withdrawal requests found</td></tr>
+                  ) : filteredRequests.map(req => (
+                    <tr key={req._id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="px-8 py-5">
+                        <span className="text-[10px] font-black text-blue-400 font-mono">{req.requestId}</span>
+                        <p className="text-[9px] text-white/20 mt-0.5">{new Date(req.requestedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                      </td>
+                      <td className="px-6 py-5">
+                        <p className="text-sm font-black text-white">{req.user?.name}</p>
+                        <p className="text-[9px] font-bold text-emerald-400/70 uppercase">{req.user?.memberId} · {req.user?.role?.toUpperCase()}</p>
+                      </td>
+                      <td className="px-6 py-5 text-right text-sm font-bold text-white/60 tabular-nums">{fmtCurr(req.grossAmount)}</td>
+                      <td className="px-6 py-5 text-right text-sm font-bold text-rose-400/70 tabular-nums">-{fmtCurr(req.tdsAmount)}</td>
+                      <td className="px-6 py-5 text-right text-sm font-black text-emerald-400 tabular-nums">{fmtCurr(req.netAmount)}</td>
+                      <td className="px-6 py-5 text-center">
+                        <span className={`text-[9px] font-black px-2 py-1 rounded-lg border ${req.user?.kycStatus === 'approved' ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' : 'text-amber-400 bg-amber-400/10 border-amber-400/20'}`}>
+                          {req.user?.kycStatus?.toUpperCase() || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-center">
+                        <span className={`text-[9px] font-black px-2 py-1 rounded-lg border ${
+                          req.status === 'pending'   ? 'text-amber-400 bg-amber-400/10 border-amber-400/20' :
+                          req.status === 'success'   ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' :
+                          'text-rose-400 bg-rose-400/10 border-rose-400/20'
+                        }`}>{req.status?.toUpperCase()}</span>
+                      </td>
+                      <td className="px-6 py-5 text-center">
+                        {req.status === 'pending' ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => openAction(req, 'approve')}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-all">
+                              Approve
+                            </button>
+                            <button onClick={() => openAction(req, 'reject')}
+                              className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black uppercase tracking-widest hover:bg-rose-500/20 transition-all">
+                              Reject
+                            </button>
+                            <button onClick={() => openAction(req, 'freeze')}
+                              className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest hover:bg-amber-500/20 transition-all">
+                              Freeze
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[9px] text-white/20 font-bold">{req.remarks || '—'}</span>
+                        )}
+                      </td>
                     </tr>
-                 </thead>
-                 <tbody className="divide-y divide-white/5">
-                    {loading ? (
-                       Array(5).fill(0).map((_, i) => (
-                         <tr key={i} className="animate-pulse">
-                            <td colSpan={6} className="px-12 py-12"><div className="h-10 bg-white/5 rounded-2xl w-full" /></td>
-                         </tr>
-                       ))
-                    ) : filteredWallets.length === 0 ? (
-                       <tr>
-                          <td colSpan={6} className="px-12 py-40 text-center text-white/10 font-black uppercase tracking-[0.4em] text-sm">
-                             Payout Registry Empty
-                          </td>
-                       </tr>
-                    ) : (
-                       filteredWallets.map((wallet) => (
-                          <tr 
-                            key={wallet._id} 
-                            onClick={() => window.location.href = `/admin/members/${wallet.user?._id}`}
-                            className="hover:bg-white/[0.04] transition-colors group cursor-pointer border-b border-white/[0.02]"
-                          >
-                             <td className="px-12 py-10">
-                                <div className="flex flex-col">
-                                   <span className="text-base font-black text-white group-hover:text-[#10b981] transition-colors">{wallet.user?.name}</span>
-                                   <span className="text-[11px] font-bold text-[#10b981] uppercase tracking-[0.2em] mt-2">REG: {wallet.user?.memberId}</span>
-                                </div>
-                             </td>
-                             <td className="px-8 py-10">
-                                <div className="text-[11px] font-black text-white/40 uppercase tracking-widest">{wallet.user?.role}</div>
-                                <div className="text-[10px] font-bold text-white/15 uppercase mt-2">{wallet.user?.rank || 'UNRANKED'}</div>
-                             </td>
-                             <td className="px-8 py-10 text-right text-sm font-black text-white/40 tabular-nums">
-                                ₹{(wallet.provisionalBalance / 100).toLocaleString('en-IN')}
-                             </td>
-                             <td className="px-8 py-10 text-right text-sm font-bold text-amber-500/30 tabular-nums">
-                                ₹{(wallet.provisionalBalance * 0.05 / 100).toLocaleString('en-IN')}
-                             </td>
-                             <td className="px-8 py-10 text-right text-base font-black text-[#10b981] tabular-nums">
-                                ₹{(wallet.provisionalBalance * 0.95 / 100).toLocaleString('en-IN')}
-                             </td>
-                             <td className="px-12 py-10 text-center">
-                                <div className={`inline-flex items-center gap-3 px-5 py-2.5 rounded-[16px] text-[10px] font-black tracking-[0.2em] border transition-all duration-500 ${
-                                   wallet.user?.kycStatus === 'approved' 
-                                     ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20 shadow-[0_0_20px_rgba(52,211,153,0.15)]' 
-                                     : 'bg-amber-400/10 text-amber-400 border-amber-400/20'
-                                }`}>
-                                   <div className={`w-2 h-2 rounded-full ${wallet.user?.kycStatus === 'approved' ? 'bg-emerald-400 shadow-[0_0_10px_#10b981]' : 'bg-amber-400'}`} />
-                                   {wallet.user?.kycStatus?.toUpperCase() || 'NOT SUBMITTED'}
-                                </div>
-                             </td>
-                          </tr>
-                       ))
-                    )}
-                 </tbody>
+                  ))}
+                </tbody>
               </table>
-           </div>
+            </div>
+          )}
+
+          {/* ── TAB: Provisional Wallets ── */}
+          {activeTab === 'provisional' && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-[9px] font-black text-white/20 uppercase tracking-[0.25em] border-b border-white/5 bg-white/[0.02]">
+                    <th className="px-8 py-5">Member</th>
+                    <th className="px-6 py-5">Role</th>
+                    <th className="px-6 py-5 text-right">Provisional</th>
+                    <th className="px-6 py-5 text-right">TDS (5%)</th>
+                    <th className="px-6 py-5 text-right">Net Settlement</th>
+                    <th className="px-6 py-5 text-center">KYC Compliance</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {loading ? Array(5).fill(0).map((_, i) => (
+                    <tr key={i} className="animate-pulse"><td colSpan={6} className="px-8 py-5"><div className="h-8 bg-white/5 rounded-xl" /></td></tr>
+                  )) : filteredWallets.length === 0 ? (
+                    <tr><td colSpan={6} className="px-8 py-20 text-center text-white/20 font-black uppercase tracking-widest text-xs">No provisional wallets</td></tr>
+                  ) : filteredWallets.map(wallet => (
+                    <tr key={wallet._id} onClick={() => window.location.href = `/admin/members/${wallet.user?._id}`}
+                      className="hover:bg-white/[0.03] cursor-pointer transition-colors group">
+                      <td className="px-8 py-5">
+                        <p className="text-sm font-black text-white group-hover:text-emerald-400 transition-colors">{wallet.user?.name}</p>
+                        <p className="text-[9px] font-bold text-emerald-400/60 uppercase">{wallet.user?.memberId}</p>
+                      </td>
+                      <td className="px-6 py-5 text-[10px] font-black text-white/40 uppercase">{wallet.user?.role}</td>
+                      <td className="px-6 py-5 text-right text-sm font-bold text-white/50 tabular-nums">{fmtCurr(wallet.provisionalBalance)}</td>
+                      <td className="px-6 py-5 text-right text-sm font-bold text-amber-400/60 tabular-nums">{fmtCurr(wallet.provisionalBalance * 0.05)}</td>
+                      <td className="px-6 py-5 text-right text-sm font-black text-emerald-400 tabular-nums">{fmtCurr(wallet.provisionalBalance * 0.95)}</td>
+                      <td className="px-6 py-5 text-center">
+                        <span className={`text-[9px] font-black px-3 py-1.5 rounded-xl border ${
+                          wallet.user?.kycStatus === 'approved'
+                            ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'
+                            : 'bg-amber-400/10 text-amber-400 border-amber-400/20'
+                        }`}>
+                          {wallet.user?.kycStatus?.toUpperCase() || 'NOT SUBMITTED'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* ── TAB: Frozen Accounts ── */}
+          {activeTab === 'frozen' && (
+            <div className="p-8">
+              {frozenWallets.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl mx-auto mb-4">🔒</div>
+                  <p className="text-white/20 font-black uppercase tracking-widest text-xs">No frozen accounts</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {frozenWallets.map((wallet: any) => (
+                    <div key={wallet._id} className="flex items-center justify-between p-5 bg-rose-500/5 border border-rose-500/20 rounded-2xl">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-400">🔒</div>
+                        <div>
+                          <p className="text-sm font-black text-white">{wallet.user?.name}</p>
+                          <p className="text-[9px] font-bold text-rose-400/70 uppercase">{wallet.user?.memberId} · {wallet.user?.role?.toUpperCase()}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-sm font-black text-rose-400">{fmtCurr(wallet.finalBalance)}</p>
+                          <p className="text-[9px] text-white/20">{(wallet as any).frozenReason || 'Admin action'}</p>
+                        </div>
+                        <button
+                          onClick={() => handleUnfreeze(wallet._id, wallet.user?.name)}
+                          disabled={actionLoading}
+                          className="px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+                        >
+                          Unfreeze
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Action Confirmation Modal */}
+      {actionModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="bg-[#131241] w-full max-w-md rounded-[2rem] p-8 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl mb-6 mx-auto ${
+              actionType === 'approve' ? 'bg-emerald-500/10 text-emerald-400' :
+              actionType === 'reject'  ? 'bg-rose-500/10 text-rose-400' :
+                                         'bg-amber-500/10 text-amber-400'
+            }`}>
+              {actionType === 'approve' ? '✓' : actionType === 'reject' ? '✕' : '🔒'}
+            </div>
+
+            <h3 className="text-lg font-black text-white text-center mb-1 capitalize">{actionType} Request</h3>
+            <p className="text-xs text-white/40 text-center mb-6">
+              {actionType === 'approve' && `Approve payout of ${fmtCurr(actionModal.amount)} (net) to ${actionModal.name}?`}
+              {actionType === 'reject'  && `Reject request ${actionModal.requestId} from ${actionModal.name}? Amount will be refunded.`}
+              {actionType === 'freeze'  && `Freeze ${actionModal.name}'s wallet? All pending requests will be put on hold.`}
+            </p>
+
+            <div className="space-y-3 mb-6">
+              <label className="text-[9px] font-black text-white/40 uppercase tracking-widest">Remarks (optional)</label>
+              <input
+                type="text"
+                value={remarks}
+                onChange={e => setRemarks(e.target.value)}
+                placeholder={actionType === 'approve' ? 'e.g. Payment transferred via NEFT' : 'e.g. KYC mismatch'}
+                className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/20 outline-none focus:border-blue-500/40 transition-all"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setActionModal(null)} disabled={actionLoading}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-[11px] font-black text-white/60 uppercase tracking-widest hover:bg-white/5 transition-all">
+                Cancel
+              </button>
+              <button onClick={handleAction} disabled={actionLoading}
+                className={`flex-1 py-3 rounded-xl text-[11px] font-black text-white uppercase tracking-widest transition-all disabled:opacity-50 ${
+                  actionType === 'approve' ? 'bg-emerald-600 hover:bg-emerald-500' :
+                  actionType === 'reject'  ? 'bg-rose-600 hover:bg-rose-500' :
+                                             'bg-amber-600 hover:bg-amber-500'
+                }`}>
+                {actionLoading ? 'Processing...' : `Confirm ${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
