@@ -8,6 +8,7 @@ declare global {
   interface Window {
     Cashfree: (config: { mode: string }) => {
       checkout: (options: any) => Promise<{ error?: { message: string }; redirect?: boolean }>;
+      subscriptionsCheckout: (options: any) => Promise<{ error?: { message: string }; redirect?: boolean }>;
     };
   }
 }
