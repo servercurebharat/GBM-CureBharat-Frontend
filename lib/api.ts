@@ -51,7 +51,13 @@ export const authAPI = {
 export const publicAPI = {
   getSeller: (memberId: string) =>
     api.get(`/public/seller/${memberId}`),
-  createOrder: (data: { planId: string, refCode: string }) =>
+  createOrder: (data: {
+    planId: string;
+    refCode: string;
+    customerName?: string;
+    customerMobile?: string;
+    customerEmail?: string;
+  }) =>
     api.post('/public/create-order', data),
   verifyPayment: (data: any) =>
     api.post('/public/verify-payment', data),
