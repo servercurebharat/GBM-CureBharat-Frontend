@@ -122,13 +122,22 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
 
       if (!res.data.success) throw new Error(res.data.message || 'Subscription creation failed');
 
-      const { authLink, subscriptionId } = res.data.data;
+      const { authLink, subscriptionId, subsSessionId } = res.data.data;
 
       // Store subscription ID so success page can poll status
       sessionStorage.setItem('cb_subscription_id', subscriptionId);
 
-      // Redirect to Cashfree mandate authorization page
-      window.location.href = authLink;
+      if (subsSessionId) {
+        if (typeof window.Cashfree === 'undefined') throw new Error('Payment SDK not loaded. Please refresh.');
+        const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox';
+        const cashfree = window.Cashfree({ mode });
+        cashfree.subscriptionsCheckout({ subsSessionId, redirectTarget: '_self' });
+      } else if (authLink) {
+        // Fallback for older api versions
+        window.location.href = authLink;
+      } else {
+        throw new Error('No checkout session or auth link returned by Cashfree');
+      }
 
     } catch (err: any) {
       console.error('[Buy] AutoPay error:', err);
