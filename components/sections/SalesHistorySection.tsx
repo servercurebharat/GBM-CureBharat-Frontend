@@ -194,21 +194,25 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
 
 function calculateCommission(sale: ISale, role: string): number {
   const bv = sale.businessVolume / 100; // in Rupees
+
+  // When the seller IS the current user (personal sale), they always earn 40% direct
+  // regardless of rank. The override % only applies to UPLINE earnings on other people's sales.
+  // The salesAPI.getAll() returns only sales made BY this user, so all listed sales are personal.
   switch (role.toLowerCase()) {
-    case 'hcc': return Math.round(bv * 0.40);
-    case 'hcm': return Math.round(bv * 0.40 * 0.40);
-    case 'hba': return Math.round(bv * 0.40 * 0.40 * 0.40);
-    case 'sh':  return Math.round(bv * 0.02);
-    default: return 0;
+    case 'hcc': return Math.round(bv * 0.40);         // 40% direct
+    case 'hcm': return Math.round(bv * 0.40);         // 40% direct (personal sale)
+    case 'hba': return Math.round(bv * 0.40);         // 40% direct (personal sale)
+    case 'sh':  return Math.round(bv * 0.40);         // 40% direct (personal sale)
+    default:    return Math.round(bv * 0.40);
   }
 }
 
 function getCommissionLabel(role: string): string {
   switch (role.toLowerCase()) {
     case 'hcc': return '40% DIRECT';
-    case 'hcm': return '16% OVERRIDE';
-    case 'hba': return '6.4% OVERRIDE';
-    case 'sh':  return '2% LEADERSHIP';
-    default: return 'EARNINGS';
+    case 'hcm': return '40% DIRECT';
+    case 'hba': return '40% DIRECT';
+    case 'sh':  return '40% DIRECT';
+    default:    return 'EARNINGS';
   }
 }

@@ -57,6 +57,14 @@ export const publicAPI = {
     api.post('/public/verify-payment', data),
 };
 
+// SUBSCRIPTIONS (AutoPay)
+export const subscriptionAPI = {
+  create: (data: any) =>
+    api.post('/subscriptions/create', data),
+  getStatus: (subscriptionId: string) =>
+    api.get(`/subscriptions/status/${subscriptionId}`),
+};
+
 // USERS
 export const usersAPI = {
   getAll: (params?: { page?: number; limit?: number; search?: string; role?: string; state?: string; refer?: string }) =>
@@ -215,6 +223,19 @@ export const complaintsAPI = {
     api.put<ApiResponse<any>>(`/complaints/${id}/status`, { status }),
   reply: (id: string, message: string) =>
     api.post<ApiResponse<any>>(`/complaints/${id}/reply`, { message }),
+};
+
+// PAYMENTS (Cashfree)
+export const paymentAPI = {
+  createOrder: (data: { amount: number; purpose?: string }) =>
+    api.post<any>('/payment/create-order', data),
+  verifyPayment: (orderId: string) =>
+    api.get<any>(`/payment/verify/${orderId}`),
+  getHistory: () =>
+    api.get<any>('/payment/history'),
+  // Admin
+  getAllPayments: (params?: { page?: number; limit?: number; status?: string }) =>
+    api.get<any>('/payment/all', { params }),
 };
 
 export default api;

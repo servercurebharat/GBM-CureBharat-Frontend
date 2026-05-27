@@ -165,8 +165,8 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
           {/* Step 2: Identity Fields */}
           <div className="bg-[#131241] rounded-2xl p-5 border border-white/5 shadow-xl space-y-4">
             <StepHeader num="02" label="Identity Documents" />
-            <InputField label="Aadhaar Number" placeholder="12-digit number" value={formData.aadhaarNumber} onChange={(v: string) => setFormData({...formData, aadhaarNumber: v})} disabled={isApproved} />
-            <InputField label="PAN Card Number" placeholder="ABCDE1234F" value={formData.panNumber} onChange={(v: string) => setFormData({...formData, panNumber: v})} disabled={isApproved} />
+            <InputField label="Aadhaar Number" placeholder="12-digit number" value={formData.aadhaarNumber} onChange={(v: string) => setFormData({...formData, aadhaarNumber: v})} disabled={isApproved} maxLength={12} digitsOnly />
+            <InputField label="PAN Card Number" placeholder="ABCDE1234F" value={formData.panNumber} onChange={(v: string) => setFormData({...formData, panNumber: v.toUpperCase()})} disabled={isApproved} maxLength={10} />
           </div>
         </div>
 
@@ -228,9 +228,11 @@ interface InputFieldProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  maxLength?: number;
+  digitsOnly?: boolean;
 }
 
-function InputField({ label, placeholder, value, onChange, disabled }: InputFieldProps) {
+function InputField({ label, placeholder, value, onChange, disabled, maxLength, digitsOnly }: InputFieldProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">{label}</label>
@@ -238,7 +240,11 @@ function InputField({ label, placeholder, value, onChange, disabled }: InputFiel
         type="text"
         placeholder={placeholder}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        maxLength={maxLength}
+        onChange={e => {
+          const v = digitsOnly ? e.target.value.replace(/\D/g, '') : e.target.value;
+          onChange(v);
+        }}
         disabled={disabled}
         className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 outline-none focus:border-blue-500/40 transition-all disabled:opacity-50"
       />

@@ -15,12 +15,12 @@ export default function CustomerKYC() {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Mobile Number</label>
-              <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#60A5FA]" placeholder="+91" />
+              <input type="tel" maxLength={10} onInput={(e) => { const t = e.currentTarget; t.value = t.value.replace(/\D/g, ''); }} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#60A5FA]" placeholder="+91 98765 43210" />
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Aadhar Number</label>
-            <input type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#60A5FA]" placeholder="XXXX XXXX XXXX" />
+            <input type="tel" maxLength={12} onInput={(e) => { const t = e.currentTarget; t.value = t.value.replace(/\D/g, ''); }} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#60A5FA]" placeholder="XXXX XXXX XXXX" />
           </div>
           <button className="w-full bg-[#6029F1] py-4 rounded-xl font-bold text-white hover:brightness-110 transition-all shadow-lg shadow-[#6029F1]/20">
             Submit KYC Form

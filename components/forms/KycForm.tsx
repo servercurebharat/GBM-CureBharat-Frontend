@@ -36,9 +36,9 @@ export default function KycForm() {
             <div>
               <label className="block text-slate-300 text-sm font-medium mb-1.5">Aadhaar Number</label>
               <input
-                type="text"
+                type="tel"
                 value={form.aadhaarNumber}
-                onChange={(e) => setForm({ ...form, aadhaarNumber: e.target.value })}
+                onChange={(e) => setForm({ ...form, aadhaarNumber: e.target.value.replace(/\D/g, '') })}
                 placeholder="12-digit Aadhaar"
                 maxLength={12}
                 required

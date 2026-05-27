@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_ROUTES = ['/login', '/register', '/otp-verify'];
 
+// Routes accessible to ANY logged-in user regardless of role
+const SHARED_ROUTES = ['/payment'];
+
 const ROLE_ROUTES: Record<string, string> = {
   admin: '/admin',
   sh: '/sh',
@@ -27,7 +30,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Protect all other routes (Dashboard routes)
+  // 2. Allow shared routes for any authenticated user (e.g. /payment/status)
+  if (SHARED_ROUTES.some(r => pathname.startsWith(r))) {
+    if (!token) return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.next();
+  }
+
+  // 3. Protect all other routes (Dashboard routes)
   if (!token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }

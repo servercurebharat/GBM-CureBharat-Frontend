@@ -1,31 +1,38 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { publicAPI } from '@/lib/api';
+import { publicAPI, subscriptionAPI } from '@/lib/api';
 import { IPlan } from '@/types';
 import { toast } from 'react-hot-toast';
 
+declare global {
+  interface Window {
+    Cashfree: (config: { mode: string }) => {
+      checkout: (options: any) => Promise<{ error?: { message: string }; redirect?: boolean }>;
+    };
+  }
+}
+
 export default function PublicBuyPage({ params }: { params: { memberId: string } }) {
-  const router = useRouter();
-  const memberId = params.memberId;
+  const router    = useRouter();
+  const memberId  = params.memberId;
 
-  // State
-  const [loading, setLoading] = useState(true);
-  const [seller, setSeller] = useState<any>(null);
-  const [plans, setPlans] = useState<IPlan[]>([]);
-  const [step, setStep] = useState(1);
+  const [loading,    setLoading]    = useState(true);
+  const [seller,     setSeller]     = useState<any>(null);
+  const [plans,      setPlans]      = useState<IPlan[]>([]);
+  const [step,       setStep]       = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [autopay,    setAutopay]    = useState(false); // AutoPay toggle
 
-  // Form
   const [formData, setFormData] = useState({
-    customerName: '',
-    customerMobile: '',
-    customerEmail: '',
-    customerState: 'Maharashtra',
-    nomineeName: '',
-    nomineeRelation: 'Spouse',
-    planId: '',
+    customerName:     '',
+    customerMobile:   '',
+    customerEmail:    '',
+    customerState:    'Maharashtra',
+    nomineeName:      '',
+    nomineeRelation:  'Spouse',
+    planId:           '',
   });
 
   const selectedPlan = plans.find(p => p._id === formData.planId);
@@ -38,8 +45,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
           setSeller(res.data.data.seller);
           const activePlans = res.data.data.plans;
           setPlans(activePlans);
-          
-          // Pre-select plan if planId is in URL
+
           const urlParams = new URLSearchParams(window.location.search);
           const pId = urlParams.get('planId');
           if (pId && activePlans.some((p: IPlan) => p._id === pId)) {
@@ -55,35 +61,78 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
     loadData();
   }, [memberId]);
 
-  const handleSimulatePayment = async () => {
-    if (!formData.planId) return toast.error('Please select a plan');
-    
+  // ── One-time payment (standard Cashfree checkout) ─────────────────────────
+  const handlePay = async () => {
+    if (!formData.planId)         return toast.error('Please select a plan');
+    if (!formData.customerName)   return toast.error('Please enter your name');
+    if (!formData.customerMobile) return toast.error('Please enter your mobile number');
+
     setSubmitting(true);
     try {
-      // In a real flow, we'd call createOrder then open Razorpay.
-      // For testing, we send a 'mock' verification to the backend.
-      const mockPaymentData = {
-        ...formData,
-        refCode: memberId,
-        razorpay_payment_id: `pay_mock_${Date.now()}`,
-        razorpay_order_id: `order_mock_${Date.now()}`,
-        razorpay_signature: 'mock_signature', // Backend will accept this if keys are dummy
-        isTest: true 
-      };
+      sessionStorage.setItem('cb_checkout_data', JSON.stringify({ ...formData, memberId }));
 
-      const res = await publicAPI.verifyPayment(mockPaymentData);
-      
-      if (res.data.success) {
-        toast.success('Payment Successful!');
-        const { policyId, newUser } = res.data.data;
-        let successUrl = `/buy/success?policyId=${policyId}`;
-        if (newUser) {
-          successUrl += `&memberId=${newUser.memberId}&password=${newUser.password}`;
-        }
-        router.push(successUrl);
-      }
+      const orderRes = await publicAPI.createOrder({
+        planId:          formData.planId,
+        refCode:         memberId,
+        customerName:    formData.customerName,
+        customerMobile:  formData.customerMobile,
+        customerEmail:   formData.customerEmail,
+      });
+
+      if (!orderRes.data.success) throw new Error(orderRes.data.message || 'Order creation failed');
+
+      const { paymentSessionId } = orderRes.data.data as { orderId: string; paymentSessionId: string };
+
+      if (typeof window.Cashfree === 'undefined') throw new Error('Payment SDK not loaded. Please refresh and try again.');
+
+      const mode     = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox';
+      const cashfree = window.Cashfree({ mode });
+
+      const result = await cashfree.checkout({ paymentSessionId, redirectTarget: '_self' });
+      if (result?.error) toast.error(result.error.message || 'Payment failed');
+
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Payment failed');
+      console.error('[Buy] Payment error:', err);
+      toast.error(err?.response?.data?.message || err.message || 'Payment failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ── AutoPay mandate creation ───────────────────────────────────────────────
+  const handleAutoPay = async () => {
+    if (!formData.planId)         return toast.error('Please select a plan');
+    if (!formData.customerName)   return toast.error('Please enter your name');
+    if (!formData.customerMobile) return toast.error('Please enter your mobile number');
+
+    setSubmitting(true);
+    try {
+      sessionStorage.setItem('cb_checkout_data', JSON.stringify({ ...formData, memberId }));
+
+      const res = await subscriptionAPI.create({
+        planId:          formData.planId,
+        refCode:         memberId,
+        customerName:    formData.customerName,
+        customerMobile:  formData.customerMobile,
+        customerEmail:   formData.customerEmail,
+        customerState:   formData.customerState,
+        nomineeName:     formData.nomineeName,
+        nomineeRelation: formData.nomineeRelation,
+      });
+
+      if (!res.data.success) throw new Error(res.data.message || 'Subscription creation failed');
+
+      const { authLink, subscriptionId } = res.data.data;
+
+      // Store subscription ID so success page can poll status
+      sessionStorage.setItem('cb_subscription_id', subscriptionId);
+
+      // Redirect to Cashfree mandate authorization page
+      window.location.href = authLink;
+
+    } catch (err: any) {
+      console.error('[Buy] AutoPay error:', err);
+      toast.error(err?.response?.data?.message || err.message || 'AutoPay setup failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -135,7 +184,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
         </div>
 
         <div className="bg-[#12151c] border border-white/[0.05] rounded-[32px] p-8 shadow-2xl shadow-black/50">
-          
+
           {/* STEP 1: Personal Details */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -159,10 +208,9 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => {
                   if (!formData.customerName || !formData.customerMobile || !formData.nomineeName) return toast.error('Please fill required fields');
-                  // Skip Step 2 (Plan Selection) if planId is already pre-selected via URL
                   setStep(formData.planId ? 3 : 2);
                 }}
                 className="w-full bg-emerald-500 hover:bg-emerald-400 text-[#0a0c10] font-black py-4 rounded-2xl transition-all shadow-xl shadow-emerald-500/20 uppercase tracking-widest text-xs mt-6"
@@ -207,7 +255,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
 
               <div className="flex gap-4 mt-8">
                 <button onClick={() => setStep(1)} className="flex-1 py-4 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-white transition-colors">Back</button>
-                <button 
+                <button
                   onClick={() => {
                     if (!formData.planId) return toast.error('Please select a plan');
                     setStep(3);
@@ -225,9 +273,10 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-white mb-1">Confirm & Pay</h2>
-                <p className="text-sm text-slate-400">Secured online payment via Razorpay</p>
+                <p className="text-sm text-slate-400">Secured online payment via Cashfree</p>
               </div>
 
+              {/* Price Breakdown */}
               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Plan Amount</span>
@@ -243,26 +292,84 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 </div>
               </div>
 
-              <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 flex gap-4">
-                <span className="text-xl">🛡️</span>
+              {/* AutoPay Toggle */}
+              <div className={`rounded-2xl border-2 p-5 transition-all duration-300 cursor-pointer ${autopay ? 'bg-purple-500/10 border-purple-500/50' : 'bg-white/[0.02] border-white/10 hover:border-white/20'}`}
+                onClick={() => setAutopay(!autopay)}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${autopay ? 'bg-purple-500/20' : 'bg-white/5'}`}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={autopay ? '#a855f7' : '#6b7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`text-sm font-black ${autopay ? 'text-purple-300' : 'text-white'}`}>Enable AutoPay (Yearly)</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Auto-renew every year — no manual payment</p>
+                    </div>
+                  </div>
+                  {/* Toggle switch */}
+                  <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${autopay ? 'bg-purple-500' : 'bg-white/10'}`}>
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${autopay ? 'left-7' : 'left-1'}`} />
+                  </div>
+                </div>
+
+                {autopay && (
+                  <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mt-2">
+                    <div className="flex items-start gap-3">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" className="mt-0.5 shrink-0">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                      </svg>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">How AutoPay Works</p>
+                        <p className="text-[10px] text-purple-300/70 font-bold leading-relaxed">
+                          ✅ <strong>First charge:</strong> ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')} deducted immediately<br/>
+                          🔁 <strong>Yearly renewal:</strong> Same amount auto-deducted each year<br/>
+                          ❌ <strong>Cancel anytime</strong> from your bank UPI / NetBanking settings
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Security badge */}
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 flex gap-4 items-center">
+                <span className="text-2xl flex-shrink-0">🛡️</span>
                 <p className="text-[10px] font-medium leading-relaxed text-blue-200/60 uppercase">
-                  Your payment is secured by Razorpay. Policy ID will be generated instantly after successful transaction.
+                  Your payment is secured by Cashfree. Policy ID will be generated instantly after successful transaction.
                 </p>
               </div>
 
               <div className="flex flex-col gap-4 mt-8">
-                <button 
+                <button
+                  id="cashfree-pay-now-btn"
                   disabled={submitting}
-                  onClick={handleSimulatePayment}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-black py-5 rounded-2xl transition-all shadow-2xl shadow-emerald-500/20 uppercase tracking-[0.2em] text-sm relative overflow-hidden group"
+                  onClick={autopay ? handleAutoPay : handlePay}
+                  className={`w-full font-black py-5 rounded-2xl transition-all shadow-2xl uppercase tracking-[0.2em] text-sm relative overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed text-white ${
+                    autopay
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'
+                      : 'bg-gradient-to-r from-emerald-500 to-blue-500 shadow-emerald-500/20'
+                  }`}
                 >
                   {submitting ? (
                     <div className="flex items-center justify-center gap-3">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Processing...</span>
+                      <span>{autopay ? 'Setting up AutoPay...' : 'Opening Payment...'}</span>
+                    </div>
+                  ) : autopay ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                      </svg>
+                      <span>Setup AutoPay — ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}/yr</span>
                     </div>
                   ) : (
-                    <span>Simulate Payment (Test)</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <span>Pay Now — ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}</span>
+                    </div>
                   )}
                 </button>
                 <button onClick={() => setStep(2)} className="text-xs font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors py-2">Edit Plan Selection</button>
