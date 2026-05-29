@@ -1,9 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { salesAPI, plansAPI } from '@/lib/api';
+import { subscriptionAPI, plansAPI } from '@/lib/api'; 
 import { IPlan, IUser } from '@/types';
 import toast from 'react-hot-toast';
+
+declare global {
+  interface Window {
+    Cashfree: (config: { mode: string }) => {
+      checkout: (options: any) => Promise<{ error?: { message: string }; redirect?: boolean }>;
+      subscriptionsCheckout: (options: any) => Promise<{ error?: { message: string }; redirect?: boolean }>;
+    };
+  }
+}
 
 export default function NewSaleSection({ user }: { user: IUser }) {
   const [plans, setPlans] = useState<IPlan[]>([]);
@@ -17,6 +26,15 @@ export default function NewSaleSection({ user }: { user: IUser }) {
   });
 
   useEffect(() => {
+    // Inject Cashfree SDK if not already present
+    if (!document.getElementById('cashfree-sdk')) {
+      const script = document.createElement('script');
+      script.id = 'cashfree-sdk';
+      script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
     const fetchPlans = async () => {
       try {
         const res = await plansAPI.getAll();
@@ -38,13 +56,36 @@ export default function NewSaleSection({ user }: { user: IUser }) {
     
     setSubmitting(true);
     try {
-      const res = await salesAPI.create(formData);
-      if (res.data.success) {
-        toast.success('Sale recorded successfully!');
-        setFormData({ customerName: '', customerMobile: '', planId: '' });
+      const res = await subscriptionAPI.create({
+        planId: formData.planId,
+        refCode: user.memberId, // Agent's own member ID
+        customerName: formData.customerName,
+        customerMobile: formData.customerMobile,
+        customerEmail: 'noreply@curebharat.com', // Optional defaults
+        customerState: 'Maharashtra',
+        nomineeName: 'Pending',
+        nomineeRelation: 'Pending'
+      });
+
+      if (!res.data.success) throw new Error(res.data.message || 'Payment initialization failed');
+
+      const { authLink, subscriptionId, subsSessionId } = res.data.data;
+
+      if (subsSessionId) {
+        if (typeof window.Cashfree === 'undefined') throw new Error('Payment SDK not loaded. Please refresh.');
+        const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox';
+        const cashfree = window.Cashfree({ mode });
+        
+        // Open the Cashfree popup/checkout securely on the agent's device
+        cashfree.subscriptionsCheckout({ subsSessionId, redirectTarget: '_self' });
+      } else if (authLink) {
+        window.location.href = authLink;
+      } else {
+        throw new Error('No checkout session returned');
       }
+
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to record sale');
+      toast.error(error.response?.data?.message || error.message || 'Failed to initialize payment');
     } finally {
       setSubmitting(false);
     }
