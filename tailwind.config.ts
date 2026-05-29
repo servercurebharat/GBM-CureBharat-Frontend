@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['Questrial', 'sans-serif', 'sans-serif'],
         display: ['var(--font-syne)', 'sans-serif'],
       },
       colors: {
