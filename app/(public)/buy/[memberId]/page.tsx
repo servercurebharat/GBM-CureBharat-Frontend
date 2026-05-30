@@ -24,7 +24,6 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
   const [plans,      setPlans]      = useState<IPlan[]>([]);
   const [step,       setStep]       = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [autopay,    setAutopay]    = useState(false); // AutoPay toggle
 
   const [formData, setFormData] = useState({
     customerName:     '',
@@ -207,7 +206,15 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 <Input label="Full Name" value={formData.customerName} onChange={(v: string) => setFormData({...formData, customerName: v})} placeholder="Enter full name" />
                 <Input label="Mobile Number" value={formData.customerMobile} onChange={(v: string) => setFormData({...formData, customerMobile: v.replace(/\D/g, '')})} placeholder="98765 43210" maxLength={10} />
                 <Input label="Email (Optional)" value={formData.customerEmail} onChange={(v: string) => setFormData({...formData, customerEmail: v})} placeholder="john@example.com" />
-                <Select label="State" value={formData.customerState} onChange={(v: string) => setFormData({...formData, customerState: v})} options={['Maharashtra', 'Gujarat', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Uttar Pradesh']} />
+                <Select label="State" value={formData.customerState} onChange={(v: string) => setFormData({...formData, customerState: v})} options={[
+                  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+                  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+                  'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+                  'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+                  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+                  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+                  'Delhi', 'Lakshadweep', 'Puducherry'
+                ]} />
               </div>
 
               <div className="pt-6 border-t border-white/5">
@@ -302,44 +309,35 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 </div>
               </div>
 
-              {/* AutoPay Toggle */}
-              <div className={`rounded-2xl border-2 p-5 transition-all duration-300 cursor-pointer ${autopay ? 'bg-purple-500/10 border-purple-500/50' : 'bg-white/[0.02] border-white/10 hover:border-white/20'}`}
-                onClick={() => setAutopay(!autopay)}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${autopay ? 'bg-purple-500/20' : 'bg-white/5'}`}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={autopay ? '#a855f7' : '#6b7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <p className={`text-sm font-black ${autopay ? 'text-purple-300' : 'text-white'}`}>Enable AutoPay (Yearly)</p>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Auto-renew every year — no manual payment</p>
-                    </div>
+              {/* AutoPay Info (Compulsory) */}
+              <div className="rounded-2xl border-2 border-purple-500/50 bg-purple-500/10 p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/20">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                    </svg>
                   </div>
-                  {/* Toggle switch */}
-                  <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${autopay ? 'bg-purple-500' : 'bg-white/10'}`}>
-                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${autopay ? 'left-7' : 'left-1'}`} />
+                  <div>
+                    <p className="text-sm font-black text-purple-300">AutoPay Enabled (Yearly)</p>
+                    <p className="text-[10px] text-purple-300/70 font-bold uppercase tracking-wide">Auto-renew every year — no manual payment</p>
                   </div>
                 </div>
 
-                {autopay && (
-                  <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 mt-2">
-                    <div className="flex items-start gap-3">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" className="mt-0.5 shrink-0">
-                        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
-                      </svg>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">How AutoPay Works</p>
-                        <p className="text-[10px] text-purple-300/70 font-bold leading-relaxed">
-                          ✅ <strong>First charge:</strong> ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')} deducted immediately<br/>
-                          🔁 <strong>Yearly renewal:</strong> Same amount auto-deducted each year<br/>
-                          ❌ <strong>Cancel anytime</strong> from your bank UPI / NetBanking settings
-                        </p>
-                      </div>
+                <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl p-4 mt-2">
+                  <div className="flex items-start gap-3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" className="mt-0.5 shrink-0">
+                      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                    </svg>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black text-purple-300 uppercase tracking-widest">How AutoPay Works</p>
+                      <p className="text-[10px] text-purple-300/80 font-bold leading-relaxed">
+                        ✅ <strong>First charge:</strong> ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')} deducted immediately<br/>
+                        🔁 <strong>Yearly renewal:</strong> Same amount auto-deducted each year<br/>
+                        ❌ <strong>Cancel anytime</strong> from your bank UPI / NetBanking settings
+                      </p>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Security badge */}
@@ -354,31 +352,20 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 <button
                   id="cashfree-pay-now-btn"
                   disabled={submitting}
-                  onClick={autopay ? handleAutoPay : handlePay}
-                  className={`w-full font-black py-5 rounded-2xl transition-all shadow-2xl uppercase tracking-[0.2em] text-sm relative overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed text-white ${
-                    autopay
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'
-                      : 'bg-gradient-to-r from-emerald-500 to-blue-500 shadow-emerald-500/20'
-                  }`}
+                  onClick={handleAutoPay}
+                  className="w-full font-black py-5 rounded-2xl transition-all shadow-2xl uppercase tracking-[0.2em] text-sm relative overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20"
                 >
                   {submitting ? (
                     <div className="flex items-center justify-center gap-3">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>{autopay ? 'Setting up AutoPay...' : 'Opening Payment...'}</span>
+                      <span>Setting up AutoPay...</span>
                     </div>
-                  ) : autopay ? (
+                  ) : (
                     <div className="flex items-center justify-center gap-2">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
                       </svg>
                       <span>Setup AutoPay — ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}/yr</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                      </svg>
-                      <span>Pay Now — ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}</span>
                     </div>
                   )}
                 </button>

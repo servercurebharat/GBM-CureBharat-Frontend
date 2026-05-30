@@ -196,7 +196,23 @@ export default function MemberDetails() {
                        fileName={`Profile_${member.memberId}`}
                        variant="ghost"
                      />
-                     <button className="px-8 py-4 bg-white/5 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+                     <button 
+                       disabled={updating}
+                       onClick={async () => {
+                         if (!confirm("Are you sure you want to reset this member's password to the default (123456)?")) return;
+                         setUpdating(true);
+                         try {
+                           const res = await adminAPI.resetUserPassword(member._id);
+                           if (res.data.success) toast.success('Password reset to 123456');
+                           else toast.error(res.data.message || 'Failed to reset password');
+                         } catch (err) {
+                           toast.error('An error occurred');
+                         } finally {
+                           setUpdating(false);
+                         }
+                       }}
+                       className="px-8 py-4 bg-white/5 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-50"
+                     >
                         Reset PWD
                      </button>
                  </div>
@@ -448,20 +464,7 @@ export default function MemberDetails() {
         )}
 
         {activeTab === 'NETWORK' && (
-          <div className="bg-[#131241] rounded-2xl sm:rounded-[40px] p-8 sm:p-16 border border-white/5 shadow-2xl text-center">
-             <div className="max-w-md mx-auto">
-                <div className="w-24 h-24 bg-white/5 rounded-[32px] flex items-center justify-center mx-auto mb-8 text-white/10">
-                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                </div>
-                <h3 className="text-xl font-black text-white tracking-tight">Genealogy Extension</h3>
-                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-4 leading-relaxed">
-                   The full downline hierarchy for this member is available in the main Genealogy Tree module. 
-                </p>
-                <Link href="/admin/hierarchy" className="mt-8 inline-block px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
-                   Open Genealogy Tree
-                </Link>
-             </div>
-          </div>
+          <NetworkView userId={member._id} />
         )}
 
       </div>
@@ -559,4 +562,81 @@ function getIcon(name: string) {
     case 'award': return <svg {...s}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>;
     default: return null;
   }
+}
+
+function NetworkView({ userId }: { userId: string }) {
+  const [downline, setDownline] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    usersAPI.getDownline(userId).then(res => {
+       if (res.data.success) {
+         setDownline(res.data.data);
+         // Expand root by default
+         setExpanded({ [res.data.data._id]: true });
+       }
+    }).finally(() => setLoading(false));
+  }, [userId]);
+
+  const toggleExpand = (id: string) => {
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  if (loading) return <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#10b981] mx-auto"></div></div>;
+  if (!downline) return <div className="text-white/40 text-center py-20 font-black uppercase tracking-widest text-xs">No network found.</div>;
+
+  const renderNode = (node: any, isRoot = false) => {
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = !!expanded[node._id];
+
+    return (
+      <div key={node._id} className={`${isRoot ? '' : 'ml-4 sm:ml-10 mt-3'}`}>
+         <div className="bg-black/20 rounded-[20px] p-5 sm:p-6 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-[#10b981]/30 transition-all shadow-xl relative group">
+            {hasChildren && (
+              <button 
+                onClick={() => toggleExpand(node._id)}
+                className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#131241] border border-[#10b981]/30 flex items-center justify-center text-[#10b981] hover:bg-[#10b981] hover:text-[#131241] transition-all z-10 shadow-lg"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`}><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            )}
+            <div className={`flex items-center gap-5 ${hasChildren ? 'pl-2' : ''}`}>
+               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg ${
+                 isRoot ? 'bg-[#10b981] text-[#131241]' : 'bg-[#10b981]/10 text-[#10b981]'
+               }`}>
+                  {node.name.slice(0, 1)}
+               </div>
+               <div>
+                  <p className="text-sm font-black text-white tracking-tight">{node.name}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    {node.memberId} <span className="mx-2 text-white/10">•</span> <span className="text-[#10b981]">{node.rank}</span>
+                  </p>
+               </div>
+            </div>
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center bg-white/5 sm:bg-transparent p-3 sm:p-0 rounded-xl">
+               <p className="text-[11px] font-black text-white uppercase tracking-widest">{node.teamSize} <span className="text-slate-500">Team</span></p>
+               <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest sm:mt-1">{node.personalSalesCount} <span className="text-slate-500">Sales</span></p>
+            </div>
+         </div>
+         {hasChildren && isExpanded && (
+           <div className="border-l-2 border-white/10 ml-6 sm:ml-6 pl-0 animate-in slide-in-from-top-2 duration-300">
+              {node.children.map((child: any) => renderNode(child))}
+           </div>
+         )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-[#131241] rounded-[32px] p-6 sm:p-12 border border-white/5 shadow-2xl animate-fade-in overflow-x-auto">
+      <h3 className="text-sm font-black text-white/50 uppercase tracking-[0.3em] mb-10 flex items-center gap-4">
+         <div className="w-2 h-2 rounded-full bg-[#10b981]" />
+         Downline Hierarchy
+      </h3>
+      <div className="min-w-[400px] pl-3">
+        {renderNode(downline, true)}
+      </div>
+    </div>
+  );
 }

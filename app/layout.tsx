@@ -1,10 +1,17 @@
 import type { Metadata } from 'next';
-import { Questrial, Syne } from 'next/font/google';
+import { Roboto, Questrial, Syne } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  variable: '--font-roboto',
+  weight: ['400', '500', '700', '900'],
+  display: 'swap',
+});
 
 const questrial = Questrial({
   subsets: ['latin'],
@@ -32,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${questrial.variable} ${syne.variable}`}>
+    <html lang="en" className={`${roboto.variable} ${syne.variable}`}>
       <body className="bg-[#0d0f14] text-[#e8eaf0] font-sans antialiased overflow-x-hidden">
         {/* Cashfree JS SDK — loaded after page is interactive */}
         <Script

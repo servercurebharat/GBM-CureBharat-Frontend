@@ -253,7 +253,7 @@ export default function Topbar({ pageTitle, user, setSidebarOpen }: TopbarProps)
                   </div>
                </div>
                
-               <div className="space-y-3">
+               <div className="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
                   {notifications.length === 0 ? (
                     <div className="text-center py-10">
                        <p className="text-[10px] font-black text-white/10 uppercase tracking-widest italic">No active alerts</p>

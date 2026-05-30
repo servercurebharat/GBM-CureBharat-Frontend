@@ -105,7 +105,15 @@ export default function NewSaleWizard() {
     }
   };
 
-  const states = ['Maharashtra', 'Delhi', 'Karnataka', 'Gujarat', 'Uttar Pradesh', 'West Bengal', 'Tamil Nadu', 'Rajasthan', 'Madhya Pradesh', 'Bihar'];
+  const states = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi', 'Lakshadweep', 'Puducherry'
+  ];
   const relations = ['Spouse', 'Parent', 'Child', 'Sibling', 'Other'];
 
   if (loading) return <DashboardLayout pageTitle="New Policy Sale"><div className="flex justify-center p-20"><div className="w-10 h-10 border-4 border-hcc border-t-transparent rounded-full animate-spin" /></div></DashboardLayout>;

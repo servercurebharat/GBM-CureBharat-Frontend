@@ -111,6 +111,8 @@ export const salesAPI = {
 export const walletAPI = {
   getMyWallet: () =>
     api.get<ApiResponse<IWallet>>('/wallet/my'),
+  getAllTransactions: (params?: { page?: number; limit?: number; type?: string }) =>
+    api.get<PaginatedResponse<any>>('/wallet/global-ledger', { params }),
   requestWithdrawal: (amount: number) =>
     api.post('/wallet/withdraw', { amount }),
   getMyWithdrawals: () =>
@@ -179,6 +181,8 @@ export const adminAPI = {
     api.put<ApiResponse<any>>(`/admin/users/${id}/bank-verify`, { status }),
   updateUserStatus: (id: string, status: string) =>
     api.put<ApiResponse<any>>(`/admin/users/${id}/status`, { status }),
+  resetUserPassword: (id: string) =>
+    api.put<ApiResponse<any>>(`/admin/users/${id}/reset-password`),
   getCommissionConfig: () =>
     api.get<ApiResponse<any>>('/admin/commission-config'),
   updateCommissionConfig: (data: any) =>

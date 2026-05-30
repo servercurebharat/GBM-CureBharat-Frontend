@@ -9,6 +9,7 @@ export default function AdminStatePerformancePage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'revenue' | 'members'>('revenue');
+  const [filterState, setFilterState] = useState('All States');
 
   useEffect(() => {
     async function fetchData() {
@@ -33,44 +34,52 @@ export default function AdminStatePerformancePage() {
   };
 
   const sortedData = useMemo(() => {
-    return [...data].sort((a, b) => b[viewMode] - a[viewMode]);
-  }, [data, viewMode]);
+    let result = [...data];
+    if (filterState !== 'All States') {
+      result = result.filter(s => s.state.toLowerCase() === filterState.toLowerCase());
+    }
+    return result.sort((a, b) => b[viewMode] - a[viewMode]);
+  }, [data, viewMode, filterState]);
 
   const totals = useMemo(() => {
     return {
-      revenue: data.reduce((acc, curr) => acc + curr.revenue, 0),
-      members: data.reduce((acc, curr) => acc + curr.members, 0),
-      activeStates: data.length,
+      revenue: sortedData.reduce((acc, curr) => acc + curr.revenue, 0),
+      members: sortedData.reduce((acc, curr) => acc + curr.members, 0),
+      activeStates: sortedData.length,
       topState: sortedData[0]?.code || '--'
     };
-  }, [data, sortedData]);
+  }, [sortedData]);
 
-  const handleMapReport = () => {
-    alert("Map Report feature is coming soon in the next update!");
-  };
+
 
   return (
     <DashboardLayout pageTitle="State Performance">
       <div className="space-y-8 pb-20">
         {/* Header Area */}
-        <div className="bg-[#131241] rounded-[2.5rem] p-10 shadow-2xl border border-white/[0.03] relative overflow-hidden group">
+        <div className="bg-[#131241] rounded-[2rem] p-8 shadow-xl border border-white/[0.03] relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/5 blur-3xl -mr-48 -mt-48 group-hover:bg-[#10b981]/10 transition-all duration-700" />
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-3">ANALYTICS / PERFORMANCE / REGIONAL</p>
-              <h1 className="text-4xl font-black text-white tracking-tight font-display">Regional Analytics</h1>
-              <p className="text-sm text-white/40 mt-4 max-w-2xl leading-relaxed">
-                Real-time performance tracking across all active Indian states. Monitor revenue distribution, 
-                member growth, and regional leadership metrics.
-              </p>
-            </div>
-            <button 
-              onClick={handleMapReport}
-              className="bg-[#10b981] px-8 py-4 rounded-[20px] text-[11px] font-black text-white uppercase tracking-[0.2em] shadow-xl shadow-[#10b981]/20 flex items-center gap-3 hover:bg-[#059669] active:scale-95 transition-all"
-            >
-               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-               View Geographic Map
-            </button>
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                  <p className="text-[10px] font-black text-[#10b981] uppercase tracking-[0.3em] mb-2">ANALYTICS / REGIONAL PERFORMANCE</p>
+                  <h1 className="text-3xl font-black text-white tracking-tight font-display">Regional Analytics</h1>
+                  <p className="text-xs text-white/40 mt-2 max-w-3xl leading-relaxed">
+                    Real-time performance tracking across all active Indian states. Monitor revenue distribution, 
+                    member growth, and regional leadership metrics.
+                  </p>
+              </div>
+              <div className="flex-shrink-0 w-full md:w-auto">
+                  <select 
+                    value={filterState}
+                    onChange={(e) => setFilterState(e.target.value)}
+                    className="w-full bg-[#1a195e] border border-white/10 rounded-xl px-6 py-3.5 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-[#10b981] min-w-[200px] cursor-pointer appearance-none shadow-xl"
+                    style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
+                  >
+                    <option value="All States" className="bg-[#131241] text-white font-medium">🌍 All States Overview</option>
+                    {[...Array.from(new Set(data.map(d => d.state)))].sort().map(state => (
+                      <option key={state as string} value={state as string} className="bg-[#131241] text-white font-medium">{state as string}</option>
+                    ))}
+                  </select>
+              </div>
           </div>
         </div>
 
@@ -227,7 +236,7 @@ function StateStat({ label, value, sub, icon, color }: any) {
           </div>
           <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center ${color} shadow-lg border border-white/5 group-hover:scale-110 transition-transform`}>
              {icon === 'trophy' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9V2h12v7"></path><path d="M12 2v7"></path><rect x="6" y="9" width="12" height="6" rx="2"></rect><path d="M10 15l-2 7 4-2 4 2-2-7"></path></svg>}
-             {icon === 'revenue' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>}
+             {icon === 'revenue' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12"/><path d="M6 8h12"/><path d="m6 13 8.5 8"/><path d="M6 13h3"/><path d="M9 13c6.667 0 6.667-10 0-10"/></svg>}
              {icon === 'growth' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>}
              {icon === 'map' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon></svg>}
           </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login', '/register', '/otp-verify'];
+const PUBLIC_ROUTES = ['/login', '/register', '/otp-verify', '/buy'];
 
 // Routes accessible to ANY logged-in user regardless of role
 const SHARED_ROUTES = ['/payment'];
@@ -44,6 +44,15 @@ export function middleware(request: NextRequest) {
   // 3. Role-based route protection
   if (userRole) {
     const allowedBase = ROLE_ROUTES[userRole];
+    
+    if (!allowedBase) {
+      // Invalid role in cookie, clear it by forcing a new login
+      const res = NextResponse.redirect(new URL('/login', request.url));
+      res.cookies.delete('auth_token');
+      res.cookies.delete('user_role');
+      return res;
+    }
+
     const isAccessingRoot = pathname === '/';
     
     // Check if user is trying to access a different role's dashboard

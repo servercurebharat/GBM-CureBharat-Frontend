@@ -325,20 +325,38 @@ function AdminMembersContent() {
                   </tbody>
                 </table>
               </div>
-              <div className="px-8 py-5 flex items-center justify-between border-t border-white/5">
+              <div className="px-8 py-5 flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-white/5">
                 <div className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-                   Page 1 of 15 · {total} records
+                   Page {page} of {Math.ceil(total / 10) || 1} · {total} records
                 </div>
                 <div className="flex items-center gap-1">
-                   <button className="p-2 text-white/20 hover:text-white transition-colors">
+                   <button 
+                     disabled={page === 1}
+                     onClick={() => setPage(p => Math.max(1, p - 1))}
+                     className="p-2 text-white/20 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                   >
                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                    </button>
-                   {[1, 2, 3].map(p => (
-                     <button key={p} className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${p === 1 ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'}`}>
-                       {p}
-                     </button>
+                   
+                   {Array.from({ length: Math.ceil(total / 10) || 1 }, (_, i) => i + 1)
+                     .filter(p => p === 1 || p === Math.ceil(total / 10) || Math.abs(page - p) <= 1)
+                     .map((p, i, arr) => (
+                       <div key={p} className="flex items-center">
+                         {i > 0 && arr[i - 1] !== p - 1 && <span className="text-white/30 px-1 text-[10px]">...</span>}
+                         <button 
+                           onClick={() => setPage(p)}
+                           className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all ${page === p ? 'bg-[#10b981] text-[#131241] shadow-lg shadow-[#10b981]/20' : 'text-white/40 hover:text-white'}`}
+                         >
+                           {p}
+                         </button>
+                       </div>
                    ))}
-                   <button className="p-2 text-white/20 hover:text-white transition-colors">
+
+                   <button 
+                     disabled={page >= Math.ceil(total / 10) || total === 0}
+                     onClick={() => setPage(p => Math.min(Math.ceil(total / 10), p + 1))}
+                     className="p-2 text-white/20 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                   >
                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                    </button>
                 </div>

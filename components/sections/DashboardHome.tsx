@@ -47,7 +47,16 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
 
   const searchParams = useSearchParams();
 
-  const STATES = ['all', 'Maharashtra', 'Gujarat', 'Delhi', 'Karnataka', 'Rajasthan', 'Uttar Pradesh'];
+  const STATES = [
+    'all',
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 
+    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+  ];
   const PERIODS = [
     { label: 'Current Month', value: 'mtd' },
     { label: 'Year to Date', value: 'ytd' },
@@ -60,11 +69,13 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       const [summaryRes, leadersRes, walletRes] = await Promise.all([
         dashboardAPI.getSummary({ period, state: selectedState }),
         dashboardAPI.getLeaders({ role: leaderRole || undefined }),
-        walletAPI.getMyWallet()
+        user?.role === 'admin' ? walletAPI.getAllTransactions({ limit: 5 }) : walletAPI.getMyWallet()
       ]);
       if (summaryRes.data.success) setSummary(summaryRes.data.data);
       if (leadersRes.data.success) setLeaders(leadersRes.data.data);
-      if (walletRes.data.success) setTransactions(walletRes.data.data?.ledger || []);
+      if (walletRes.data.success) {
+        setTransactions(user?.role === 'admin' ? walletRes.data.data : (walletRes.data.data?.ledger || []));
+      }
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
     } finally {
@@ -851,7 +862,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                 ))}
               </div>
             ) : (
-              <button className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View Rankings</button>
+              <Link href={user.role === 'admin' ? '/admin/members' : `/${user.role}/team`} className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View Rankings</Link>
             )}
          </div>
 
@@ -961,8 +972,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
               <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Pending Withdrawals</h3>
               <div className="flex gap-4">
-                 <button className="px-6 py-2 bg-#059669/20 text-blue-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-blue-400/20 hover:bg-#059669 hover:text-white transition-all">Batch Approve</button>
-                 <button className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">View All</button>
+                 <Link href="/admin/payouts" className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">View All</Link>
               </div>
            </div>
            <div className="overflow-x-auto">
@@ -970,7 +980,8 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                  <thead>
                     <tr className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/5">
                        <th className="px-10 py-6">ID</th>
-                       <th className="px-10 py-6">Cycle</th>
+                       <th className="px-10 py-6">Member</th>
+                       <th className="px-10 py-6">Date</th>
                        <th className="px-10 py-6">Role</th>
                        <th className="px-10 py-6 text-right">Amount</th>
                        <th className="px-10 py-6 text-right">TDS</th>
@@ -981,11 +992,15 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                  <tbody className="divide-y divide-white/5">
                     {summary.pendingWithdrawals.map((w: any) => (
                       <tr key={w._id} className="hover:bg-white/[0.02] transition-colors">
-                         <td className="px-10 py-6 text-[10px] font-black text-blue-400 uppercase tracking-widest">#{w._id.slice(-6)}</td>
-                         <td className="px-10 py-6 text-[10px] font-black text-white uppercase">{w.cycleMonth}</td>
+                         <td className="px-10 py-6 text-[10px] font-black text-blue-400 uppercase tracking-widest">#{w.requestId || w._id.slice(-6)}</td>
+                         <td className="px-10 py-6">
+                            <p className="text-[11px] font-black text-white">{w.user?.name || 'Unknown'}</p>
+                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">{w.user?.memberId || '-'}</p>
+                         </td>
+                         <td className="px-10 py-6 text-[10px] font-black text-white uppercase">{new Date(w.requestedAt || w.createdAt).toLocaleDateString()}</td>
                          <td className="px-10 py-6 text-[10px] font-bold text-slate-400">{w.user?.role?.toUpperCase()}</td>
-                         <td className="px-10 py-6 text-right text-[11px] font-black text-white">{formatCurrency(w.amount)}</td>
-                         <td className="px-10 py-6 text-right text-[10px] font-black text-slate-500">{formatCurrency(w.amount * 0.05)}</td>
+                         <td className="px-10 py-6 text-right text-[11px] font-black text-white">{formatCurrency(w.grossAmount)}</td>
+                         <td className="px-10 py-6 text-right text-[10px] font-black text-slate-500">{formatCurrency(w.tdsAmount)}</td>
                          <td className="px-10 py-6 text-center">
                             <span className="bg-amber-500/10 text-amber-500 px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border border-amber-500/20">Review</span>
                          </td>
@@ -1004,7 +1019,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       <div className="bg-[#131241] rounded-[40px] shadow-2xl border border-white/5 overflow-hidden">
          <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
             <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Recent Transactions</h3>
-            <a href={`/${user.role}/finance`} className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">View Hub</a>
+            <Link href={user.role === 'admin' ? '/admin/wallet-ledger' : `/${user.role}/finance`} className="text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors">View Hub</Link>
          </div>
          <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
