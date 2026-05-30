@@ -240,8 +240,11 @@ function SuccessContent() {
             </div>
             <div>
               <h3 className="text-[11px] font-black text-[#fbbf24] uppercase tracking-widest mb-1.5">Identity Verification Required</h3>
-              <p className="text-[10px] font-bold text-[#fbbf24]/70 leading-relaxed uppercase">
+              <p className="text-[10px] font-bold text-[#fbbf24]/70 leading-relaxed uppercase mb-2">
                 Please login to your dashboard immediately to submit your KYC documents (Aadhaar, PAN, Bank Details) to activate your policy and unlock payouts.
+              </p>
+              <p className="text-[10px] font-black text-[#fbbf24] leading-relaxed uppercase">
+                To login, use your registered mobile no. and default password 123456.
               </p>
               <Link href="/login" className="inline-block mt-3 px-4 py-2 bg-[#fbbf24] text-[#131241] rounded-lg text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all">
                 Login to Verify →
