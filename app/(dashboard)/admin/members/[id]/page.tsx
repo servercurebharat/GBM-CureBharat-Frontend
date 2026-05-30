@@ -101,29 +101,29 @@ export default function MemberDetails() {
         <div className="bg-[#131241] rounded-2xl sm:rounded-[32px] p-5 sm:p-8 border border-white/5 shadow-2xl relative overflow-hidden">
            <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/10 blur-[120px] -mr-48 -mt-48" />
            
-           <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-8 relative z-10 w-full">
+           <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8 relative z-10 w-full">
               {/* Identity Info */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
                  <button onClick={() => router.back()} className="p-3 sm:p-4 bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-white transition-all group active:scale-95 self-start sm:self-auto shrink-0">
                     <svg className="group-hover:-translate-x-1 transition-transform" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6"></polyline></svg>
                  </button>
-                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full">
+                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 min-w-0">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[24px] bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center text-2xl sm:text-3xl font-black text-white shadow-xl uppercase shrink-0">
                        {member.name.slice(0, 1)}
                     </div>
-                    <div className="flex-1 w-full">
+                    <div className="min-w-0">
                        <div className="flex flex-wrap items-center gap-3">
-                          <h1 className="text-3xl font-black text-white tracking-tight leading-tight">{member.name}</h1>
-                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                          <h1 className="text-3xl font-black text-white tracking-tight leading-tight truncate">{member.name}</h1>
+                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0 ${
                              member.status === 'active' ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                           }`}>
                              {member.status}
                           </span>
                        </div>
                         <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3 mt-4">
-                          <span className="text-xs sm:text-sm font-black text-[#10b981] tracking-widest uppercase">ID: {member.memberId}</span>
-                          <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10" />
-                          <div className={`px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border flex items-center gap-2.5 transition-all duration-500 shadow-2xl backdrop-blur-md ${
+                          <span className="text-xs sm:text-sm font-black text-[#10b981] tracking-widest uppercase shrink-0">ID: {member.memberId}</span>
+                          <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10 shrink-0" />
+                          <div className={`px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border flex items-center gap-2.5 transition-all duration-500 shadow-2xl backdrop-blur-md shrink-0 ${
                              member.role === 'hcc' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-emerald-500/5' :
                              member.role === 'hcm' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400 shadow-blue-500/5' :
                              member.role === 'hba' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-amber-500/5' :
@@ -145,7 +145,7 @@ export default function MemberDetails() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4 sm:gap-6 w-full 2xl:w-auto">
+              <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4 sm:gap-6 shrink-0">
                  <div className="flex w-full sm:w-auto overflow-x-auto custom-scrollbar pb-2 sm:pb-0">
                     <div className="flex bg-black/40 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-md shrink-0">
                        {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
@@ -162,7 +162,7 @@ export default function MemberDetails() {
                     </div>
                  </div>
                  <div className="h-10 w-px bg-white/5 hidden xl:block mx-2 shrink-0" />
-                 <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                 <div className="flex flex-row flex-wrap items-center gap-3">
                     {member.status === 'blocked' ? (
                       <button 
                         disabled={updating}
