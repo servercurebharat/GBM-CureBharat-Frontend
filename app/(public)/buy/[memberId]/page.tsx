@@ -408,9 +408,9 @@ function Select({ label, value, onChange, options }: any) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-emerald-500/50 appearance-none"
+        className="w-full bg-[#12151c] border border-white/10 rounded-xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-emerald-500/50 appearance-none"
       >
-        {options.map((o: string) => <option key={o} value={o} className="bg-[#12151c]">{o}</option>)}
+        {options.map((o: string) => <option key={o} value={o} className="bg-[#12151c] text-white">{o}</option>)}
       </select>
     </div>
   );
