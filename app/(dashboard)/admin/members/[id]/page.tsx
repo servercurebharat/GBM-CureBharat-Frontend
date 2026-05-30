@@ -98,7 +98,7 @@ export default function MemberDetails() {
       <div className="space-y-6 pb-20 animate-fade-in max-w-[1600px] mx-auto">
         
         {/* Modern Header Section */}
-        <div className="bg-[#0b101e] rounded-2xl sm:rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col">
+        <div className="bg-[#131241] rounded-2xl sm:rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col">
            <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/10 blur-[120px] -mr-48 -mt-48" />
            
            {/* Top Content (Profile + Actions) */}
@@ -207,7 +207,7 @@ export default function MemberDetails() {
            </div>
 
            {/* Tabs Row */}
-           <div className="flex w-full overflow-x-auto custom-scrollbar relative z-10 bg-[#0f1523]">
+           <div className="flex w-full overflow-x-auto custom-scrollbar relative z-10 bg-black/20">
               {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
                 <button
                   key={tab}
