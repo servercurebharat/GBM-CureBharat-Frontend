@@ -118,6 +118,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
         customerState:   formData.customerState,
         nomineeName:     formData.nomineeName,
         nomineeRelation: formData.nomineeRelation,
+        returnUrl:       `${window.location.origin}/buy/success`
       });
 
       if (!res.data.success) throw new Error(res.data.message || 'Subscription creation failed');
