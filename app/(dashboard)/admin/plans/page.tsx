@@ -22,6 +22,7 @@ export default function AdminPlansPage() {
     description: '',
     isActive: true
   });
+  const [brochureFile, setBrochureFile] = useState<File | null>(null);
 
   const fetchPlans = async () => {
     setLoading(true);
@@ -71,11 +72,17 @@ export default function AdminPlansPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
-      ...formData,
-      price: formData.price * 100, // Convert to paise
-      businessVolume: formData.businessVolume * 100
-    };
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('category', formData.category);
+    data.append('price', String(formData.price * 100));
+    data.append('businessVolume', String(formData.businessVolume * 100));
+    data.append('isCommissionable', String(formData.isCommissionable));
+    data.append('description', formData.description);
+    data.append('isActive', String(formData.isActive));
+    if (brochureFile) {
+      data.append('brochure', brochureFile);
+    }
 
     try {
       let res;
@@ -88,6 +95,7 @@ export default function AdminPlansPage() {
       if (res.data.success) {
         toast.success(editingPlan ? 'Plan updated' : 'Plan created');
         setIsModalOpen(false);
+        setBrochureFile(null);
         fetchPlans();
       }
     } catch (error: any) {
@@ -188,6 +196,29 @@ export default function AdminPlansPage() {
                       </p>
                     </div>
 
+                    <div className="flex gap-3 mb-3">
+                      {plan.brochureUrl && (
+                        <>
+                          <a 
+                            href={plan.brochureUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 text-center bg-[#6029F1]/10 hover:bg-[#6029F1]/20 text-[#6029F1] rounded-xl py-3 text-[10px] font-black uppercase tracking-widest border border-[#6029F1]/20 transition-all"
+                          >
+                            View Brochure
+                          </a>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(plan.brochureUrl!);
+                              toast.success('Brochure link copied!');
+                            }}
+                            className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-xl py-3 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
+                          >
+                            Share
+                          </button>
+                        </>
+                      )}
+                    </div>
                     <div className="flex gap-3">
                       <button 
                         onClick={() => handleOpenModal(plan)}
@@ -214,67 +245,78 @@ export default function AdminPlansPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-8">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300">
-            <div className="bg-[#6029F1] p-8 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl -mr-32 -mt-32" />
+          <div className="bg-[#131241] border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className="bg-[#131241] border-b border-white/10 p-8 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#6029F1]/20 blur-3xl -mr-32 -mt-32 pointer-events-none" />
               <h2 className="text-2xl font-bold font-display relative z-10">{editingPlan ? 'Edit Plan' : 'Add New Plan'}</h2>
-              <p className="text-white/60 text-xs font-bold uppercase tracking-widest relative z-10 mt-1">Product Configuration</p>
+              <p className="text-white/40 text-xs font-bold uppercase tracking-widest relative z-10 mt-1">Product Configuration</p>
             </div>
             
             <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Plan Name</label>
-                  {/* Issue #8 fix: text color was too light. Using slate-900 for legibility */}
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Plan Name</label>
                   <input 
                     type="text" 
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#6029F1] focus:ring-2 focus:ring-[#6029F1]/10 focus:bg-white transition-all"
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white placeholder:text-white/20 outline-none focus:border-[#6029F1] focus:ring-1 focus:ring-[#6029F1] transition-all"
                     placeholder="e.g. Super Suraksha"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</label>
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Category</label>
                   <select 
                     value={formData.category}
                     onChange={(e: any) => setFormData({...formData, category: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-[#6029F1] focus:bg-white transition-all appearance-none"
+                    className="w-full bg-[#12151c] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-[#6029F1] transition-all appearance-none"
                   >
                     <option value="service">Service Sale (Commissionable)</option>
                     <option value="onboarding">Onboarding (Entry Only)</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price (₹)</label>
-                  {/* Issue #8 fix: numeric inputs also need dark text */}
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Price (₹)</label>
                   <input 
                     type="number" 
                     required
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
-                    className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 outline-none focus:border-[#6029F1] focus:ring-2 focus:ring-[#6029F1]/10 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-[#6029F1] focus:ring-1 focus:ring-[#6029F1] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business Volume (BV ₹)</label>
+                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Business Volume (BV ₹)</label>
                   <input 
                     type="number" 
                     required
                     value={formData.businessVolume}
                     onChange={(e) => setFormData({...formData, businessVolume: Number(e.target.value)})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-[#6029F1] focus:bg-white transition-all"
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-[#6029F1] focus:ring-1 focus:ring-[#6029F1] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</label>
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Brochure (Image/PDF)</label>
+                <input 
+                  type="file" 
+                  accept="image/*,.pdf"
+                  onChange={(e) => setBrochureFile(e.target.files?.[0] || null)}
+                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white outline-none focus:border-[#6029F1] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-[#6029F1] file:text-white hover:file:brightness-110 cursor-pointer"
+                />
+                {editingPlan?.brochureUrl && !brochureFile && (
+                  <p className="text-[10px] text-white/40 mt-1">Current brochure exists. Uploading a new one will replace it.</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Description</label>
                 <textarea 
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-[#6029F1] focus:bg-white transition-all min-h-[100px]"
+                  className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white placeholder:text-white/20 outline-none focus:border-[#6029F1] focus:ring-1 focus:ring-[#6029F1] transition-all min-h-[100px]"
                   placeholder="Short product overview..."
                 />
               </div>
@@ -311,7 +353,7 @@ export default function AdminPlansPage() {
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="flex-1 bg-white/5 hover:bg-white/10 text-white rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
                 >
                   Cancel
                 </button>

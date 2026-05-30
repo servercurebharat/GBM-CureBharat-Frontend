@@ -85,8 +85,8 @@ export default function AddMemberModal({ isOpen, onClose, currentUser, onSuccess
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="w-full max-w-[500px] bg-[#111420] border border-white/10 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+      <div className="w-full max-w-[500px] max-h-[90vh] flex flex-col bg-[#111420] border border-white/10 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02] shrink-0">
           <div>
             <h3 className="text-lg font-bold text-white">Enroll New Member</h3>
             <p className="text-[10px] text-muted font-bold uppercase tracking-widest opacity-50">Sponsoring as {currentUser.memberId}</p>
@@ -94,7 +94,7 @@ export default function AddMemberModal({ isOpen, onClose, currentUser, onSuccess
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="p-8 space-y-5 overflow-y-auto">
           {success ? (
             <div className="py-10 text-center animate-in fade-in zoom-in">
               <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 text-3xl mx-auto mb-4">✓</div>

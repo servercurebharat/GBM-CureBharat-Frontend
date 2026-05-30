@@ -161,10 +161,14 @@ export const plansAPI = {
     api.get<ApiResponse<IPlan[]>>('/plans'),
   getAllAdmin: () =>
     api.get<ApiResponse<IPlan[]>>('/plans/admin/all'),
-  create: (data: Partial<IPlan>) =>
-    api.post<ApiResponse<IPlan>>('/plans', data),
-  update: (id: string, data: Partial<IPlan>) =>
-    api.put<ApiResponse<IPlan>>(`/plans/${id}`, data),
+  create: (data: Partial<IPlan> | FormData) =>
+    api.post<ApiResponse<IPlan>>('/plans', data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    }),
+  update: (id: string, data: Partial<IPlan> | FormData) =>
+    api.put<ApiResponse<IPlan>>(`/plans/${id}`, data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    }),
   delete: (id: string) =>
     api.delete<ApiResponse<any>>(`/plans/${id}`),
 };
