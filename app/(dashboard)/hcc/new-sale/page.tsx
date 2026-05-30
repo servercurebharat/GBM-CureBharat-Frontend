@@ -90,6 +90,7 @@ export default function NewSaleWizard() {
       const res = await salesAPI.create({
         customerName: saleForm.customerName,
         customerMobile: saleForm.customerMobile,
+        customerState: saleForm.customerState || 'Maharashtra',
         planId: saleForm.planId,
         ePinCode: saleForm.ePinCode
       });

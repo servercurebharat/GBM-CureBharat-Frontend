@@ -196,6 +196,7 @@ export interface RegisterData {
 export interface CreateSaleData {
   customerName: string;
   customerMobile: string;
+  customerState?: string;
   planId: string;
   ePinCode?: string;
 }
