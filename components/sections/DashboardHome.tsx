@@ -74,7 +74,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       if (summaryRes.data.success) setSummary(summaryRes.data.data);
       if (leadersRes.data.success) setLeaders(leadersRes.data.data);
       if (walletRes.data.success) {
-        setTransactions(user?.role === 'admin' ? walletRes.data.data : (walletRes.data.data?.ledger || []));
+        setTransactions(user?.role === 'admin' ? walletRes.data.data : ((walletRes.data.data as any)?.ledger || []));
       }
     } catch (err) {
       console.error('Dashboard data fetch error:', err);
