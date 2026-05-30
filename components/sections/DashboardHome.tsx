@@ -63,24 +63,28 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
     { label: 'All Time', value: 'all' }
   ];
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [summaryRes, leadersRes, walletRes] = await Promise.all([
-        dashboardAPI.getSummary({ period, state: selectedState }),
-        dashboardAPI.getLeaders({ role: leaderRole || undefined }),
-        user?.role === 'admin' ? walletAPI.getAllTransactions({ limit: 5 }) : walletAPI.getMyWallet()
-      ]);
-      if (summaryRes.data.success) setSummary(summaryRes.data.data);
-      if (leadersRes.data.success) setLeaders(leadersRes.data.data);
-      if (walletRes.data.success) {
-        setTransactions(user?.role === 'admin' ? walletRes.data.data : ((walletRes.data.data as any)?.ledger || []));
+  const fetchData = () => {
+    if (!summary) setLoading(true);
+    
+    dashboardAPI.getSummary({ period, state: selectedState })
+      .then(res => {
+        if (res.data.success) setSummary(res.data.data);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+
+    dashboardAPI.getLeaders({ role: leaderRole || undefined })
+      .then(res => {
+        if (res.data.success) setLeaders(res.data.data);
+      })
+      .catch(err => console.error(err));
+
+    const walletReq = user?.role === 'admin' ? walletAPI.getAllTransactions({ limit: 5 }) : walletAPI.getMyWallet();
+    walletReq.then(res => {
+      if (res.data.success) {
+        setTransactions(user?.role === 'admin' ? res.data.data : ((res.data.data as any)?.ledger || []));
       }
-    } catch (err) {
-      console.error('Dashboard data fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
+    }).catch(err => console.error(err));
   };
 
   useEffect(() => {
@@ -265,7 +269,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
           <h1 className="text-4xl font-black text-[#1E293B] tracking-tight">Welcome Back, {user.name}</h1>
           <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-xs">Performance Overview & Business Analytics</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
            {/* Period Filter */}
            <div className="relative">
               <div 
