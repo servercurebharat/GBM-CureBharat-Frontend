@@ -76,6 +76,7 @@ export interface IPlan {
   isCommissionable: boolean;
   gstPercent: number;
   description: string;
+  brochureUrl?: string;
   isActive: boolean;
 }
 
