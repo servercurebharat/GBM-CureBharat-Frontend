@@ -571,7 +571,7 @@ function NetworkView({ userId }: { userId: string }) {
 
   useEffect(() => {
     usersAPI.getDownline(userId).then(res => {
-       if (res.data.success) {
+       if (res.data.success && res.data.data) {
          setDownline(res.data.data);
          // Expand root by default
          setExpanded({ [res.data.data._id]: true });
