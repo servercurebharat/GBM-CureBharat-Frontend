@@ -126,10 +126,30 @@ export default function ProductCatalog({ user }: { user: IUser }) {
                         Brochure
                       </a>
                       <button 
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          navigator.clipboard.writeText(plan.brochureUrl!);
-                          toast.success('Brochure link copied!');
+                          try {
+                            toast.loading('Preparing brochure...', { id: 'share-brochure' });
+                            const response = await fetch(plan.brochureUrl!);
+                            const blob = await response.blob();
+                            const extension = plan.brochureUrl!.split('.').pop()?.split('?')[0] || 'pdf';
+                            const file = new File([blob], `${plan.name}-Brochure.${extension}`, { type: blob.type });
+                            
+                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                              await navigator.share({
+                                title: plan.name + ' Brochure',
+                                files: [file]
+                              });
+                              toast.success('Shared successfully!', { id: 'share-brochure' });
+                            } else {
+                              navigator.clipboard.writeText(plan.brochureUrl!);
+                              toast.success('Brochure link copied to clipboard!', { id: 'share-brochure' });
+                            }
+                          } catch (error) {
+                            console.error(error);
+                            navigator.clipboard.writeText(plan.brochureUrl!);
+                            toast.success('Brochure link copied!', { id: 'share-brochure' });
+                          }
                         }}
                         className="flex-[0.5] bg-white/5 hover:bg-white/10 text-white rounded-xl py-4 flex items-center justify-center text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
                       >
