@@ -237,7 +237,7 @@ export const complaintsAPI = {
 
 // PAYMENTS (Cashfree)
 export const paymentAPI = {
-  createOrder: (data: { amount: number; purpose?: string }) =>
+  createOrder: (data: { amount: number; purpose?: string; returnUrl?: string }) =>
     api.post<any>('/payment/create-order', data),
   verifyPayment: (orderId: string) =>
     api.get<any>(`/payment/verify/${orderId}`),

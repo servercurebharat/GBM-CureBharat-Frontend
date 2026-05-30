@@ -42,7 +42,11 @@ export default function PaymentButton({
 
     try {
       // ── Step 1: Create order on backend ─────────────────────────────────────
-      const { data } = await paymentAPI.createOrder({ amount, purpose });
+      const { data } = await paymentAPI.createOrder({ 
+        amount, 
+        purpose,
+        returnUrl: `${window.location.origin}/api/payment-return?path=/payment/status` 
+      });
 
       if (!data.success) {
         throw new Error(data.message || 'Failed to create payment order');
