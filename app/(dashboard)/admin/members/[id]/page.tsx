@@ -101,18 +101,18 @@ export default function MemberDetails() {
         <div className="bg-[#131241] rounded-2xl sm:rounded-[32px] p-5 sm:p-8 border border-white/5 shadow-2xl relative overflow-hidden">
            <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/10 blur-[120px] -mr-48 -mt-48" />
            
-           <div className="flex flex-col xl:flex-row items-center justify-between gap-8 relative z-10">
+           <div className="flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-8 relative z-10 w-full">
               {/* Identity Info */}
-              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-                 <button onClick={() => router.back()} className="p-3 sm:p-4 bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-white transition-all group active:scale-95">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full">
+                 <button onClick={() => router.back()} className="p-3 sm:p-4 bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-white transition-all group active:scale-95 self-start sm:self-auto shrink-0">
                     <svg className="group-hover:-translate-x-1 transition-transform" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6"></polyline></svg>
                  </button>
-                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[24px] bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center text-2xl sm:text-3xl font-black text-white shadow-xl uppercase">
+                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[24px] bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center text-2xl sm:text-3xl font-black text-white shadow-xl uppercase shrink-0">
                        {member.name.slice(0, 1)}
                     </div>
-                    <div>
-                       <div className="flex items-center gap-3">
+                    <div className="flex-1 w-full">
+                       <div className="flex flex-wrap items-center gap-3">
                           <h1 className="text-3xl font-black text-white tracking-tight leading-tight">{member.name}</h1>
                           <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
                              member.status === 'active' ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
@@ -120,7 +120,7 @@ export default function MemberDetails() {
                              {member.status}
                           </span>
                        </div>
-                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mt-4">
+                        <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3 mt-4">
                           <span className="text-xs sm:text-sm font-black text-[#10b981] tracking-widest uppercase">ID: {member.memberId}</span>
                           <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10" />
                           <div className={`px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border flex items-center gap-2.5 transition-all duration-500 shadow-2xl backdrop-blur-md ${
@@ -145,22 +145,24 @@ export default function MemberDetails() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                 <div className="flex bg-black/40 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-md">
-                    {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[14px] text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-                          activeTab === tab ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/20' : 'text-white/40 hover:text-white'
-                        }`}
-                      >
-                        {tab}
-                      </button>
-                    ))}
+              <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4 sm:gap-6 w-full 2xl:w-auto">
+                 <div className="flex w-full sm:w-auto overflow-x-auto custom-scrollbar pb-2 sm:pb-0">
+                    <div className="flex bg-black/40 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-md shrink-0">
+                       {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
+                         <button
+                           key={tab}
+                           onClick={() => setActiveTab(tab)}
+                           className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[14px] text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                             activeTab === tab ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/20' : 'text-white/40 hover:text-white'
+                           }`}
+                         >
+                           {tab}
+                         </button>
+                       ))}
+                    </div>
                  </div>
-                 <div className="h-10 w-px bg-white/5 hidden xl:block mx-2" />
-                 <div className="flex items-center gap-3">
+                 <div className="h-10 w-px bg-white/5 hidden xl:block mx-2 shrink-0" />
+                 <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     {member.status === 'blocked' ? (
                       <button 
                         disabled={updating}
