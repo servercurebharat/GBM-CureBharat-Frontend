@@ -98,127 +98,128 @@ export default function MemberDetails() {
       <div className="space-y-6 pb-20 animate-fade-in max-w-[1600px] mx-auto">
         
         {/* Modern Header Section */}
-        <div className="bg-[#131241] rounded-2xl sm:rounded-[32px] p-5 sm:p-8 border border-white/5 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#0b101e] rounded-2xl sm:rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden flex flex-col">
            <div className="absolute top-0 right-0 w-96 h-96 bg-[#10b981]/10 blur-[120px] -mr-48 -mt-48" />
            
-           <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8 relative z-10 w-full">
+           {/* Top Content (Profile + Actions) */}
+           <div className="p-6 sm:p-8 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8 relative z-10 w-full border-b border-white/10">
               {/* Identity Info */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
-                 <button onClick={() => router.back()} className="p-3 sm:p-4 bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl text-white transition-all group active:scale-95 self-start sm:self-auto shrink-0">
-                    <svg className="group-hover:-translate-x-1 transition-transform" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+                 <button onClick={() => router.back()} className="text-white/40 hover:text-white transition-colors shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                  </button>
-                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 min-w-0">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[24px] bg-gradient-to-br from-[#10b981] to-[#059669] flex items-center justify-center text-2xl sm:text-3xl font-black text-white shadow-xl uppercase shrink-0">
+                 <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] bg-[#22c55e] flex items-center justify-center text-2xl sm:text-3xl font-black text-white shadow-lg uppercase shrink-0">
                        {member.name.slice(0, 1)}
                     </div>
-                    <div className="min-w-0">
-                       <div className="flex flex-wrap items-center gap-3">
-                          <h1 className="text-3xl font-black text-white tracking-tight leading-tight truncate">{member.name}</h1>
-                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0 ${
-                             member.status === 'active' ? 'bg-[#10b981]/10 text-[#10b981] border-[#10b981]/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                    <div className="min-w-0 flex flex-col justify-center">
+                       <div className="flex items-center mb-1">
+                          <span className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                             member.status === 'active' ? 'bg-[#064e3b] text-[#34d399]' : 'bg-rose-500/20 text-rose-400'
                           }`}>
                              {member.status}
                           </span>
                        </div>
-                        <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3 mt-4">
-                          <span className="text-xs sm:text-sm font-black text-[#10b981] tracking-widest uppercase shrink-0">ID: {member.memberId}</span>
-                          <span className="hidden sm:block w-1.5 h-1.5 rounded-full bg-white/10 shrink-0" />
-                          <div className={`px-4 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border flex items-center gap-2.5 transition-all duration-500 shadow-2xl backdrop-blur-md shrink-0 ${
-                             member.role === 'hcc' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-emerald-500/5' :
-                             member.role === 'hcm' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400 shadow-blue-500/5' :
-                             member.role === 'hba' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-amber-500/5' :
-                             member.role === 'sh' ? 'bg-purple-500/10 border-purple-500/30 text-purple-400 shadow-purple-500/5' :
-                             'bg-white/5 border-white/10 text-white/40'
-                          }`}>
-                             <div className={`w-2 h-2 rounded-full animate-pulse shadow-[0_0_10px_currentColor] ${
-                                member.role === 'hcc' ? 'bg-emerald-400' :
-                                member.role === 'hcm' ? 'bg-blue-400' :
-                                member.role === 'hba' ? 'bg-amber-400' :
-                                member.role === 'sh' ? 'bg-purple-400' :
-                                'bg-white/20'
-                             }`} />
-                             <span className="text-[12px] font-black uppercase tracking-[0.3em]">{member.role}</span>
-                          </div>
+                       <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-none truncate mb-2">{member.name}</h1>
+                       <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[13px] font-medium text-[#34d399] tracking-wide">ID: {member.memberId}</span>
+                       </div>
+                       <div className={`inline-flex px-3 py-1 rounded-full border items-center gap-1.5 transition-all w-max ${
+                          member.role === 'hcc' ? 'bg-[#1e293b] border-white/5 text-slate-300' :
+                          member.role === 'hcm' ? 'bg-[#1e293b] border-white/5 text-slate-300' :
+                          member.role === 'hba' ? 'bg-[#1e293b] border-white/5 text-slate-300' :
+                          member.role === 'sh' ? 'bg-[#1e293b] border-white/5 text-slate-300' :
+                          'bg-white/5 border-white/10 text-white/40'
+                       }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                             member.role === 'hcc' ? 'bg-[#34d399]' :
+                             member.role === 'hcm' ? 'bg-blue-400' :
+                             member.role === 'hba' ? 'bg-amber-400' :
+                             member.role === 'sh' ? 'bg-purple-400' :
+                             'bg-white/20'
+                          }`} />
+                          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-300">{member.role}</span>
                        </div>
                     </div>
                  </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4 sm:gap-6 shrink-0">
-                 <div className="flex w-full sm:w-auto overflow-x-auto custom-scrollbar pb-2 sm:pb-0">
-                    <div className="flex bg-black/40 p-1.5 rounded-[20px] border border-white/5 backdrop-blur-md shrink-0">
-                       {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
-                         <button
-                           key={tab}
-                           onClick={() => setActiveTab(tab)}
-                           className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-[12px] sm:rounded-[14px] text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-                             activeTab === tab ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/20' : 'text-white/40 hover:text-white'
-                           }`}
-                         >
-                           {tab}
-                         </button>
-                       ))}
-                    </div>
-                 </div>
-                 <div className="h-10 w-px bg-white/5 hidden xl:block mx-2 shrink-0" />
-                 <div className="flex flex-row flex-wrap items-center gap-3">
-                    {member.status === 'blocked' ? (
-                      <button 
-                        disabled={updating}
-                        onClick={() => handleStatusUpdate('active')}
-                        className="px-8 py-4 bg-[#10b981] hover:bg-[#059669] text-[#131241] rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl shadow-[#10b981]/10 disabled:opacity-50"
-                      >
-                         Activate
-                      </button>
-                    ) : (
-                      <button 
-                        disabled={updating}
-                        onClick={() => handleStatusUpdate('blocked')}
-                        className="px-8 py-4 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all disabled:opacity-50"
-                      >
-                         Block
-                      </button>
-                    )}
-                     <ExportDropdown 
-                       title={`Member Profile: ${member.name}`}
-                       headers={['Field', 'Value']}
-                       rows={[
-                         ['Name', member.name],
-                         ['Member ID', member.memberId],
-                         ['Role', member.role],
-                         ['Status', member.status],
-                         ['Mobile', member.mobile],
-                         ['Email', member.email || 'N/A'],
-                         ['State', member.state],
-                         ['Rank', member.rank],
-                         ['Team Size', member.teamSize.toString()],
-                         ['Joined', new Date(member.createdAt).toLocaleDateString()]
-                       ]}
-                       fileName={`Profile_${member.memberId}`}
-                       variant="ghost"
-                     />
-                     <button 
-                       disabled={updating}
-                       onClick={async () => {
-                         if (!confirm("Are you sure you want to reset this member's password to the default (123456)?")) return;
-                         setUpdating(true);
-                         try {
-                           const res = await adminAPI.resetUserPassword(member._id);
-                           if (res.data.success) toast.success('Password reset to 123456');
-                           else toast.error(res.data.message || 'Failed to reset password');
-                         } catch (err) {
-                           toast.error('An error occurred');
-                         } finally {
-                           setUpdating(false);
-                         }
-                       }}
-                       className="px-8 py-4 bg-white/5 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-50"
-                     >
-                        Reset PWD
-                     </button>
-                 </div>
+              <div className="flex flex-row flex-wrap items-center gap-3 shrink-0">
+                 {member.status === 'blocked' ? (
+                   <button 
+                     disabled={updating}
+                     onClick={() => handleStatusUpdate('active')}
+                     className="px-6 py-2.5 bg-transparent border border-[#10b981]/50 hover:bg-[#10b981]/10 text-[#10b981] rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                   >
+                      ACTIVATE
+                   </button>
+                 ) : (
+                   <button 
+                     disabled={updating}
+                     onClick={() => handleStatusUpdate('blocked')}
+                     className="px-6 py-2.5 bg-transparent border border-white/20 text-white hover:bg-white/10 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                   >
+                      BLOCK
+                   </button>
+                 )}
+                  <ExportDropdown 
+                    title={`Member Profile: ${member.name}`}
+                    headers={['Field', 'Value']}
+                    rows={[
+                      ['Name', member.name],
+                      ['Member ID', member.memberId],
+                      ['Role', member.role],
+                      ['Status', member.status],
+                      ['Mobile', member.mobile],
+                      ['Email', member.email || 'N/A'],
+                      ['State', member.state],
+                      ['Rank', member.rank],
+                      ['Team Size', member.teamSize.toString()],
+                      ['Joined', new Date(member.createdAt).toLocaleDateString()]
+                    ]}
+                    fileName={`Profile_${member.memberId}`}
+                    variant="outline-dark"
+                  />
+                  <button 
+                    disabled={updating}
+                    onClick={async () => {
+                      if (!confirm("Are you sure you want to reset this member's password to the default (123456)?")) return;
+                      setUpdating(true);
+                      try {
+                        const res = await adminAPI.resetUserPassword(member._id);
+                        if (res.data.success) toast.success('Password reset to 123456');
+                        else toast.error(res.data.message || 'Failed to reset password');
+                      } catch (err) {
+                        toast.error('An error occurred');
+                      } finally {
+                        setUpdating(false);
+                      }
+                    }}
+                    className="px-6 py-2.5 bg-transparent border border-white/20 text-white hover:bg-white/10 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                  >
+                     RESET PWD
+                  </button>
+                  <button className="px-4 py-2.5 bg-transparent border border-white/20 text-white hover:bg-white/10 rounded-xl transition-all">
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                  </button>
               </div>
+           </div>
+
+           {/* Tabs Row */}
+           <div className="flex w-full overflow-x-auto custom-scrollbar relative z-10 bg-[#0f1523]">
+              {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-1 min-w-[120px] py-4 sm:py-5 text-[12px] font-black uppercase tracking-widest transition-all ${
+                    activeTab === tab ? 'text-white bg-white/5 border-t-2 border-t-transparent' : 'text-white/40 border-t-2 border-t-transparent hover:text-white hover:bg-white/5'
+                  }`}
+                  style={activeTab === tab ? { boxShadow: 'inset 0 2px 0 0 white' } : {}}
+                >
+                  {tab}
+                </button>
+              ))}
            </div>
         </div>
 

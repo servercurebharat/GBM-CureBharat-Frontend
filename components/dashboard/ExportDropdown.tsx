@@ -9,7 +9,7 @@ interface ExportDropdownProps {
   headers: string[];
   rows: any[][];
   fileName: string;
-  variant?: 'primary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'outline' | 'ghost' | 'outline-dark';
 }
 
 export default function ExportDropdown({ title, headers, rows, fileName, variant = 'primary' }: ExportDropdownProps) {
@@ -54,6 +54,7 @@ export default function ExportDropdown({ title, headers, rows, fileName, variant
   const variants = {
     primary: 'bg-[#131241] text-white hover:brightness-110 shadow-lg shadow-[#131241]/20',
     outline: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50',
+    'outline-dark': 'bg-transparent border border-white/20 text-white hover:bg-white/10',
     ghost:   'bg-white/5 text-white hover:bg-white/10'
   };
 
