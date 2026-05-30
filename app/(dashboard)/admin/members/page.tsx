@@ -47,6 +47,8 @@ function AdminMembersContent() {
     fetchStats();
   }, [refreshKey]);
 
+  const [statusFilter, setStatusFilter] = useState<string>('All Status');
+
   useEffect(() => {
     async function fetchMembers() {
       setLoading(true);
@@ -57,12 +59,21 @@ function AdminMembersContent() {
         else if (activeTab === 'HCM') roleFilter = 'hcm';
         else if (activeTab === 'HCC') roleFilter = 'hcc';
 
+        let statusParam = undefined;
+        let kycStatusParam = undefined;
+        if (statusFilter === 'Active') statusParam = 'active';
+        else if (statusFilter === 'Inactive') statusParam = 'inactive';
+        else if (statusFilter === 'Blocked') statusParam = 'blocked';
+        else if (statusFilter === 'Pending KYC') kycStatusParam = 'pending';
+
         const res = await usersAPI.getAll({ 
           page, 
           limit: 10, 
           search, 
           role: roleFilter,
           state: stateFilter !== 'All States' ? stateFilter : undefined,
+          status: statusParam,
+          kycStatus: kycStatusParam,
           refer: referredBy || undefined
         });
         if (res.data.success) {
@@ -76,7 +87,7 @@ function AdminMembersContent() {
       }
     }
     fetchMembers();
-  }, [page, search, activeTab, stateFilter, referredBy, refreshKey]);
+  }, [page, search, activeTab, stateFilter, statusFilter, referredBy, refreshKey]);
 
   const tabs = ['ALL ROLES', 'STATE HEAD', 'HBA', 'HCM', 'HCC'];
 
@@ -179,6 +190,17 @@ function AdminMembersContent() {
                   <option>Karnataka</option>
                   <option>Tamil Nadu</option>
                   <option>Uttar Pradesh</option>
+                </select>
+                <select 
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-1 focus:ring-[#10b981] min-w-[120px] flex-1 md:flex-none"
+                >
+                  <option>All Status</option>
+                  <option>Active</option>
+                  <option>Inactive</option>
+                  <option>Pending KYC</option>
+                  <option>Blocked</option>
                 </select>
                  <ExportDropdown 
                    title="Member Network Report"
