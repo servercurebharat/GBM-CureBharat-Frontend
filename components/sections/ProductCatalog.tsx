@@ -114,15 +114,40 @@ export default function ProductCatalog({ user }: { user: IUser }) {
                    </div>
                 </div>
 
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    generateLink(plan._id);
-                  }}
-                  className="w-full py-4 rounded-2xl bg-white/5 hover:bg-[#49D2B5] text-white hover:text-[#0d0f14] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-300 border border-white/10 group-hover:border-[#49D2B5]/50 active:scale-[0.98]"
-                >
-                   Generate & Copy Link
-                </button>
+                <div className="space-y-2">
+                  {plan.brochureUrl && (
+                    <div className="flex gap-2 w-full">
+                      <a 
+                        href={plan.brochureUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 text-center bg-[#49D2B5]/10 hover:bg-[#49D2B5]/20 text-[#49D2B5] rounded-xl py-4 text-[10px] font-black uppercase tracking-widest border border-[#49D2B5]/20 transition-all"
+                      >
+                        Brochure
+                      </a>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(plan.brochureUrl!);
+                          toast.success('Brochure link copied!');
+                        }}
+                        className="flex-[0.5] bg-white/5 hover:bg-white/10 text-white rounded-xl py-4 flex items-center justify-center text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
+                      >
+                        Share
+                      </button>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      generateLink(plan._id);
+                    }}
+                    className="w-full py-4 rounded-xl bg-white/5 hover:bg-[#49D2B5] text-white hover:text-[#0d0f14] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-300 border border-white/10 group-hover:border-[#49D2B5]/50 active:scale-[0.98]"
+                  >
+                     Generate & Copy Link
+                  </button>
+                </div>
              </div>
           </div>
         ))}
