@@ -18,7 +18,7 @@ const nextConfig = {
       {
         // Only proxy paths that start with /api/ — NOT bare static files like /image.png
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://mlm-backend-phi.vercel.app/api' : 'http://localhost:4000/api')}/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://gbm-cure-bharat-backend.vercel.app/api' : 'http://localhost:4000/api')}/:path*`,
       },
     ];
   },

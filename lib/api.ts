@@ -45,6 +45,10 @@ export const authAPI = {
     api.post('/auth/logout'),
   changePassword: (data: any) =>
     api.post<ApiResponse<any>>('/auth/change-password', data),
+  forgotPassword: (mobile: string) =>
+    api.post<ApiResponse<any>>('/auth/forgot-password', { mobile }),
+  resetPassword: (data: any) =>
+    api.post<ApiResponse<any>>('/auth/reset-password', data),
 };
 
 // PUBLIC SALES (REFERRAL LINKS)
