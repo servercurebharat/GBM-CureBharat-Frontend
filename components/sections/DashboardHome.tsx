@@ -269,7 +269,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
           <h1 className="text-4xl font-black text-[#1E293B] tracking-tight">Welcome Back, {user.name}</h1>
           <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-xs">Performance Overview & Business Analytics</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center justify-end gap-3 w-full md:w-auto md:ml-auto">
            {/* Period Filter */}
            <div className="relative">
               <div 

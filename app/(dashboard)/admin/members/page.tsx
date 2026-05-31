@@ -48,6 +48,7 @@ function AdminMembersContent() {
   }, [refreshKey]);
 
   const [statusFilter, setStatusFilter] = useState<string>('All Status');
+  const [sortFilter, setSortFilter] = useState<string>('newest');
 
   useEffect(() => {
     async function fetchMembers() {
@@ -74,7 +75,8 @@ function AdminMembersContent() {
           state: stateFilter !== 'All States' ? stateFilter : undefined,
           status: statusParam,
           kycStatus: kycStatusParam,
-          refer: referredBy || undefined
+          refer: referredBy || undefined,
+          sort: sortFilter
         });
         if (res.data.success) {
           setMembers(res.data.data || []);
@@ -87,7 +89,7 @@ function AdminMembersContent() {
       }
     }
     fetchMembers();
-  }, [page, search, activeTab, stateFilter, statusFilter, referredBy, refreshKey]);
+  }, [page, search, activeTab, stateFilter, statusFilter, sortFilter, referredBy, refreshKey]);
 
   const tabs = ['ALL ROLES', 'STATE HEAD', 'HBA', 'HCM', 'HCC'];
 
@@ -157,27 +159,28 @@ function AdminMembersContent() {
             </div>
 
             {/* Search & Action Bar */}
-            <div className="bg-[#131241] p-4 rounded-[1.5rem] shadow-xl border border-white/[0.03] flex flex-col md:flex-row gap-4 items-center">
-              <div className="relative flex-1">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <div className="bg-[#131241] p-4 rounded-[1.5rem] shadow-xl border border-white/[0.03] flex flex-col md:flex-row flex-wrap gap-4 items-center">
+              <div className="relative flex-1 min-w-[200px]">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input
                   type="text"
-                  placeholder="Search by ID, Name..."
+                  placeholder="Search by ID, Name, or Mobile..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/[0.05] rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-[#10b981] transition-all"
+                  className="w-full bg-white border border-[#E1E2EC] rounded-xl pl-12 pr-4 py-3 text-sm font-bold text-black placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#10b981] transition-all shadow-sm"
                 />
               </div>
               <div className="relative w-full md:w-48">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                 <input
                   type="text"
                   placeholder="Referred By..."
                   value={referredBy}
                   onChange={(e) => setReferredBy(e.target.value)}
-                  className="w-full bg-white/[0.05] border border-white/[0.05] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-[#10b981] transition-all"
+                  className="w-full bg-white border border-[#E1E2EC] rounded-xl pl-12 pr-4 py-3 text-sm font-bold text-black placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#10b981] transition-all shadow-sm"
                 />
               </div>
-              <div className="flex gap-3 w-full md:w-auto">
+              <div className="flex flex-wrap gap-3 w-full md:w-auto">
                 <select 
                   value={stateFilter}
                   onChange={(e) => setStateFilter(e.target.value)}
@@ -192,15 +195,33 @@ function AdminMembersContent() {
                   <option>Uttar Pradesh</option>
                 </select>
                 <select 
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-1 focus:ring-[#10b981] min-w-[120px] flex-1 md:flex-none"
+                  value={statusFilter === 'All Status' && sortFilter === 'newest' ? 'All Status' : statusFilter === 'All Status' && sortFilter === 'oldest' ? '__oldest' : statusFilter === 'All Status' && sortFilter === 'recent' ? '__recent' : statusFilter}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '__recent') {
+                      setSortFilter('newest');
+                      setStatusFilter('All Status');
+                      setPage(1);
+                    } else if (val === '__oldest') {
+                      setSortFilter('oldest');
+                      setStatusFilter('All Status');
+                      setPage(1);
+                    } else {
+                      setSortFilter('newest');
+                      setStatusFilter(val);
+                      setPage(1);
+                    }
+                  }}
+                  className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-2 focus:ring-[#10b981] min-w-[140px] flex-1 md:flex-none"
                 >
-                  <option>All Status</option>
-                  <option>Active</option>
-                  <option>Inactive</option>
-                  <option>Pending KYC</option>
-                  <option>Blocked</option>
+                  <option value="All Status">All Status</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Pending KYC">Pending KYC</option>
+                  <option value="Blocked">Blocked</option>
+                  <option disabled>──────────</option>
+                  <option value="__recent">Recently Added</option>
+                  <option value="__oldest">Oldest First</option>
                 </select>
                  <ExportDropdown 
                    title="Member Network Report"

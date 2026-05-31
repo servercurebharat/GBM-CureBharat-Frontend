@@ -93,7 +93,7 @@ export default function ExportDropdown({ title, headers, rows, fileName, variant
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(prev => !prev)}
-        className={`${variants[variant]} px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2`}
+        className={`${variants[variant]} px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap`}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export Data

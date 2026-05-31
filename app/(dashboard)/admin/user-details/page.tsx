@@ -19,7 +19,7 @@ export default function AdminUserDetailsPage() {
     status: 'ACTIVE',
     kycStatus: 'KYC APPROVED',
     location: 'Maharashtra, IN',
-    sponsorId: 'MLM-10292',
+    sponsorId: 'GBM-10292',
     contact: '+91 98XXX XXX21',
     joined: 'Oct 14, 2022',
     sales: '₹ 8,42,100',

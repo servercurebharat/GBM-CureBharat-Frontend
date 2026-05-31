@@ -19,6 +19,10 @@
   --brand-navy: #131241;
 }
 
+body, h1, h2, h3, h4, h5, h6, p, span, a, div, button, input {
+  font-family: var(--font-inter), sans-serif !important;
+}
+
 .cb-gradient {
   background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-teal) 100%);
 }

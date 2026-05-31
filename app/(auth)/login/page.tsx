@@ -301,7 +301,7 @@ export default function LoginPage() {
               <br />Empire.
             </h1>
             <p className="mt-5 text-base leading-relaxed max-w-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              India's most advanced wellness MLM platform. Real-time commissions, preventive healthcare, and a nationwide hospital network.
+              India's most advanced wellness GBM platform. Real-time commissions, preventive healthcare, and a nationwide hospital network.
             </p>
           </div>
 

@@ -1,33 +1,20 @@
 import type { Metadata } from 'next';
-import { Roboto, Questrial, Syne } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-const roboto = Roboto({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-roboto',
-  weight: ['400', '500', '700', '900'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
-const questrial = Questrial({
-  subsets: ['latin'],
-  variable: '--font-questrial',
-  weight: ['400'],
-});
-
-const syne = Syne({
-  subsets: ['latin'],
-  variable: '--font-syne',
-  weight: ['400', '500', '600', '700', '800'],
-});
-
 export const metadata: Metadata = {
-  title: 'CureBharat MLM Platform',
-  description: 'Premium wellness insurance MLM management system',
+  title: 'CureBharat GBM Platform',
+  description: 'Premium wellness insurance GBM management system',
   icons: {
     icon: '/favicon.ico',
   },
@@ -39,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${roboto.variable} ${syne.variable}`}>
+    <html lang="en" className={`${inter.variable}`}>
       <body className="bg-[#0d0f14] text-[#e8eaf0] font-sans antialiased overflow-x-hidden">
         {/* Cashfree JS SDK — loaded after page is interactive */}
         <Script

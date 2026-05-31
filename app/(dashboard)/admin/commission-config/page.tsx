@@ -68,7 +68,7 @@ export default function CommissionConfigPage() {
             <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-3">SYSTEM ADMINISTRATION</p>
             <h1 className="text-4xl font-black text-white tracking-tight font-display">Commission Engine</h1>
             <p className="text-sm text-white/40 mt-6 max-w-2xl leading-relaxed">
-              Configure the global commission percentages and financial rules for the CureBharat MLM network. 
+              Configure the global commission percentages and financial rules for the CureBharat GBM network. 
               Changes here apply instantly to all new sales generated across the platform.
             </p>
           </div>

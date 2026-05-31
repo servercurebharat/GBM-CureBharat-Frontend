@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-roboto)', 'sans-serif'],
-        display: ['var(--font-syne)', 'sans-serif'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+        display: ['var(--font-inter)', 'sans-serif'],
       },
       colors: {
         bg: '#FFFFFF', // Clean white background

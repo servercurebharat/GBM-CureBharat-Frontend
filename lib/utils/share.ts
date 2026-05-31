@@ -18,7 +18,7 @@ export function shareOnWhatsApp(memberId: string, message?: string): void {
   const referralLink = `${origin}/buy/${memberId}`;
   const shareText =
     message ||
-    `🌟 Join CureBharat Wellness – India's most advanced healthcare MLM platform!\n\nGet access to:\n✅ Preventive Healthcare Plans\n✅ 10,000+ Hospital Network\n✅ Real-time Commission Payouts\n\nEnroll now 👇\n${referralLink}`;
+    `🌟 Join CureBharat Wellness – India's most advanced healthcare GBM platform!\n\nGet access to:\n✅ Preventive Healthcare Plans\n✅ 10,000+ Hospital Network\n✅ Real-time Commission Payouts\n\nEnroll now 👇\n${referralLink}`;
 
   const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   window.open(waUrl, '_blank', 'noopener,noreferrer');

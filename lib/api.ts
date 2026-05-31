@@ -77,7 +77,7 @@ export const subscriptionAPI = {
 
 // USERS
 export const usersAPI = {
-  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string; state?: string; refer?: string; status?: string; kycStatus?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; search?: string; role?: string; state?: string; refer?: string; status?: string; kycStatus?: string; sort?: string }) =>
     api.get<PaginatedResponse<IUser>>('/users', { params }),
   getStats: () =>
     api.get<ApiResponse<any>>('/users/stats'),
