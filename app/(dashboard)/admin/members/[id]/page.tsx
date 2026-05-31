@@ -113,14 +113,14 @@ export default function MemberDetails() {
                        {member.name.slice(0, 1)}
                     </div>
                     <div className="min-w-0 flex flex-col justify-center">
-                       <div className="flex items-center mb-1">
-                          <span className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                       <div className="flex items-center gap-4 mb-2">
+                          <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-none truncate">{member.name}</h1>
+                          <span className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shrink-0 ${
                              member.status === 'active' ? 'bg-[#064e3b] text-[#34d399]' : 'bg-rose-500/20 text-rose-400'
                           }`}>
                              {member.status}
                           </span>
                        </div>
-                       <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-none truncate mb-2">{member.name}</h1>
                        <div className="flex items-center gap-2 mb-2">
                           <span className="text-[13px] font-medium text-[#34d399] tracking-wide">ID: {member.memberId}</span>
                        </div>
