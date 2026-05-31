@@ -370,7 +370,6 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                     </div>
                   )}
                 </button>
-                <button onClick={() => setStep(2)} className="text-xs font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors py-2">Edit Plan Selection</button>
               </div>
             </div>
           )}
