@@ -192,7 +192,7 @@ export default function AdminPlansPage() {
                     <div className="mb-8">
                       <p className="text-3xl font-bold font-display text-white">₹{(plan.price / 100).toLocaleString('en-IN')}</p>
                       <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mt-1">
-                        BV: ₹{((plan.businessVolume || 0) / 100).toLocaleString('en-IN')} | {plan.isCommissionable ? 'Commissionable' : 'No Payout'}
+                        {plan.isCommissionable ? 'Commissionable' : 'No Payout'}
                       </p>
                     </div>
 
@@ -307,16 +307,7 @@ export default function AdminPlansPage() {
                     className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-[#6029F1] focus:ring-1 focus:ring-[#6029F1] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Business Volume (BV ₹)</label>
-                  <input 
-                    type="number" 
-                    required
-                    value={formData.businessVolume}
-                    onChange={(e) => setFormData({...formData, businessVolume: Number(e.target.value)})}
-                    className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-[#6029F1] focus:ring-1 focus:ring-[#6029F1] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
+
               </div>
 
               <div className="space-y-2">

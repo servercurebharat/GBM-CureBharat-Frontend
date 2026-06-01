@@ -87,10 +87,7 @@ export default function ProductCatalog({ user }: { user: IUser }) {
                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-2xl shadow-inner border border-white/5">
                       {plan.name.toLowerCase().includes('platinum') ? '💎' : plan.name.toLowerCase().includes('gold') ? '⭐' : <img src="/favicon.ico" alt="Logo" className="w-8 h-8 object-contain" />}
                    </div>
-                   <div className="text-right">
-                      <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Business Volume</p>
-                      <p className="text-sm font-black text-white">{plan.businessVolume.toLocaleString()}</p>
-                   </div>
+
                 </div>
 
                 <div>
