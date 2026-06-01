@@ -583,21 +583,10 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 </div>
               </div>
 
-              {/* AutoPay notice */}
-              <div className="rounded-2xl border-2 border-purple-500/40 bg-purple-500/10 p-5">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-purple-500/20">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-black text-purple-300">AutoPay Enabled (Yearly)</p>
-                    <p className="text-[9px] text-purple-300/60 font-bold uppercase tracking-wide">Auto-renew every year</p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-purple-300/70 font-bold leading-relaxed">
-                  ✅ First charge: ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')} deducted immediately · 🔁 Yearly renewal auto-deducted · ❌ Cancel anytime from your bank
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex gap-3 items-center">
+                <span className="text-xl flex-shrink-0">✅</span>
+                <p className="text-[9px] font-medium text-emerald-200/80 uppercase leading-relaxed">
+                  One-time payment of ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}. No automatic renewals.
                 </p>
               </div>
 
@@ -613,8 +602,8 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                   id="cashfree-pay-now-btn"
                   type="button"
                   disabled={submitting}
-                  onClick={handleAutoPay}
-                  className="w-full font-black py-5 rounded-2xl transition-all shadow-2xl uppercase tracking-[0.2em] text-sm disabled:opacity-60 disabled:cursor-not-allowed text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20"
+                  onClick={handlePay}
+                  className="w-full font-black py-5 rounded-2xl transition-all shadow-2xl uppercase tracking-[0.2em] text-sm disabled:opacity-60 disabled:cursor-not-allowed text-white bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20"
                 >
                   {submitting ? (
                     <div className="flex items-center justify-center gap-3">
@@ -622,7 +611,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                       <span>Processing...</span>
                     </div>
                   ) : (
-                    <span>Setup AutoPay — ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}/yr</span>
+                    <span>Pay Now — ₹{((selectedPlan.price * 1.18) / 100).toLocaleString('en-IN')}</span>
                   )}
                 </button>
                 <button type="button" onClick={() => setStep(2)} className="text-xs font-bold text-slate-500 uppercase tracking-widest hover:text-white transition-colors py-2">
