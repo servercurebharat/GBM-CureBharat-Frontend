@@ -30,12 +30,19 @@ export default function AddMemberModal({ isOpen, onClose, currentUser, onSuccess
 
   const getAllowedRoles = () => {
     const role = currentUser.role?.toLowerCase();
-    if (role === 'admin') return [
-      { id: 'sh', label: 'State Head' },
-      { id: 'hba', label: 'HBA' },
-      { id: 'hcm', label: 'HCM' },
-      { id: 'hcc', label: 'HCC' }
-    ];
+    if (role === 'admin') {
+      const SUPER_ADMINS = ['8269210100', '9689509651'];
+      const roles = [
+        { id: 'sh', label: 'State Head' },
+        { id: 'hba', label: 'HBA' },
+        { id: 'hcm', label: 'HCM' },
+        { id: 'hcc', label: 'HCC' }
+      ];
+      if (SUPER_ADMINS.includes(currentUser.mobile)) {
+        roles.unshift({ id: 'admin', label: 'Admin' });
+      }
+      return roles;
+    }
     if (role === 'sh') return [
       { id: 'hba', label: 'HBA' },
       { id: 'hcm', label: 'HCM' },

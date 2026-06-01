@@ -65,6 +65,12 @@ export const publicAPI = {
     api.post('/public/create-order', data),
   verifyPayment: (data: any) =>
     api.post('/public/verify-payment', data),
+  checkMobile: (mobile: string) =>
+    api.get(`/public/check-mobile/${mobile}`),
+  sendOTP: (email: string) =>
+    api.post('/public/send-otp', { email }),
+  verifyOTP: (email: string, otp: string) =>
+    api.post('/public/verify-otp', { email, otp }),
 };
 
 // SUBSCRIPTIONS (AutoPay)

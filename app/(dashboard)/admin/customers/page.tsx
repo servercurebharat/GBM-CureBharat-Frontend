@@ -43,14 +43,21 @@ export default function CustomerDatabase() {
   const handleExport = () => {
     if (!customers || customers.length === 0) return;
     
-    const headers = ['Customer Name', 'Mobile', 'Policy ID', 'Plan', 'Status', 'Join Date'];
+    const headers = ['Customer Name', 'Mobile', 'Email', 'State', 'DOB', 'PAN No', 'Policy ID', 'Plan', 'Sold By (ID)', 'Status', 'Join Date', 'Nominee Name', 'Nominee Relation'];
     const rows = customers.map(c => [
-      c.customerName,
+      `"${c.customerName || ''}"`,
       c.customerMobile,
+      c.customerEmail || '',
+      c.customerState || '',
+      c.customerDOB || '',
+      c.customerPAN || '',
       c.policyId,
-      (c.plan as any)?.name || 'Health Plan',
+      `"${(c.plan as any)?.name || 'Health Plan'}"`,
+      (c.seller as any)?.memberId || '',
       c.status,
-      new Date(c.createdAt).toLocaleDateString()
+      new Date(c.createdAt).toLocaleDateString(),
+      `"${c.nomineeName || ''}"`,
+      c.nomineeRelation || ''
     ]);
 
     const csvContent = [

@@ -107,8 +107,11 @@ function SuccessContent() {
           customerMobile:  saved.customerMobile  || '',
           customerEmail:   saved.customerEmail   || '',
           customerState:   saved.customerState   || '',
+          customerDOB:     saved.customerDOB     || '',
+          customerPAN:     saved.customerPAN     || '',
           nomineeName:     saved.nomineeName     || '',
           nomineeRelation: saved.nomineeRelation || '',
+          enrollmentType:  saved.enrollmentType  || 'customer',
           sourceType:      'public_link',
         });
 

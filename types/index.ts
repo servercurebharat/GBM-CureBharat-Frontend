@@ -95,6 +95,13 @@ export interface ISale {
   };
   customerName: string;
   customerMobile: string;
+  customerEmail?: string;
+  customerState?: string;
+  customerDOB?: string;
+  customerPAN?: string;
+  enrollmentType?: string;
+  nomineeName?: string;
+  nomineeRelation?: string;
   plan: IPlan;
   saleAmount: number;
   businessVolume: number;

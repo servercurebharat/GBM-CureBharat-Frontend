@@ -79,10 +79,15 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       })
       .catch(err => console.error(err));
 
-    const walletReq = user?.role === 'admin' ? walletAPI.getAllTransactions({ limit: 5 }) : walletAPI.getMyWallet();
+    const walletReq = user?.role === 'admin' 
+      ? walletAPI.getAllTransactions({ limit: 10, page: 1 }) 
+      : walletAPI.getMyWallet();
     walletReq.then(res => {
       if (res.data.success) {
-        setTransactions(user?.role === 'admin' ? res.data.data : ((res.data.data as any)?.ledger || []));
+        const raw = user?.role === 'admin' ? res.data.data : ((res.data.data as any)?.ledger || []);
+        // Sort by date descending to ensure newest first
+        const sorted = [...raw].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setTransactions(sorted);
       }
     }).catch(err => console.error(err));
   };
@@ -1048,9 +1053,13 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                          </td>
                          <td className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{entry.type}</td>
                          <td className="px-10 py-6 text-right">
-                            <span className={`text-[11px] font-black ${entry.type === 'credit' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                               {entry.type === 'credit' ? '+' : '-'}{formatCurrency(entry.amount)}
-                            </span>
+                             <span className={`text-[11px] font-black ${
+                               entry.type === 'withdrawal' || entry.type === 'tds_deduction' 
+                                 ? 'text-rose-400' 
+                                 : 'text-emerald-400'
+                             }`}>
+                               {(entry.type === 'withdrawal' || entry.type === 'tds_deduction') ? '-' : '+'}{formatCurrency(entry.amount)}
+                             </span>
                          </td>
                          <td className="px-10 py-6 text-center">
                             <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
