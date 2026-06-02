@@ -852,7 +852,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       <div className="bg-[#131241] rounded-[40px] shadow-2xl border border-white/5 overflow-hidden">
          <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
              <div>
-               <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Top 10 {roleLabel(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role)))}s (By Earnings)</h3>
+               <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Top 10 {roleLabel(leaderRole || (user.role === 'admin' ? 'hcm' : getNextRole(user.role)))}s (By Earnings)</h3>
             </div>
             {user.role === 'admin' ? (
               <div className="flex items-center gap-4">
@@ -862,7 +862,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                       key={r} 
                       onClick={() => setLeaderRole(r === leaderRole ? '' : r)}
                       className={`px-3 py-1.5 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                        (leaderRole || 'hcc') === r 
+                        (leaderRole || 'hcm') === r 
                           ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/20' 
                           : 'text-white/40 hover:bg-white/10 hover:text-white'
                       }`}
@@ -899,9 +899,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                <thead>
                   <tr className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/5">
                      <th className="px-10 py-6">Rank</th>
-                     <th className="px-10 py-6">{(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role))).toUpperCase()} Name</th>
+                     <th className="px-10 py-6">{(leaderRole || (user.role === 'admin' ? 'hcm' : getNextRole(user.role))).toUpperCase()} Name</th>
                      <th className="px-10 py-6">State</th>
-                     <th className="px-10 py-6">Direct {getNextRole(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role)))}s</th>
+                     <th className="px-10 py-6">Direct {getNextRole(leaderRole || (user.role === 'admin' ? 'hcm' : getNextRole(user.role)))}s</th>
                      <th className="px-10 py-6 text-right">Team Sales</th>
                      <th className="px-10 py-6 text-right">Total Earning Commission</th>
                      <th className="px-10 py-6 text-right">Total Income</th>
