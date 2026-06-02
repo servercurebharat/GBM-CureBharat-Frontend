@@ -903,7 +903,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                      <th className="px-10 py-6">State</th>
                      <th className="px-10 py-6">Direct {getNextRole(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role)))}s</th>
                      <th className="px-10 py-6 text-right">Team Sales</th>
-                     <th className="px-10 py-6 text-right">Override (2%)</th>
+                     <th className="px-10 py-6 text-right">Total Earning Commission</th>
                      <th className="px-10 py-6 text-right">Total Income</th>
                      <th className="px-10 py-6 text-center">Hierarchy</th>
                   </tr>
