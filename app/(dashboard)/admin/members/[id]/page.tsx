@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { usersAPI, adminAPI, plansAPI } from '@/lib/api';
+import { usersAPI, adminAPI, plansAPI, salesAPI } from '@/lib/api';
 import { IUser, IPlan } from '@/types';
 import Link from 'next/link';
 import ExportDropdown from '@/components/dashboard/ExportDropdown';
@@ -15,7 +15,7 @@ export default function MemberDetails() {
   const [member, setMember] = useState<IUser | null>(null);
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'KYC' | 'NETWORK'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'KYC' | 'NETWORK' | 'SALES'>('OVERVIEW');
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -208,7 +208,7 @@ export default function MemberDetails() {
 
            {/* Tabs Row */}
            <div className="flex w-full overflow-x-auto custom-scrollbar relative z-10 bg-black/20">
-              {(['OVERVIEW', 'KYC', 'NETWORK'] as const).map(tab => (
+              {(['OVERVIEW', 'KYC', 'NETWORK', 'SALES'] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -470,6 +470,10 @@ export default function MemberDetails() {
           <NetworkView userId={member._id} />
         )}
 
+        {activeTab === 'SALES' && (
+          <SalesHistoryView userId={member._id} />
+        )}
+
       </div>
     </DashboardLayout>
   );
@@ -639,6 +643,88 @@ function NetworkView({ userId }: { userId: string }) {
       </h3>
       <div className="min-w-[400px] pl-3">
         {renderNode(downline, true)}
+      </div>
+    </div>
+  );
+}
+
+function SalesHistoryView({ userId }: { userId: string }) {
+  const [sales, setSales] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    salesAPI.getAll({ sellerId: userId, limit: 100 }).then(res => {
+      if (res.data.success && res.data.data) {
+        setSales(res.data.data);
+      }
+    }).finally(() => setLoading(false));
+  }, [userId]);
+
+  if (loading) return <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div></div>;
+
+  return (
+    <div className="bg-[#131241] rounded-[32px] p-6 sm:p-12 border border-white/5 shadow-2xl animate-fade-in overflow-hidden">
+      <div className="flex items-center justify-between mb-10">
+        <h3 className="text-sm font-black text-white/50 uppercase tracking-[0.3em] flex items-center gap-4">
+           <div className="w-2 h-2 rounded-full bg-blue-500" />
+           Sales History
+        </h3>
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Sales: {sales.length}</span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[800px]">
+          <thead>
+            <tr className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/5">
+               <th className="px-6 py-4">Policy ID / Date</th>
+               <th className="px-6 py-4">Customer Details</th>
+               <th className="px-6 py-4">Plan Name</th>
+               <th className="px-6 py-4">Status</th>
+               <th className="px-6 py-4 text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {sales.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-20 text-white/40 font-black uppercase tracking-widest text-xs">
+                  No sales found for this user.
+                </td>
+              </tr>
+            ) : (
+              sales.map((sale: any) => (
+                <tr key={sale._id} className="hover:bg-white/[0.02] transition-colors">
+                   <td className="px-6 py-4">
+                     <p className="text-[11px] font-black text-blue-400 font-mono">{sale.policyId}</p>
+                     <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-widest">
+                       {new Date(sale.createdAt).toLocaleDateString()}
+                     </p>
+                   </td>
+                   <td className="px-6 py-4">
+                     <p className="text-[11px] font-black text-white">{sale.customerName}</p>
+                     <p className="text-[9px] font-bold text-slate-500 mt-1">{sale.customerMobile}</p>
+                   </td>
+                   <td className="px-6 py-4">
+                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
+                       {sale.plan?.name || 'Unknown Plan'}
+                     </span>
+                   </td>
+                   <td className="px-6 py-4">
+                     <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                       sale.status === 'active' 
+                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                         : 'bg-white/5 text-white/40 border-white/10'
+                     }`}>
+                       {sale.status}
+                     </span>
+                   </td>
+                   <td className="px-6 py-4 text-right">
+                     <p className="text-sm font-black text-white">₹{(sale.saleAmount / 100).toLocaleString('en-IN')}</p>
+                   </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
