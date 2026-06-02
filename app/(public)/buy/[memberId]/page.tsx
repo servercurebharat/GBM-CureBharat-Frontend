@@ -41,6 +41,13 @@ const STATES = [
   'Dadra and Nagar Haveli and Daman and Diu','Delhi','Lakshadweep','Puducherry',
 ];
 
+const formatDOB = (val: string) => {
+  const cleaned = val.replace(/\D/g, '');
+  if (cleaned.length <= 2) return cleaned;
+  if (cleaned.length <= 4) return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+};
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function PublicBuyPage({ params }: { params: { memberId: string } }) {
   const memberId = params.memberId;
@@ -372,7 +379,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                   )}
                 </div>
 
-                <Input label="Date of Birth" value={formData.customerDOB} onChange={v => setFormData(p => ({ ...p, customerDOB: v }))} placeholder="DD/MM/YYYY" />
+                <Input label="Date of Birth" value={formData.customerDOB} onChange={v => setFormData(p => ({ ...p, customerDOB: formatDOB(v) }))} placeholder="DD/MM/YYYY" />
                 <Select label="State" value={formData.customerState} onChange={v => setFormData(p => ({ ...p, customerState: v }))} options={STATES} />
               </div>
 

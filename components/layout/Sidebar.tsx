@@ -208,12 +208,12 @@ export default function Sidebar({ role, user, isOpen, setIsOpen }: { role: Role;
       {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      <aside className={`fixed lg:static inset-y-0 left-0 w-[264px] min-h-screen flex flex-col flex-shrink-0 z-50 transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`} style={{ background: 'linear-gradient(180deg, #131241 0%, #0d0f14 100%)' }}>
+      <aside className={`fixed lg:static inset-y-0 left-0 w-[264px] min-h-screen flex flex-col flex-shrink-0 z-[70] transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`} style={{ background: 'linear-gradient(180deg, #131241 0%, #0d0f14 100%)' }}>
         <div className="absolute top-0 left-0 right-0 h-40 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 0%, #49D2B512 0%, transparent 70%)` }} />
 
         <div className="h-[90px] px-5 flex items-center justify-center relative border-b border-white/5 flex-shrink-0">
