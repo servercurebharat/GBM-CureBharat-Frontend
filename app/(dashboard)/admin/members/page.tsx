@@ -186,13 +186,17 @@ function AdminMembersContent() {
                   onChange={(e) => setStateFilter(e.target.value)}
                   className="bg-white border border-[#E1E2EC] rounded-xl px-4 py-3 text-sm font-bold text-black outline-none focus:ring-1 focus:ring-[#10b981] min-w-[120px] flex-1 md:flex-none"
                 >
-                  <option>All States</option>
-                  <option>Maharashtra</option>
-                  <option>Gujarat</option>
-                  <option>Delhi</option>
-                  <option>Karnataka</option>
-                  <option>Tamil Nadu</option>
-                  <option>Uttar Pradesh</option>
+                  {[
+                    'All States',
+                    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+                    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+                    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+                    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+                    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+                    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+                  ].map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
                 </select>
                 <select 
                   value={statusFilter === 'All Status' && sortFilter === 'newest' ? 'All Status' : statusFilter === 'All Status' && sortFilter === 'oldest' ? '__oldest' : statusFilter === 'All Status' && sortFilter === 'recent' ? '__recent' : statusFilter}
