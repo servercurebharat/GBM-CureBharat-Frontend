@@ -389,10 +389,14 @@ function TreeNode({ node, level, forceExpand }: { node: any, level: number, forc
            </div>
         </td>
         <td className="px-4 py-5">
-           <span className="text-[11px] font-black text-white/40 tabular-nums tracking-tight">₹0</span>
+           <span className="text-[11px] font-black text-white/40 tabular-nums tracking-tight">
+             ₹{((node.totalSalesAmount || 0) / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+           </span>
         </td>
         <td className="px-4 py-5 text-right">
-           <span className="text-[11px] font-black text-white tabular-nums tracking-tight">₹0</span>
+           <span className="text-[11px] font-black text-emerald-400 tabular-nums tracking-tight">
+             ₹{((node.totalIncome || 0) / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+           </span>
         </td>
         <td className="px-4 py-5 text-center">
            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.02] border border-white/[0.05]">
