@@ -107,7 +107,7 @@ export const usersAPI = {
 export const salesAPI = {
   create: (data: CreateSaleData) =>
     api.post<ApiResponse<ISale>>('/sales', data),
-  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string; search?: string; status?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string; search?: string; status?: string; sellerId?: string }) =>
     api.get<PaginatedResponse<ISale>>('/sales', { params }),
   getFTDAnalytics: (date: string) =>
     api.get<ApiResponse<any>>('/sales/analytics/ftd', { params: { date } }),
