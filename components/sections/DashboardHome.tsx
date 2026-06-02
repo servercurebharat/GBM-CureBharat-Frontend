@@ -851,10 +851,29 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       {/* Leaderboard Section */}
       <div className="bg-[#131241] rounded-[40px] shadow-2xl border border-white/5 overflow-hidden">
          <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-            <div>
-               <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Top 10 {roleLabel(getNextRole(user.role))}s (By Earnings)</h3>
+             <div>
+               <h3 className="text-sm font-black text-white uppercase tracking-[0.3em]">Top 10 {roleLabel(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role)))}s (By Earnings)</h3>
             </div>
-            {user.role === 'hcm' ? (
+            {user.role === 'admin' ? (
+              <div className="flex items-center gap-4">
+                <div className="flex gap-2 bg-white/5 p-1 rounded-xl">
+                  {['sh', 'hba', 'hcm', 'hcc'].map(r => (
+                    <button 
+                      key={r} 
+                      onClick={() => setLeaderRole(r === leaderRole ? '' : r)}
+                      className={`px-3 py-1.5 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                        (leaderRole || 'hcc') === r 
+                          ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/20' 
+                          : 'text-white/40 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+                <Link href="/admin/members" className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View All</Link>
+              </div>
+            ) : user.role === 'hcm' ? (
               <div className="flex gap-2 bg-white/5 p-1 rounded-xl">
                 {['hcc', 'hcm', 'hba'].map(r => (
                   <button 
@@ -871,7 +890,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                 ))}
               </div>
             ) : (
-              <Link href={user.role === 'admin' ? '/admin/members' : `/${user.role}/team`} className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View Rankings</Link>
+              <Link href={`/${user.role}/team`} className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition-colors">View Rankings</Link>
             )}
          </div>
 
@@ -880,9 +899,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                <thead>
                   <tr className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/5">
                      <th className="px-10 py-6">Rank</th>
-                     <th className="px-10 py-6">{getNextRole(user.role)} Name</th>
+                     <th className="px-10 py-6">{(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role))).toUpperCase()} Name</th>
                      <th className="px-10 py-6">State</th>
-                     <th className="px-10 py-6">Direct {getNextRole(getNextRole(user.role))}s</th>
+                     <th className="px-10 py-6">Direct {getNextRole(leaderRole || (user.role === 'admin' ? 'hcc' : getNextRole(user.role)))}s</th>
                      <th className="px-10 py-6 text-right">Team Sales</th>
                      <th className="px-10 py-6 text-right">Override (2%)</th>
                      <th className="px-10 py-6 text-right">Total Income</th>
