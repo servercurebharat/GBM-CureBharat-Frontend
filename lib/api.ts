@@ -71,6 +71,10 @@ export const publicAPI = {
     api.post('/public/send-otp', { email }),
   verifyOTP: (email: string, otp: string) =>
     api.post('/public/verify-otp', { email, otp }),
+  getKycSale: (saleId: string) =>
+    api.get(`/public/kyc/${saleId}`),
+  submitKyc: (saleId: string, kycData: any) =>
+    api.post(`/public/kyc/${saleId}`, kycData),
 };
 
 // SUBSCRIPTIONS (AutoPay)
