@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { subscriptionAPI, plansAPI } from '@/lib/api'; 
+import { useState, useEffect, useRef } from 'react';
+import { subscriptionAPI, plansAPI, publicAPI } from '@/lib/api'; 
 import { IPlan, IUser } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -19,9 +19,15 @@ export default function NewSaleSection({ user }: { user: IUser }) {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [otpState, setOtpState] = useState<'idle' | 'sending' | 'sent' | 'verifying' | 'verified'>('idle');
+  const [otpInput, setOtpInput] = useState('');
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const countdownRef = useRef<NodeJS.Timeout>();
+
   const [formData, setFormData] = useState({
     customerName: '',
     customerMobile: '',
+    customerEmail: '',
     planId: ''
   });
 
@@ -50,9 +56,44 @@ export default function NewSaleSection({ user }: { user: IUser }) {
     fetchPlans();
   }, []);
 
+  const handleSendOTP = async () => {
+    if (!formData.customerEmail.includes('@')) return toast.error('Enter a valid email address');
+    setOtpState('sending');
+    try {
+      await publicAPI.sendOTP(formData.customerEmail);
+      setOtpState('sent');
+      setOtpCountdown(60);
+      countdownRef.current = setInterval(() => {
+        setOtpCountdown(prev => {
+          if (prev <= 1) { clearInterval(countdownRef.current); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+      toast.success(`OTP sent to ${formData.customerEmail}`);
+    } catch (err: any) {
+      setOtpState('idle');
+      toast.error(err.response?.data?.message || 'Failed to send OTP');
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (otpInput.length !== 6) return toast.error('Enter the 6-digit OTP');
+    setOtpState('verifying');
+    try {
+      await publicAPI.verifyOTP(formData.customerEmail, otpInput);
+      setOtpState('verified');
+      clearInterval(countdownRef.current);
+      toast.success('Email verified! ✓');
+    } catch (err: any) {
+      setOtpState('sent');
+      toast.error(err.response?.data?.message || 'Invalid OTP');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.planId) return toast.error('Please select a plan');
+    if (otpState !== 'verified') return toast.error('Please verify the email with OTP first');
     
     setSubmitting(true);
     try {
@@ -61,7 +102,7 @@ export default function NewSaleSection({ user }: { user: IUser }) {
         refCode: user.memberId, // Agent's own member ID
         customerName: formData.customerName,
         customerMobile: formData.customerMobile,
-        customerEmail: 'noreply@curebharat.com', // Optional defaults
+        customerEmail: formData.customerEmail, // Pass verified email
         customerState: 'Maharashtra',
         nomineeName: 'Pending',
         nomineeRelation: 'Pending'
@@ -134,6 +175,66 @@ export default function NewSaleSection({ user }: { user: IUser }) {
                     placeholder="10-digit mobile"
                   />
                </div>
+            </div>
+
+            {/* Email + OTP Section */}
+            <div className="space-y-3">
+              <div className="flex flex-col md:flex-row items-end gap-4">
+                <div className="flex-1 w-full space-y-3">
+                  <label className="text-[10px] font-black text-[#B5B8BD] uppercase tracking-[0.2em] pl-1">
+                    Customer Email *
+                    {otpState === 'verified' && <span className="ml-2 text-emerald-400">✓ Verified</span>}
+                  </label>
+                  <input
+                    required
+                    type="email"
+                    value={formData.customerEmail}
+                    onChange={e => {
+                      setFormData(p => ({ ...p, customerEmail: e.target.value }));
+                      if (otpState !== 'idle') { setOtpState('idle'); setOtpInput(''); }
+                    }}
+                    disabled={otpState === 'verified'}
+                    placeholder="customer@email.com"
+                    className={`w-full bg-white/[0.03] border rounded-2xl px-6 py-4 text-sm font-bold text-white outline-none transition-all placeholder:opacity-30 disabled:opacity-40 shadow-inner ${
+                      otpState === 'verified' ? 'border-emerald-500/50' : 'border-white/10 focus:border-[#60A5FA]/40'
+                    }`}
+                  />
+                </div>
+                {otpState !== 'verified' && (
+                  <button
+                    type="button"
+                    disabled={otpState === 'sending' || !formData.customerEmail.includes('@')}
+                    onClick={handleSendOTP}
+                    className="w-full md:w-auto h-[54px] px-8 rounded-2xl bg-[#60A5FA] hover:bg-blue-400 text-[#0B0A26] font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-40 whitespace-nowrap shadow-lg shadow-blue-500/20"
+                  >
+                    {otpState === 'sending' ? 'Sending...' : otpState === 'sent' ? 'Resend' : 'Send OTP'}
+                  </button>
+                )}
+              </div>
+
+              {(otpState === 'sent' || otpState === 'verifying') && (
+                <div className="flex gap-4 animate-in slide-in-from-top-2 duration-300">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otpInput}
+                    onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Enter 6-digit OTP"
+                    className="flex-1 bg-white/[0.03] border border-blue-500/40 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none focus:border-blue-500 tracking-[0.5em] placeholder:tracking-normal placeholder:opacity-20 shadow-inner"
+                  />
+                  <button
+                    type="button"
+                    disabled={otpInput.length !== 6 || otpState === 'verifying'}
+                    onClick={handleVerifyOTP}
+                    className="h-[54px] px-8 rounded-2xl bg-indigo-500 hover:bg-indigo-400 text-white font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-40 shadow-lg shadow-indigo-500/20"
+                  >
+                    {otpState === 'verifying' ? '...' : 'Verify'}
+                  </button>
+                </div>
+              )}
+              {otpCountdown > 0 && otpState !== 'verified' && (
+                <p className="text-[10px] font-bold text-slate-400 pl-1">Resend OTP in {otpCountdown}s</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
