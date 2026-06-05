@@ -79,33 +79,37 @@ export default function PerformanceReport() {
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col md:flex-row flex-wrap items-stretch md:items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
             {/* Scope Toggle */}
             <div className="flex bg-slate-800 border border-slate-700 rounded-xl p-1">
               <button
                 onClick={() => setScope('MTD')}
-                className={`px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'MTD' ? 'bg-emerald-500 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                className={`flex-1 px-4 py-2.5 md:py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'MTD' ? 'bg-emerald-500 text-white shadow' : 'text-slate-400 hover:text-white'}`}
               >
                 Monthly View
               </button>
               <button
                 onClick={() => setScope('FTD')}
-                className={`px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'FTD' ? 'bg-blue-500 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                className={`flex-1 px-4 py-2.5 md:py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${scope === 'FTD' ? 'bg-blue-500 text-white shadow' : 'text-slate-400 hover:text-white'}`}
               >
                 Daily View
               </button>
             </div>
 
-            {/* Picker */}
-            {scope === 'FTD' ? (
-              <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                className="bg-slate-800 border border-slate-700 text-white text-sm font-bold px-4 py-2 rounded-xl outline-none cursor-pointer" />
-            ) : (
-              <input type="month" value={month} onChange={e => setMonth(e.target.value)}
-                className="bg-slate-800 border border-slate-700 text-white text-sm font-bold px-4 py-2 rounded-xl outline-none cursor-pointer" />
-            )}
+            <div className="flex items-center gap-3">
+              {/* Picker */}
+              {scope === 'FTD' ? (
+                <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 text-white text-sm font-bold px-4 py-2.5 md:py-2 rounded-xl outline-none cursor-pointer flex-1" style={{ colorScheme: 'dark' }} />
+              ) : (
+                <input type="month" value={month} onChange={e => setMonth(e.target.value)}
+                  className="bg-slate-800 border border-slate-700 text-white text-sm font-bold px-4 py-2.5 md:py-2 rounded-xl outline-none cursor-pointer flex-1" style={{ colorScheme: 'dark' }} />
+              )}
 
-            <ExportDropdown {...getExportData()} />
+              <div className="flex-shrink-0">
+                <ExportDropdown {...getExportData()} />
+              </div>
+            </div>
           </div>
         </div>
 
