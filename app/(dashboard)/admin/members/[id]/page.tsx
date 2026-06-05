@@ -240,7 +240,7 @@ export default function MemberDetails() {
                          <DetailBlock label="Mobile Number" value={member.mobile} icon="phone" />
                          <DetailBlock label="Email Address" value={member.email || 'Not Provided'} icon="mail" />
                          <DetailBlock label="State / Territory" value={member.state} icon="map-pin" />
-                         <DetailBlock label="Sponsor Details" value={typeof member.referrerId === 'object' ? `${member.referrerId.name} (${member.referrerId.memberId})` : 'System Direct'} icon="users" />
+                         <DetailBlock label="Sponsor Details" value={member.referrerId && typeof member.referrerId === 'object' ? `${(member.referrerId as any).name} (${(member.referrerId as any).memberId})` : 'System Direct'} icon="users" />
                          <DetailBlock label="Member Since" value={new Date(member.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} icon="calendar" />
                       </div>
                    </div>
