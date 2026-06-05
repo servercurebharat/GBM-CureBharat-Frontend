@@ -179,7 +179,8 @@ export default function CustomerKYCPage() {
   return (
     <div className="min-h-screen bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 flex flex-col items-center">
+          <img src="/logo.png" alt="CureBharat" className="h-16 object-contain mb-4" />
           <h1 className="text-4xl font-extrabold text-white mb-2">Complete Your Profile</h1>
           <p className="text-lg text-slate-400">Policy: <span className="text-[#49D2B5] font-mono">{saleData.policyId}</span> | {saleData.plan?.name}</p>
         </div>
