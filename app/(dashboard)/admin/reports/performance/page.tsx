@@ -7,6 +7,18 @@ import ExportDropdown from '@/components/dashboard/ExportDropdown';
 
 type Scope = 'FTD' | 'MTD';
 
+const ICONS = {
+  revenue:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  policies:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+  ticket:    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  sellers:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  members:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>,
+  map:       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>,
+  calendar:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  analytics: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>,
+};
+
+
 export default function PerformanceReport() {
   const [scope, setScope] = useState<Scope>('MTD');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -61,8 +73,9 @@ export default function PerformanceReport() {
             <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">
               Reports / {scope === 'FTD' ? 'Daily Pulse' : 'Month-to-Date'}
             </p>
-            <h1 className="text-2xl font-bold text-white">
-              {scope === 'FTD' ? `📅 ${displayDate}` : `📊 ${displayMonth} Analytics`}
+            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+              <span className="text-slate-500">{scope === 'FTD' ? ICONS.calendar : ICONS.analytics}</span>
+              {scope === 'FTD' ? displayDate : `${displayMonth} Analytics`}
             </h1>
           </div>
 
@@ -107,6 +120,7 @@ export default function PerformanceReport() {
         {!loading && scope === 'FTD' && ftdData && <FTDView data={ftdData} />}
         {!loading && scope === 'MTD' && mtdData && <MTDView data={mtdData} displayMonth={displayMonth} />}
 
+
       </div>
     </DashboardLayout>
   );
@@ -130,16 +144,16 @@ function FTDView({ data }: { data: any }) {
     <div className="space-y-6">
       {/* Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Revenue" value={fmt(metrics?.totalRevenue || 0)} sub="Gross sales today" accent="emerald" icon="💰" />
-        <StatCard label="Policies Sold" value={(metrics?.totalSales || 0).toString()} sub="Total transactions" accent="blue" icon="📋" />
+        <StatCard label="Total Revenue" value={fmt(metrics?.totalRevenue || 0)} sub="Gross sales today" accent="emerald" icon={ICONS.revenue} />
+        <StatCard label="Policies Sold" value={(metrics?.totalSales || 0).toString()} sub="Total transactions" accent="blue" icon={ICONS.policies} />
         <StatCard
           label="Avg. Ticket Size"
           value={metrics?.totalSales > 0 ? fmt(Math.round(metrics.totalRevenue / metrics.totalSales)) : '₹0'}
           sub="Per policy average"
           accent="amber"
-          icon="🎯"
+          icon={ICONS.ticket}
         />
-        <StatCard label="Active Sellers" value={(topPerformers?.hcc?.length || 0).toString()} sub="Members with sales" accent="purple" icon="👤" />
+        <StatCard label="Active Sellers" value={(topPerformers?.hcc?.length || 0).toString()} sub="Members with sales" accent="purple" icon={ICONS.sellers} />
       </div>
 
       {/* Hourly Chart */}
@@ -149,7 +163,7 @@ function FTDView({ data }: { data: any }) {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-sm font-black text-white uppercase tracking-widest">Intraday Sales Velocity</h3>
-              <p className="text-xs text-slate-500 mt-1">Hourly transaction breakdown — hover bars for details</p>
+              <p className="text-xs text-slate-500 mt-1">Hourly breakdown — hover bars for details</p>
             </div>
             <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
               <div className="w-3 h-3 rounded-sm bg-blue-500" /> Policies sold
@@ -158,7 +172,7 @@ function FTDView({ data }: { data: any }) {
 
           {metrics?.totalSales === 0 ? (
             <div className="h-48 flex items-center justify-center text-slate-500 text-sm font-bold">
-              📭 No sales recorded for this date
+              No sales recorded for this date
             </div>
           ) : (
             <div className="h-52 flex items-end gap-1 border-b border-slate-700 pb-6 relative">
@@ -223,10 +237,10 @@ function MTDView({ data, displayMonth }: { data: any; displayMonth: string }) {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Revenue" value={fmt(metrics?.totalRevenue || 0)} sub="Gross for the month" accent="emerald" icon="💰" />
-        <StatCard label="Policies Sold" value={(metrics?.totalSales || 0).toString()} sub="Active transactions" accent="blue" icon="📋" />
-        <StatCard label="Avg. Ticket Size" value={avgTicket > 0 ? fmt(avgTicket) : '₹0'} sub="Per policy average" accent="amber" icon="🎯" />
-        <StatCard label="New Members" value={(newMembersCount || 0).toString()} sub="Joined this month" accent="purple" icon="🙋" />
+        <StatCard label="Total Revenue" value={fmt(metrics?.totalRevenue || 0)} sub="Gross for the month" accent="emerald" icon={ICONS.revenue} />
+        <StatCard label="Policies Sold" value={(metrics?.totalSales || 0).toString()} sub="Active transactions" accent="blue" icon={ICONS.policies} />
+        <StatCard label="Avg. Ticket Size" value={avgTicket > 0 ? fmt(avgTicket) : '₹0'} sub="Per policy average" accent="amber" icon={ICONS.ticket} />
+        <StatCard label="New Members" value={(newMembersCount || 0).toString()} sub="Joined this month" accent="purple" icon={ICONS.members} />
       </div>
 
       {/* Territory + Top Performers */}
@@ -234,7 +248,7 @@ function MTDView({ data, displayMonth }: { data: any; displayMonth: string }) {
         {/* Territory Breakdown */}
         <div className="lg:col-span-7 bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-800 flex items-center gap-3">
-            <span className="text-lg">🗺️</span>
+            <span className="text-slate-400">{ICONS.map}</span>
             <div>
               <h3 className="text-sm font-black text-white uppercase tracking-widest">Territory Performance</h3>
               <p className="text-xs text-slate-500 mt-0.5">Revenue generated by state</p>
@@ -243,7 +257,7 @@ function MTDView({ data, displayMonth }: { data: any; displayMonth: string }) {
           <div className="p-6 space-y-5">
             {stateBreakdown.length === 0 ? (
               <div className="py-12 text-center text-slate-500 text-sm font-bold">
-                📭 No territory data for this period
+                No territory data for this period
               </div>
             ) : stateBreakdown.map((s: any, i: number) => {
               const maxRev = stateBreakdown[0].revenue;
@@ -273,22 +287,22 @@ function MTDView({ data, displayMonth }: { data: any; displayMonth: string }) {
 
         {/* Top Performers Sidebar */}
         <div className="lg:col-span-5 space-y-4">
-          <TopPerformerCard title="🏆 Top HCC This Month" data={topPerformers?.hcc || []} fmt={fmt} accent="#3b82f6" />
-          <TopPerformerCard title="⚡ Top HCM This Month" data={topPerformers?.hcm || []} fmt={fmt} accent="#10b981" />
+          <TopPerformerCard title="Top HCC This Month" data={topPerformers?.hcc || []} fmt={fmt} accent="#3b82f6" />
+          <TopPerformerCard title="Top HCM This Month" data={topPerformers?.hcm || []} fmt={fmt} accent="#10b981" />
         </div>
       </div>
 
       {/* HBA & SH tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PerformersTable title="Top HBA (Business Associates)" data={topPerformers?.hba || []} roleColor="amber" fmt={fmt} />
-        <PerformersTable title="Top SH (State Heads)" data={topPerformers?.sh || []} roleColor="purple" fmt={fmt} />
+        <PerformersTable title="Top HBA — Business Associates" data={topPerformers?.hba || []} roleColor="amber" fmt={fmt} />
+        <PerformersTable title="Top SH — State Heads" data={topPerformers?.sh || []} roleColor="purple" fmt={fmt} />
       </div>
     </div>
   );
 }
 
 // ─── SHARED COMPONENTS ───────────────────────────────────────────────────────
-function StatCard({ label, value, sub, accent, icon }: { label: string; value: string; sub: string; accent: string; icon: string }) {
+function StatCard({ label, value, sub, accent, icon }: { label: string; value: string; sub: string; accent: string; icon: React.ReactNode }) {
   const styles: Record<string, { bg: string; border: string; text: string; sub: string }> = {
     emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', sub: 'text-emerald-600' },
     blue:    { bg: 'bg-blue-500/10',    border: 'border-blue-500/20',    text: 'text-blue-400',    sub: 'text-blue-600'    },
@@ -300,7 +314,7 @@ function StatCard({ label, value, sub, accent, icon }: { label: string; value: s
     <div className={`${s.bg} border ${s.border} rounded-2xl p-5 transition-all hover:scale-[1.02] cursor-default`}>
       <div className="flex items-start justify-between mb-3">
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</p>
-        <span className="text-lg">{icon}</span>
+        <span className={`${s.text}`}>{icon}</span>
       </div>
       <p className={`text-2xl font-black ${s.text} mb-1 truncate`}>{value}</p>
       <p className={`text-[10px] font-bold uppercase tracking-widest ${s.sub}`}>{sub}</p>
