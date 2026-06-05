@@ -31,7 +31,7 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
     state: user?.address?.state || '',
     zipCode: user?.address?.zipCode || '',
     
-    familyDetails: user?.familyDetails?.length ? user.familyDetails : Array.from({length: 6}).map(() => ({ name: '', relation: '', dob: '', gender: 'Male' })),
+    familyDetails: user?.familyDetails?.length ? user.familyDetails : [],
     
     existingMedicalConditions: user?.healthDetails?.existingMedicalConditions || 'None',
     currentMedications: user?.healthDetails?.currentMedications || 'None',
@@ -339,41 +339,85 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
 
         {/* Family Details */}
         <div className="bg-[#131241] rounded-2xl p-5 border border-white/5 shadow-xl space-y-4">
-          <StepHeader num="08" label="Family Details (Optional)" sub="For family floater plans" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+            <StepHeader num="08" label="Family Details (Optional)" sub="For family floater plans" />
+            {!isApproved && (
+              <button 
+                type="button"
+                onClick={() => setFormData({...formData, familyDetails: [...formData.familyDetails, { name: '', relation: 'Spouse', dob: '', gender: 'Male' }]})}
+                className="bg-[#49D2B5]/20 text-[#49D2B5] px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-[#49D2B5]/30 transition-all flex items-center gap-2 border border-[#49D2B5]/30 self-start sm:self-auto"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Member
+              </button>
+            )}
+          </div>
           <div className="space-y-3">
+             {formData.familyDetails.length === 0 && (
+                <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+                   <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">No family members added</p>
+                </div>
+             )}
              {formData.familyDetails.map((member, idx) => (
-               <div key={idx} className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                 <InputField label={`Member ${idx + 1} Name`} placeholder="Name" value={member.name} onChange={(v: string) => {
-                    const newFam = [...formData.familyDetails];
-                    newFam[idx].name = v;
-                    setFormData({...formData, familyDetails: newFam});
-                 }} disabled={isApproved} />
-                 <InputField label="Relation" placeholder="Relation" value={member.relation} onChange={(v: string) => {
-                    const newFam = [...formData.familyDetails];
-                    newFam[idx].relation = v;
-                    setFormData({...formData, familyDetails: newFam});
-                 }} disabled={isApproved} />
-                 <div className="space-y-1.5">
-                   <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">DOB</label>
-                   <input type="date" value={member.dob} onChange={e => {
-                      const newFam = [...formData.familyDetails];
-                      newFam[idx].dob = e.target.value;
-                      setFormData({...formData, familyDetails: newFam});
-                   }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50" />
-                 </div>
-                 <div className="space-y-1.5">
-                   <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Gender</label>
-                   <select value={member.gender} onChange={e => {
-                      const newFam = [...formData.familyDetails];
-                      newFam[idx].gender = e.target.value;
-                      setFormData({...formData, familyDetails: newFam});
-                   }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
-                     <option value="Male" className="bg-[#131241]">Male</option>
-                     <option value="Female" className="bg-[#131241]">Female</option>
-                     <option value="Other" className="bg-[#131241]">Other</option>
-                   </select>
-                 </div>
-               </div>
+                <div key={idx} className="relative grid grid-cols-1 sm:grid-cols-4 gap-3 p-5 pt-8 sm:pt-5 bg-white/[0.02] border border-white/5 rounded-xl">
+                  {!isApproved && (
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData({...formData, familyDetails: formData.familyDetails.filter((_, i) => i !== idx)})}
+                      className="absolute top-2 right-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors sm:top-5 sm:right-5 sm:translate-x-full sm:-mr-10"
+                      title="Remove Member"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                  )}
+                  <InputField label={`Member ${idx + 1} Name`} placeholder="Name" value={member.name} onChange={(v: string) => {
+                     const newFam = [...formData.familyDetails];
+                     newFam[idx].name = v;
+                     setFormData({...formData, familyDetails: newFam});
+                  }} disabled={isApproved} />
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Relation</label>
+                    <select value={member.relation} onChange={e => {
+                       const newFam = [...formData.familyDetails];
+                       newFam[idx].relation = e.target.value;
+                       setFormData({...formData, familyDetails: newFam});
+                    }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                      <option value="" disabled className="bg-[#131241]">Select Relation</option>
+                      <option value="Spouse" className="bg-[#131241]">Spouse</option>
+                      <option value="Son" className="bg-[#131241]">Son</option>
+                      <option value="Daughter" className="bg-[#131241]">Daughter</option>
+                      <option value="Father" className="bg-[#131241]">Father</option>
+                      <option value="Mother" className="bg-[#131241]">Mother</option>
+                      <option value="Father-in-law" className="bg-[#131241]">Father-in-law</option>
+                      <option value="Mother-in-law" className="bg-[#131241]">Mother-in-law</option>
+                      <option value="Brother" className="bg-[#131241]">Brother</option>
+                      <option value="Sister" className="bg-[#131241]">Sister</option>
+                      <option value="Other" className="bg-[#131241]">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">DOB</label>
+                    <input type="date" value={member.dob} onChange={e => {
+                       const newFam = [...formData.familyDetails];
+                       newFam[idx].dob = e.target.value;
+                       setFormData({...formData, familyDetails: newFam});
+                    }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Gender</label>
+                    <select value={member.gender} onChange={e => {
+                       const newFam = [...formData.familyDetails];
+                       newFam[idx].gender = e.target.value;
+                       setFormData({...formData, familyDetails: newFam});
+                    }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                      <option value="Male" className="bg-[#131241]">Male</option>
+                      <option value="Female" className="bg-[#131241]">Female</option>
+                      <option value="Other" className="bg-[#131241]">Other</option>
+                    </select>
+                  </div>
+                </div>
              ))}
           </div>
         </div>
