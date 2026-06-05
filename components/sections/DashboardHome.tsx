@@ -35,7 +35,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   const [loadingChildren, setLoadingChildren] = useState<Record<string, boolean>>({});
 
   // Filter States
-  const [period, setPeriod] = useState('mtd');
+  const [period, setPeriod] = useState('all');
   const [selectedState, setSelectedState] = useState('all');
   const [leaderRole, setLeaderRole] = useState<string>('');
   const [activeDropdown, setActiveDropdown] = useState<'period' | 'state' | null>(null);
