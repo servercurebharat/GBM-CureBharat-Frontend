@@ -25,7 +25,12 @@ export interface IUser {
   gender?: 'male' | 'female' | 'other';
   dob?: string;
   profileImage?: string;
+  maritalStatus?: string;
+  occupation?: string;
+  alternateMobile?: string;
   address?: {
+    addressLine1?: string;
+    addressLine2?: string;
     street?: string;
     city?: string;
     state?: string;
@@ -44,6 +49,19 @@ export interface IUser {
     name?: string;
     relation?: string;
     mobile?: string;
+    dob?: string;
+    gender?: string;
+  };
+  familyDetails?: Array<{
+    name: string;
+    relation: string;
+    dob: string;
+    gender: string;
+  }>;
+  healthDetails?: {
+    existingMedicalConditions?: string;
+    currentMedications?: string;
+    lifestyle?: string;
   };
   
   kycDocuments?: {
