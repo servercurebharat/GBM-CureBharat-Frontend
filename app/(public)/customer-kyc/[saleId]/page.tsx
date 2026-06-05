@@ -30,9 +30,18 @@ export default function CustomerKYCPage() {
     city: '',
     state: '',
     pincode: '',
-    familyDetails: [
-      { name: '', relation: '', dob: '', gender: 'Male' }
-    ]
+    // Medical
+    existingMedicalConditions: 'None',
+    currentMedications: 'None',
+    lifestyle: 'Moderate',
+    // Nominee
+    nomineeName: '',
+    nomineeRelation: '',
+    nomineeDOB: '',
+    nomineeGender: 'Male',
+    nomineeContact: '',
+    // Family
+    familyDetails: [] as Array<{ name: string; relation: string; dob: string; gender: string }>
   });
 
   useEffect(() => {
@@ -49,12 +58,16 @@ export default function CustomerKYCPage() {
         if (res.data.data.kycSubmitted) {
           toast.success('Your profile is already submitted!');
         } else {
-          // Pre-fill some fields
+          // Pre-fill fields
           setFormData(prev => ({
             ...prev,
             fullName: res.data.data.sale.customerName || '',
             mobile: res.data.data.sale.customerMobile || '',
             email: res.data.data.sale.customerEmail || '',
+            dob: res.data.data.sale.customerDOB || '',
+            pan: res.data.data.sale.customerPAN || '',
+            nomineeName: res.data.data.sale.nomineeName || '',
+            nomineeRelation: res.data.data.sale.nomineeRelation || '',
           }));
         }
       }
@@ -76,9 +89,19 @@ export default function CustomerKYCPage() {
     setFormData(prev => ({ ...prev, familyDetails: updatedFamily }));
   };
 
+  // Extract limit from plan name e.g., "4A+2C" -> 6
+  const getFamilyLimit = () => {
+    if (!saleData?.plan?.name) return 0;
+    const planName = saleData.plan.name.toUpperCase();
+    if (planName.includes('4A+2C') || planName.includes('4A + 2C')) return 6;
+    if (planName.includes('2A+2C') || planName.includes('2A + 2C')) return 4;
+    return 2; // default 2 members
+  };
+
   const addFamilyMember = () => {
-    if (formData.familyDetails.length >= 4) {
-      toast.error('You can add up to 4 family members.');
+    const limit = getFamilyLimit();
+    if (formData.familyDetails.length >= limit) {
+      toast.error(`Your plan allows a maximum of ${limit} family members.`);
       return;
     }
     setFormData(prev => ({
@@ -167,7 +190,7 @@ export default function CustomerKYCPage() {
           <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
               <User className="text-[#49D2B5]" />
-              <h2 className="text-2xl font-bold text-white">Primary Applicant Details</h2>
+              <h2 className="text-2xl font-bold text-white">Primary Applicant Details (For Protection Cover)</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -209,24 +232,39 @@ export default function CustomerKYCPage() {
           <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
               <MapPin className="text-[#49D2B5]" />
-              <h2 className="text-2xl font-bold text-white">Contact & Address Details</h2>
+              <h2 className="text-2xl font-bold text-white">Contact Information</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Mobile Number *</label>
                 <input required type="text" name="mobile" value={formData.mobile} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Alternate Number</label>
+                <input type="text" name="alternateMobile" value={formData.alternateMobile} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Email ID *</label>
                 <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
               </div>
             </div>
+          </div>
 
+          {/* Section 3: Address Details */}
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
+              <MapPin className="text-[#49D2B5]" />
+              <h2 className="text-2xl font-bold text-white">Address Details</h2>
+            </div>
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Address Line 1 *</label>
                 <input required type="text" name="addressLine1" value={formData.addressLine1} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Address Line 2</label>
+                <input type="text" name="addressLine2" value={formData.addressLine2} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
@@ -245,19 +283,28 @@ export default function CustomerKYCPage() {
             </div>
           </div>
 
-          {/* Section 3: Family / Nominee */}
+          {/* Section 4: Family Details */}
           <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700">
               <div className="flex items-center gap-3">
                 <Users className="text-[#49D2B5]" />
-                <h2 className="text-2xl font-bold text-white">Family / Nominee Details</h2>
+                <h2 className="text-2xl font-bold text-white">Family Details</h2>
               </div>
               <button type="button" onClick={addFamilyMember} className="text-sm font-medium text-[#49D2B5] hover:text-[#3db29a] bg-[#49D2B5]/10 px-4 py-2 rounded-lg">
                 + Add Member
               </button>
             </div>
             
+            <p className="text-sm text-slate-400 mb-4">
+              Your plan (<strong className="text-white">{saleData.plan?.name}</strong>) allows up to {getFamilyLimit()} members.
+            </p>
+
             <div className="space-y-4">
+              {formData.familyDetails.length === 0 && (
+                <div className="text-center py-6 bg-slate-900/50 rounded-xl border border-slate-700 border-dashed">
+                  <p className="text-slate-500 text-sm">No family members added. Click "+ Add Member" to include family in your plan.</p>
+                </div>
+              )}
               {formData.familyDetails.map((member, index) => (
                 <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-700 relative group">
                   <div className="md:col-span-2">
@@ -278,21 +325,88 @@ export default function CustomerKYCPage() {
                       <option>Male</option>
                       <option>Female</option>
                     </select>
-                    {formData.familyDetails.length > 1 && (
-                      <button type="button" onClick={() => removeFamilyMember(index)} className="absolute -right-2 -top-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-                    )}
+                    <button type="button" onClick={() => removeFamilyMember(index)} className="absolute -right-2 -top-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
                   </div>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-slate-500 mt-4">* First member will be considered as the primary nominee.</p>
           </div>
 
-          <div className="flex justify-end">
+          {/* Section 5: Nominee Details */}
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
+              <Users className="text-[#49D2B5]" />
+              <h2 className="text-2xl font-bold text-white">Nominee Details</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Nominee Name *</label>
+                <input required type="text" name="nomineeName" value={formData.nomineeName} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Relationship with Applicant *</label>
+                <input required type="text" name="nomineeRelation" value={formData.nomineeRelation} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Date of Birth *</label>
+                <input required type="date" name="nomineeDOB" value={formData.nomineeDOB} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Gender *</label>
+                <select required name="nomineeGender" value={formData.nomineeGender} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]">
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-300 mb-1">Contact Number</label>
+                <input type="text" name="nomineeContact" value={formData.nomineeContact} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 6: Health & Wellness */}
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
+              <FileText className="text-[#49D2B5]" />
+              <h2 className="text-2xl font-bold text-white">Health & Wellness Information</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-300 mb-1">Existing Medical Conditions (if any)</label>
+                <input type="text" name="existingMedicalConditions" value={formData.existingMedicalConditions} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" placeholder="E.g. Diabetes, Asthma" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-300 mb-1">Current Medications (if any)</label>
+                <input type="text" name="currentMedications" value={formData.currentMedications} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Lifestyle *</label>
+                <select required name="lifestyle" value={formData.lifestyle} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]">
+                  <option>Sedentary</option>
+                  <option>Moderate</option>
+                  <option>Active</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Declaration Checkbox */}
+          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl flex items-start gap-4">
+            <input required type="checkbox" id="declaration" className="mt-1 w-5 h-5 rounded bg-slate-900 border-slate-700 text-[#49D2B5] focus:ring-[#49D2B5]" />
+            <label htmlFor="declaration" className="text-sm text-slate-300 leading-relaxed">
+              <strong>Declaration:</strong> I hereby declare that the information provided above is true and correct to the best of my knowledge. I agree to abide by the terms and conditions of CureBharat Wellness Private Limited.
+            </label>
+          </div>
+
+          <div className="flex justify-end pt-4">
             <button
               type="submit"
               disabled={submitting}
-              className="bg-gradient-to-r from-[#49D2B5] to-[#3db29a] hover:from-[#3db29a] hover:to-[#2e8f7a] text-white font-bold py-4 px-10 rounded-xl shadow-lg transform transition active:scale-95 disabled:opacity-70 text-lg"
+              className="bg-gradient-to-r from-[#49D2B5] to-[#3db29a] hover:from-[#3db29a] hover:to-[#2e8f7a] text-white font-bold py-4 px-10 rounded-xl shadow-lg transform transition active:scale-95 disabled:opacity-70 text-lg w-full md:w-auto"
             >
               {submitting ? 'Submitting securely...' : 'Submit Profile & Generate Policy'}
             </button>
