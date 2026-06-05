@@ -33,7 +33,7 @@ export default function HbaTeamPerformancePage() {
         <div className="bg-surface border border-white/[0.07] rounded-2xl p-6 shadow-xl">
           <h3 className="font-display text-sm font-bold text-black uppercase tracking-wider mb-5">Level-wise Distribution</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-5">
+            <div className="bg-white/[0.02] border border-white/[0.02] rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-[10px] font-black">HBA</div>
                 <div>
@@ -43,7 +43,7 @@ export default function HbaTeamPerformancePage() {
               </div>
               <div className="text-2xl font-display font-bold text-black">1</div>
             </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-5">
+            <div className="bg-white/[0.02] border border-white/[0.02] rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-[10px] font-black">HCM</div>
                 <div>
@@ -53,7 +53,7 @@ export default function HbaTeamPerformancePage() {
               </div>
               <div className="text-2xl font-display font-bold text-black">{HBA_TEAM_MEMBERS.length}</div>
             </div>
-            <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-5">
+            <div className="bg-white/[0.02] border border-white/[0.02] rounded-xl p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-[10px] font-black">HCC</div>
                 <div>

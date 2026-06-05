@@ -42,7 +42,7 @@ export default function HcmTeamMonitorPage() {
               className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
                 filter === f
                   ? 'bg-hcm text-[#0d0f14]'
-                  : 'bg-white/[0.03] border border-white/[0.07] text-muted hover:text-white hover:bg-white/[0.05]'
+                  : 'bg-white/[0.03] border border-white/[0.07] text-muted hover:text-white hover:bg-white/[0.02]'
               }`}
             >
               {f} ({f === 'all' ? HCM_TEAM_MEMBERS.length : f === 'active' ? activeCount : inactiveCount})
@@ -86,21 +86,21 @@ export default function HcmTeamMonitorPage() {
                 </div>
 
                 <div className="grid grid-cols-4 gap-3 mb-4">
-                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.02] border border-white/[0.02] rounded-lg p-3 text-center">
                     <div className="text-[9px] text-muted font-bold uppercase tracking-widest">This Month</div>
                     <div className={`text-lg font-display font-bold ${member.personalSalesThisMonth > 0 ? 'text-white' : 'text-red-400'}`}>
                       {member.personalSalesThisMonth}
                     </div>
                   </div>
-                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.02] border border-white/[0.02] rounded-lg p-3 text-center">
                     <div className="text-[9px] text-muted font-bold uppercase tracking-widest">Total Sales</div>
                     <div className="text-lg font-display font-bold text-white">{member.personalSalesCount}</div>
                   </div>
-                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.02] border border-white/[0.02] rounded-lg p-3 text-center">
                     <div className="text-[9px] text-muted font-bold uppercase tracking-widest">Revenue</div>
                     <div className="text-sm font-display font-bold" style={{ color }}>₹{(member.totalRevenue / 100 / 1000).toFixed(0)}k</div>
                   </div>
-                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-center">
+                  <div className="bg-white/[0.02] border border-white/[0.02] rounded-lg p-3 text-center">
                     <div className="text-[9px] text-muted font-bold uppercase tracking-widest">Last Active</div>
                     <div className="text-[11px] font-bold text-white">{new Date(member.lastActive).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</div>
                   </div>

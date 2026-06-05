@@ -134,7 +134,7 @@ function PayoutContent() {
               </button>
               <ExportDropdown
                 title="Payout Report"
-                headers={['Name', 'Member ID', 'Role', 'Provisional', 'TDS (5%)', 'Net Payout', 'KYC Status']}
+                headers={['Name', 'Member ID', 'Role', 'Provisional', 'TDS (2%)', 'Net Payout', 'KYC Status']}
                 rows={data?.wallets.map(w => [
                   w.user?.name, w.user?.memberId, w.user?.role?.toUpperCase(),
                   `Rs. ${(w.provisionalBalance / 100).toLocaleString()}`,
@@ -204,7 +204,7 @@ function PayoutContent() {
                     <th className="px-8 py-5">Request ID</th>
                     <th className="px-6 py-5">Member</th>
                     <th className="px-6 py-5 text-right">Gross Amount</th>
-                    <th className="px-6 py-5 text-right">TDS (5%)</th>
+                    <th className="px-6 py-5 text-right">TDS (2%)</th>
                     <th className="px-6 py-5 text-right">Net Payout</th>
                     <th className="px-6 py-5 text-center">KYC</th>
                     <th className="px-6 py-5 text-center">Status</th>
@@ -279,7 +279,7 @@ function PayoutContent() {
                     <th className="px-8 py-5">Member</th>
                     <th className="px-6 py-5">Role</th>
                     <th className="px-6 py-5 text-right">Provisional</th>
-                    <th className="px-6 py-5 text-right">TDS (5%)</th>
+                    <th className="px-6 py-5 text-right">TDS (2%)</th>
                     <th className="px-6 py-5 text-right">Net Settlement</th>
                     <th className="px-6 py-5 text-center">KYC Compliance</th>
                   </tr>

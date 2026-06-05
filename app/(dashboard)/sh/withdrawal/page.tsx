@@ -164,7 +164,7 @@ export default function WithdrawalPage() {
                        <span className="text-white">{formatCurrency(parseFloat(requestAmount) || 0)}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-bold">
-                       <span className="text-[#B5B8BD] uppercase tracking-wider flex items-center gap-2">TDS Deduction (5%) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
+                       <span className="text-[#B5B8BD] uppercase tracking-wider flex items-center gap-2">TDS Deduction (2%) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
                        <span className="text-red-400">- {formatCurrency(tds || 0)}</span>
                     </div>
                     <div className="pt-4 border-t border-white/5 flex justify-between items-center">
@@ -201,7 +201,7 @@ export default function WithdrawalPage() {
                     {[
                       { label: 'Minimum Withdrawal', desc: '₹500.00 per transaction.', icon: 'info' },
                       { label: 'Processing Timelines', desc: 'Settlements are processed on weekly cycles.', icon: 'clock' },
-                      { label: 'Statutory Deductions', desc: '5% TDS is mandatory for all SH commissions.', icon: 'bank' },
+                      { label: 'Statutory Deductions', desc: '2% TDS is mandatory for all SH commissions.', icon: 'bank' },
                     ].map((policy, i) => (
                       <div key={i} className="flex gap-4">
                          <div className="mt-1 text-amber-400">

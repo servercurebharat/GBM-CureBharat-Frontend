@@ -217,7 +217,7 @@ function ConfigInput({ label, value, onChange, description }: { label: string, v
           min="0"
           max="100"
           step="0.01"
-          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 pr-20 text-sm font-black text-white outline-none focus:border-[#10b981]/50 focus:bg-white/[0.05] transition-all tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 pr-20 text-sm font-black text-white outline-none focus:border-[#10b981]/50 focus:bg-white/[0.02] transition-all tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         {/* Badge floats clear of the input value */}
         <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black text-white/20 group-focus-within:text-[#10b981] transition-colors tracking-widest pointer-events-none bg-white/5 px-2 py-1 rounded-lg border border-white/5">

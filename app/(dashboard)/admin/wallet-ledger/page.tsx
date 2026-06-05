@@ -121,7 +121,7 @@ function LedgerContent() {
            <LedgerStat 
              label="ESTIMATED TDS" 
              value={formatCurrency(summary?.estimatedTDS || 0)} 
-             trend="5% Government Retention" 
+             trend="2% Government Retention" 
              icon="swap" 
              color="text-amber-400"
            />

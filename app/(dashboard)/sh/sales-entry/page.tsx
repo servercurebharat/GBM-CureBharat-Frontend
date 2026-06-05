@@ -126,7 +126,7 @@ export default function SalesEntryPage() {
                     <span className="text-[11px] font-bold text-[#60A5FA]">+ ₹200.00</span>
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">TDS Deduction (5%)</span>
+                    <span className="text-[10px] font-bold text-[#B5B8BD] uppercase tracking-widest">TDS Deduction (2%)</span>
                     <span className="text-[11px] font-bold text-red-400">- ₹32.50</span>
                  </div>
                  <div className="pt-5 border-t border-white/5 flex items-center justify-between">

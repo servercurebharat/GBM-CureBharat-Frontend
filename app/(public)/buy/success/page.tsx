@@ -178,7 +178,7 @@ function SuccessContent() {
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="relative z-10 max-w-md w-full bg-[#12151c] border border-white/[0.05] rounded-[40px] p-10 text-center shadow-2xl shadow-black/50 animate-in zoom-in-95 duration-500">
+      <div className="relative z-10 max-w-md w-full bg-[#12151c] border border-white/[0.02] rounded-[40px] p-10 text-center shadow-2xl shadow-black/50 animate-in zoom-in-95 duration-500">
         <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-emerald-500/20">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3">
             <polyline points="20 6 9 17 4 12" />

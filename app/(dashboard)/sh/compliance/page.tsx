@@ -73,10 +73,10 @@ export default function ShCompliancePage() {
       shadowColor: 'rgba(251,191,36,0.15)',
       status: 'DEDUCTED @ SOURCE',
       statusOk: true,
-      description: 'TDS (Tax Deducted at Source) at 5% is deducted from your commission payouts under Section 194H. You can claim this while filing ITR.',
+      description: 'TDS (Tax Deducted at Source) at 2% is deducted from your commission payouts under Section 194H. You can claim this while filing ITR.',
       details: [
         { label: 'TDS Section', value: 'Sec 194H – Commission', ok: true },
-        { label: 'Applicable Rate', value: '5% on Net Payout', ok: true },
+        { label: 'Applicable Rate', value: '2% on Net Payout', ok: true },
         { label: 'Form 26AS', value: 'Updated Quarterly', ok: true },
         { label: 'ITR Form', value: 'ITR-1 / ITR-3', ok: true },
       ]

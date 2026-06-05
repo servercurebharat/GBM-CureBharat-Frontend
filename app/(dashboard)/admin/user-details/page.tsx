@@ -230,7 +230,7 @@ export default function AdminUserDetailsPage() {
                        <span className="text-[9px] font-black text-[#34d399] tracking-widest uppercase">CLEAR</span>
                     </div>
                     <div className="h-1.5 bg-white/5 rounded-full overflow-hidden mb-8">
-                       <div className="h-full bg-[#34d399] rounded-full" style={{ width: '85%' }} />
+                       <div className="h-full bg-[#34d399] rounded-full" style={{ width: '82%' }} />
                     </div>
 
                     <button className="w-full bg-[#34d399] rounded-xl py-4 text-[10px] font-black text-[#0d0f14] uppercase tracking-widest mb-4 flex items-center justify-center gap-2">

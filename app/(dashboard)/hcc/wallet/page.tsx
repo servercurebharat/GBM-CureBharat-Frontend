@@ -122,7 +122,7 @@ export default function HCCWallet() {
               </li>
               <li className="flex items-start gap-3 text-[10px] text-white/40 leading-relaxed uppercase font-bold tracking-tight">
                 <span className="text-hcc mt-1">•</span>
-                <span>TDS is deducted as per Indian Income Tax rules (5% with PAN).</span>
+                <span>TDS is deducted as per Indian Income Tax rules (2% with PAN).</span>
               </li>
               <li className="flex items-start gap-3 text-[10px] text-white/40 leading-relaxed uppercase font-bold tracking-tight">
                 <span className="text-hcc mt-1">•</span>

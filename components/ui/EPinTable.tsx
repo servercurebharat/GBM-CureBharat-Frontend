@@ -64,7 +64,7 @@ export default function EPinTable({ pins, color, title }: EPinTableProps) {
               <th className="text-left text-[10px] text-[#7c82a6] font-bold uppercase tracking-widest px-6 py-3">Created</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-indigo-500/[0.05]">
+          <tbody className="divide-y divide-indigo-500/[0.02]">
             {pins.map((pin) => (
               <tr key={pin._id} className="hover:bg-indigo-500/[0.03] transition-colors">
                 <td className="px-6 py-4">

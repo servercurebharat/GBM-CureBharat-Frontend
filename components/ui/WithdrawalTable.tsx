@@ -52,7 +52,7 @@ export default function WithdrawalTable({ withdrawals, color, title }: Withdrawa
               <th className="text-left text-[10px] text-[#7c82a6] font-bold uppercase tracking-widest px-6 py-3">Reference</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-indigo-500/[0.05]">
+          <tbody className="divide-y divide-indigo-500/[0.02]">
             {withdrawals.map((wd) => (
               <tr key={wd._id} className="hover:bg-indigo-500/[0.03] transition-colors">
                 <td className="px-6 py-4">

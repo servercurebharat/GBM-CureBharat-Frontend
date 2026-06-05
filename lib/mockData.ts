@@ -100,7 +100,7 @@ export const HBA_LEDGER: ILedgerEntry[] = [
   { _id: 'led-h6', type: 'override', amount: 144000, description: 'Override from HCM Amit Patel — March cycle', sourceUserId: 'hcm-002', status: 'final', cycleMonth: '2026-03', date: '2026-03-25T11:30:00Z' },
   { _id: 'led-h7', type: 'override', amount: 112000, description: 'Override from HCM Sneha Desai — March cycle', sourceUserId: 'hcm-003', status: 'final', cycleMonth: '2026-03', date: '2026-03-20T15:00:00Z' },
   { _id: 'led-h8', type: 'withdrawal', amount: -500000, description: 'Payout processed — March cycle', status: 'final', cycleMonth: '2026-03', date: '2026-03-05T10:00:00Z' },
-  { _id: 'led-h9', type: 'tds_deduction', amount: -50000, description: 'TDS deduction @ 5% — March payout', status: 'final', cycleMonth: '2026-03', date: '2026-03-05T10:00:00Z' },
+  { _id: 'led-h9', type: 'tds_deduction', amount: -50000, description: 'TDS deduction @ 2% — March payout', status: 'final', cycleMonth: '2026-03', date: '2026-03-05T10:00:00Z' },
   { _id: 'led-h10', type: 'override', amount: 168000, description: 'Override from HCM Ravi Joshi — Feb cycle', sourceUserId: 'hcm-004', status: 'final', cycleMonth: '2026-02', date: '2026-02-26T12:00:00Z' },
 ];
 
@@ -114,7 +114,7 @@ export const HCM_LEDGER: ILedgerEntry[] = [
   { _id: 'led-m6', type: 'override', amount: 96000, description: 'Override from HCC Meera Nair — March cycle', sourceUserId: 'hcc-001', status: 'final', cycleMonth: '2026-03', date: '2026-03-27T10:00:00Z' },
   { _id: 'led-m7', type: 'override', amount: 56000, description: 'Override from HCC Rohit Verma — March cycle', sourceUserId: 'hcc-005', status: 'final', cycleMonth: '2026-03', date: '2026-03-24T11:00:00Z' },
   { _id: 'led-m8', type: 'withdrawal', amount: -300000, description: 'Payout processed — March cycle', status: 'final', cycleMonth: '2026-03', date: '2026-03-05T10:00:00Z' },
-  { _id: 'led-m9', type: 'tds_deduction', amount: -30000, description: 'TDS deduction @ 5% — March payout', status: 'final', cycleMonth: '2026-03', date: '2026-03-05T10:00:00Z' },
+  { _id: 'led-m9', type: 'tds_deduction', amount: -30000, description: 'TDS deduction @ 2% — March payout', status: 'final', cycleMonth: '2026-03', date: '2026-03-05T10:00:00Z' },
   { _id: 'led-m10', type: 'direct', amount: 119900, description: 'Personal sale — Super Suraksha', status: 'final', cycleMonth: '2026-03', date: '2026-03-12T15:00:00Z' },
 ];
 

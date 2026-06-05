@@ -7,7 +7,7 @@ const data = [
   { name: 'Remaining', value: 25 },
 ];
 
-const COLORS = ['#6366f1', 'rgba(255, 255, 255, 0.05)'];
+const COLORS = ['#6366f1', 'rgba(255, 255, 255, 0.02)'];
 
 export default function PerformanceGauge() {
   return (

@@ -33,7 +33,7 @@ export default function HcmOverrideLedgerPage() {
             {HCM_TEAM_MEMBERS.filter(m => m.status === 'active').slice(0, 6).map((member) => {
               const memberOverride = Math.round(member.totalRevenue * 0.4 * 0.4);
               return (
-                <div key={member._id} className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 flex items-center gap-3 hover:border-white/[0.1] transition-colors">
+                <div key={member._id} className="bg-white/[0.02] border border-white/[0.02] rounded-xl p-4 flex items-center gap-3 hover:border-white/[0.1] transition-colors">
                   <div 
                     className="w-10 h-10 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0"
                     style={{ backgroundColor: `${color}15`, color }}

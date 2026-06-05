@@ -217,7 +217,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
            </div>
            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TDS Deducted (5%)</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TDS Deducted (2%)</p>
               <h5 className="text-lg font-black text-slate-800">{formatCurrency(data?.totalTDS || 0)}</h5>
               <p className="text-[9px] font-bold text-slate-500 mt-0.5">FY 2024-25</p>
            </div>
@@ -340,7 +340,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
            <div className="bg-[#131241] w-full max-w-md rounded-[32px] p-10 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-200">
               <h3 className="text-xl font-black text-white mb-2">Request Payout</h3>
-              <p className="text-xs font-medium text-slate-400 mb-8 leading-relaxed">Submit your withdrawal request. Note that 5% TDS will be deducted as per government norms.</p>
+              <p className="text-xs font-medium text-slate-400 mb-8 leading-relaxed">Submit your withdrawal request. Note that 2% TDS will be deducted as per government norms.</p>
               
               <form onSubmit={handleWithdraw} className="space-y-6">
                  <div className="space-y-3">
@@ -396,7 +396,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
                  {withdrawAmount && (
                    <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
                       <div className="flex justify-between items-center">
-                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TDS Deduction (5%)</span>
+                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TDS Deduction (2%)</span>
                          <span className="text-xs font-bold text-rose-400">- ₹{(parseFloat(withdrawAmount) * 0.05).toFixed(2)}</span>
                       </div>
                       <div className="pt-3 border-t border-white/5 flex justify-between items-center">

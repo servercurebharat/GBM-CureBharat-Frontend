@@ -127,7 +127,7 @@ function HierarchyContent() {
           />
           <KpiCard 
             label="NEW JOINS" 
-            value={stats ? Math.round(stats.totalUsers * 0.05).toLocaleString() : '0'} 
+            value={stats ? Math.round(stats.totalUsers * 0.02).toLocaleString() : '0'} 
             sub="Last 24 hours" 
             icon="user-plus" 
             color="amber" 
@@ -325,7 +325,7 @@ function TreeNode({ node, level, forceExpand }: { node: any, level: number, forc
 
   return (
     <>
-      <tr className={`group transition-all duration-300 border-b border-white/[0.03] ${isExpanded ? 'bg-white/[0.03]' : 'hover:bg-white/[0.05]'}`}>
+      <tr className={`group transition-all duration-300 border-b border-white/[0.03] ${isExpanded ? 'bg-white/[0.03]' : 'hover:bg-white/[0.02]'}`}>
         <td className="px-8 py-5">
            <div className="flex items-center gap-6" style={{ paddingLeft: `${level * 32}px` }}>
               <div className="flex items-center gap-3 min-w-[32px]">
@@ -399,7 +399,7 @@ function TreeNode({ node, level, forceExpand }: { node: any, level: number, forc
            </span>
         </td>
         <td className="px-4 py-5 text-center">
-           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.02] border border-white/[0.05]">
+           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.02] border border-white/[0.02]">
               <div className={`w-1.5 h-1.5 rounded-full ${node.status === 'active' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-slate-500'}`} />
               <span className={`text-[9px] font-black uppercase tracking-widest ${node.status === 'active' ? 'text-emerald-400/70' : 'text-white/20'}`}>{node.status}</span>
            </div>
