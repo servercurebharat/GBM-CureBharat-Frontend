@@ -17,6 +17,31 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
     bankName:      user?.kycDocuments?.bankName || '',
     accountNumber: user?.kycDocuments?.accountNumber || '',
     ifscCode:      user?.kycDocuments?.ifscCode || '',
+    
+    // Policy KYC details
+    maritalStatus: user?.maritalStatus || 'Single',
+    occupation: user?.occupation || '',
+    alternateMobile: user?.alternateMobile || '',
+    gender: user?.gender || 'Male',
+    dob: user?.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
+    
+    addressLine1: user?.address?.addressLine1 || '',
+    addressLine2: user?.address?.addressLine2 || '',
+    city: user?.address?.city || '',
+    state: user?.address?.state || '',
+    zipCode: user?.address?.zipCode || '',
+    
+    familyDetails: user?.familyDetails?.length ? user.familyDetails : Array.from({length: 6}).map(() => ({ name: '', relation: '', dob: '', gender: 'Male' })),
+    
+    existingMedicalConditions: user?.healthDetails?.existingMedicalConditions || 'None',
+    currentMedications: user?.healthDetails?.currentMedications || 'None',
+    lifestyle: user?.healthDetails?.lifestyle || 'Moderate',
+    
+    nomineeName: user?.nomineeDetails?.name || '',
+    nomineeRelation: user?.nomineeDetails?.relation || '',
+    nomineeMobile: user?.nomineeDetails?.mobile || '',
+    nomineeDOB: user?.nomineeDetails?.dob ? new Date(user.nomineeDetails.dob).toISOString().split('T')[0] : '',
+    nomineeGender: user?.nomineeDetails?.gender || 'Male'
   });
 
   const [previews, setPreviews] = useState<{ [key: string]: string }>({
@@ -93,6 +118,31 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
       if (files.panCard)      data.append('panCard',      files.panCard);
       if (files.bankProof)    data.append('bankProof',    files.bankProof);
       if (files.selfie)       data.append('selfie',       files.selfie);
+
+      if (formData.maritalStatus) data.append('maritalStatus', formData.maritalStatus);
+      if (formData.occupation) data.append('occupation', formData.occupation);
+      if (formData.alternateMobile) data.append('alternateMobile', formData.alternateMobile);
+      if (formData.gender) data.append('gender', formData.gender);
+      if (formData.dob) data.append('dob', formData.dob);
+      if (formData.addressLine1) data.append('addressLine1', formData.addressLine1);
+      if (formData.addressLine2) data.append('addressLine2', formData.addressLine2);
+      if (formData.city) data.append('city', formData.city);
+      if (formData.state) data.append('state', formData.state);
+      if (formData.zipCode) data.append('zipCode', formData.zipCode);
+      
+      data.append('familyDetails', JSON.stringify(formData.familyDetails));
+      data.append('healthDetails', JSON.stringify({
+        existingMedicalConditions: formData.existingMedicalConditions,
+        currentMedications: formData.currentMedications,
+        lifestyle: formData.lifestyle
+      }));
+      data.append('nomineeDetails', JSON.stringify({
+        name: formData.nomineeName,
+        relation: formData.nomineeRelation,
+        mobile: formData.nomineeMobile,
+        dob: formData.nomineeDOB,
+        gender: formData.nomineeGender
+      }));
 
       const res = await usersAPI.updateKYC(user._id, data);
       if (res.data.success) { alert('KYC submitted!'); onUpdate(); }
@@ -205,6 +255,126 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
           </div>
           <div className="max-w-xs">
             <FileUploadZone label="Bank Proof (Passbook/Cheque)" field="bankProof" preview={previews.bankProof} onChange={handleFileChange} disabled={isApproved} />
+          </div>
+        </div>
+        
+        {/* Policy Holder Details */}
+        <div className="bg-[#131241] rounded-2xl p-5 border border-white/5 shadow-xl space-y-4">
+          <StepHeader num="05" label="Primary Applicant Details (For Protection Cover)" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Date of Birth</label>
+              <input type="date" value={formData.dob} onChange={e => setFormData({...formData, dob: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Gender</label>
+              <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                <option value="Male" className="bg-[#131241]">Male</option>
+                <option value="Female" className="bg-[#131241]">Female</option>
+                <option value="Other" className="bg-[#131241]">Other</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Marital Status</label>
+              <select value={formData.maritalStatus} onChange={e => setFormData({...formData, maritalStatus: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                <option value="Single" className="bg-[#131241]">Single</option>
+                <option value="Married" className="bg-[#131241]">Married</option>
+              </select>
+            </div>
+            <InputField label="Occupation" placeholder="e.g. Salaried" value={formData.occupation} onChange={(v: string) => setFormData({...formData, occupation: v})} disabled={isApproved} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <InputField label="Address Line 1" placeholder="Flat / House No. / Building" value={formData.addressLine1} onChange={(v: string) => setFormData({...formData, addressLine1: v})} disabled={isApproved} />
+             <InputField label="Address Line 2" placeholder="Street / Area" value={formData.addressLine2} onChange={(v: string) => setFormData({...formData, addressLine2: v})} disabled={isApproved} />
+             <InputField label="City" placeholder="City" value={formData.city} onChange={(v: string) => setFormData({...formData, city: v})} disabled={isApproved} />
+             <div className="grid grid-cols-2 gap-4">
+                <InputField label="State" placeholder="State" value={formData.state} onChange={(v: string) => setFormData({...formData, state: v})} disabled={isApproved} />
+                <InputField label="PIN Code" placeholder="PIN Code" value={formData.zipCode} onChange={(v: string) => setFormData({...formData, zipCode: v})} disabled={isApproved} digitsOnly maxLength={6} />
+             </div>
+             <InputField label="Alternate Mobile" placeholder="Alternate Mobile Number" value={formData.alternateMobile} onChange={(v: string) => setFormData({...formData, alternateMobile: v})} disabled={isApproved} digitsOnly maxLength={10} />
+          </div>
+        </div>
+
+        {/* Health & Nominee */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+           <div className="bg-[#131241] rounded-2xl p-5 border border-white/5 shadow-xl space-y-4">
+             <StepHeader num="06" label="Health & Wellness Information" />
+             <div className="space-y-4">
+               <InputField label="Existing Medical Conditions (if any)" placeholder="e.g. None, Diabetes" value={formData.existingMedicalConditions} onChange={(v: string) => setFormData({...formData, existingMedicalConditions: v})} disabled={isApproved} />
+               <InputField label="Current Medications (if any)" placeholder="e.g. None" value={formData.currentMedications} onChange={(v: string) => setFormData({...formData, currentMedications: v})} disabled={isApproved} />
+               <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Lifestyle</label>
+                  <select value={formData.lifestyle} onChange={e => setFormData({...formData, lifestyle: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                     <option value="Sedentary" className="bg-[#131241]">Sedentary</option>
+                     <option value="Moderate" className="bg-[#131241]">Moderate</option>
+                     <option value="Active" className="bg-[#131241]">Active</option>
+                  </select>
+               </div>
+             </div>
+           </div>
+
+           <div className="bg-[#131241] rounded-2xl p-5 border border-white/5 shadow-xl space-y-4">
+             <StepHeader num="07" label="Nominee Details" />
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <InputField label="Nominee Name" placeholder="Full Name" value={formData.nomineeName} onChange={(v: string) => setFormData({...formData, nomineeName: v})} disabled={isApproved} />
+               <InputField label="Relationship" placeholder="e.g. Spouse, Son" value={formData.nomineeRelation} onChange={(v: string) => setFormData({...formData, nomineeRelation: v})} disabled={isApproved} />
+               <div className="space-y-1.5">
+                 <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Date of Birth</label>
+                 <input type="date" value={formData.nomineeDOB} onChange={e => setFormData({...formData, nomineeDOB: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50" />
+               </div>
+               <div className="space-y-1.5">
+                 <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Gender</label>
+                 <select value={formData.nomineeGender} onChange={e => setFormData({...formData, nomineeGender: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                   <option value="Male" className="bg-[#131241]">Male</option>
+                   <option value="Female" className="bg-[#131241]">Female</option>
+                   <option value="Other" className="bg-[#131241]">Other</option>
+                 </select>
+               </div>
+               <div className="sm:col-span-2">
+                 <InputField label="Contact Number" placeholder="Mobile Number" value={formData.nomineeMobile} onChange={(v: string) => setFormData({...formData, nomineeMobile: v})} disabled={isApproved} digitsOnly maxLength={10} />
+               </div>
+             </div>
+           </div>
+        </div>
+
+        {/* Family Details */}
+        <div className="bg-[#131241] rounded-2xl p-5 border border-white/5 shadow-xl space-y-4">
+          <StepHeader num="08" label="Family Details (Optional)" sub="For family floater plans" />
+          <div className="space-y-3">
+             {formData.familyDetails.map((member, idx) => (
+               <div key={idx} className="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl">
+                 <InputField label={`Member ${idx + 1} Name`} placeholder="Name" value={member.name} onChange={(v: string) => {
+                    const newFam = [...formData.familyDetails];
+                    newFam[idx].name = v;
+                    setFormData({...formData, familyDetails: newFam});
+                 }} disabled={isApproved} />
+                 <InputField label="Relation" placeholder="Relation" value={member.relation} onChange={(v: string) => {
+                    const newFam = [...formData.familyDetails];
+                    newFam[idx].relation = v;
+                    setFormData({...formData, familyDetails: newFam});
+                 }} disabled={isApproved} />
+                 <div className="space-y-1.5">
+                   <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">DOB</label>
+                   <input type="date" value={member.dob} onChange={e => {
+                      const newFam = [...formData.familyDetails];
+                      newFam[idx].dob = e.target.value;
+                      setFormData({...formData, familyDetails: newFam});
+                   }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50" />
+                 </div>
+                 <div className="space-y-1.5">
+                   <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Gender</label>
+                   <select value={member.gender} onChange={e => {
+                      const newFam = [...formData.familyDetails];
+                      newFam[idx].gender = e.target.value;
+                      setFormData({...formData, familyDetails: newFam});
+                   }} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                     <option value="Male" className="bg-[#131241]">Male</option>
+                     <option value="Female" className="bg-[#131241]">Female</option>
+                     <option value="Other" className="bg-[#131241]">Other</option>
+                   </select>
+                 </div>
+               </div>
+             ))}
           </div>
         </div>
 

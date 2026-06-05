@@ -372,9 +372,9 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       {/* KYC Alert Banner */}
       {user.kycStatus !== 'approved' && (
         <div className={`
-          ${user.kycStatus === 'not_submitted' ? 'bg-amber-500/10 border-amber-500/20' : ''}
-          ${user.kycStatus === 'pending' ? 'bg-#10b981/10 border-#10b981/20' : ''}
-          ${user.kycStatus === 'rejected' ? 'bg-rose-500/10 border-rose-500/20' : ''}
+          ${user.kycStatus === 'not_submitted' ? 'bg-amber-500/10 border border-amber-500/20' : ''}
+          ${user.kycStatus === 'pending' ? 'bg-emerald-500/10 border border-emerald-500/20' : ''}
+          ${user.kycStatus === 'rejected' ? 'bg-rose-500/10 border border-rose-500/20' : ''}
           rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group transition-all duration-500
         `}>
            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-3xl -mr-32 -mt-32 group-hover:bg-white/10 transition-all duration-700" />
@@ -382,7 +382,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
               <div className={`
                 w-16 h-16 rounded-2xl flex items-center justify-center
                 ${user.kycStatus === 'not_submitted' ? 'bg-amber-500/10 text-amber-500' : ''}
-                ${user.kycStatus === 'pending' ? 'bg-#10b981/10 text-#10b981' : ''}
+                ${user.kycStatus === 'pending' ? 'bg-emerald-500/10 text-emerald-500' : ''}
                 ${user.kycStatus === 'rejected' ? 'bg-rose-500/10 text-rose-500' : ''}
               `}>
                  {user.kycStatus === 'pending' ? (
@@ -395,7 +395,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                  <h4 className={`
                     text-lg font-black tracking-tight uppercase
                     ${user.kycStatus === 'not_submitted' ? 'text-amber-500' : ''}
-                    ${user.kycStatus === 'pending' ? 'text-#10b981' : ''}
+                    ${user.kycStatus === 'pending' ? 'text-emerald-500' : ''}
                     ${user.kycStatus === 'rejected' ? 'text-rose-500' : ''}
                  `}>
                     {user.kycStatus === 'not_submitted' && 'Identity Verification Required'}
@@ -419,7 +419,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
               className={`
                 relative z-10 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-xl
                 ${user.kycStatus === 'not_submitted' ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20' : ''}
-                ${user.kycStatus === 'pending' ? 'bg-#059669 hover:bg-#10b981 text-white shadow-#10b981/20' : ''}
+                ${user.kycStatus === 'pending' ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20' : ''}
                 ${user.kycStatus === 'rejected' ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-500/20' : ''}
               `}
            >
