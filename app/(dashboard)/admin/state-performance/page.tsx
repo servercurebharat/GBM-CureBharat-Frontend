@@ -16,7 +16,11 @@ export default function AdminStatePerformancePage() {
       try {
         const res = await adminAPI.getStatePerformance();
         if (res.data.success) {
-          setData(res.data.data || []);
+          const processedData = (res.data.data || []).map((s: any) => ({
+            ...s,
+            revenue: s.revenue / 100
+          }));
+          setData(processedData);
         }
       } catch (err) {
         console.error('Failed to fetch state performance', err);
