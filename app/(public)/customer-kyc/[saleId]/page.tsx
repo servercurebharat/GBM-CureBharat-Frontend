@@ -89,10 +89,13 @@ export default function CustomerKYCPage() {
     setFormData(prev => ({ ...prev, familyDetails: updatedFamily }));
   };
 
-  // Extract limit from plan name e.g., "4A+2C" -> 6
+  // Extract limit from plan name
   const getFamilyLimit = () => {
     if (!saleData?.plan?.name) return 0;
     const planName = saleData.plan.name.toUpperCase();
+    if (planName.includes('SAMPOORNA SURAKSHA')) return 6; // 4A + 2C
+    if (planName.includes('SUPER SURAKSHA')) return 4;     // 2A + 2C
+    if (planName.includes('SURAKSHA SPECIAL')) return 4;   // 2A + 2C
     if (planName.includes('4A+2C') || planName.includes('4A + 2C')) return 6;
     if (planName.includes('2A+2C') || planName.includes('2A + 2C')) return 4;
     return 2; // default 2 members
@@ -117,6 +120,10 @@ export default function CustomerKYCPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.mobile && formData.mobile.length !== 10) return toast.error('Mobile number must be 10 digits');
+    if (formData.alternateMobile && formData.alternateMobile.length !== 10) return toast.error('Alternate mobile number must be 10 digits');
+    if (formData.nomineeContact && formData.nomineeContact.length !== 10) return toast.error('Nominee contact number must be 10 digits');
+
     setSubmitting(true);
     try {
       const res = await publicAPI.submitKyc(saleId as string, formData);
@@ -236,14 +243,14 @@ export default function CustomerKYCPage() {
               <h2 className="text-2xl font-bold text-white">Contact Information</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Mobile Number *</label>
-                <input required type="text" name="mobile" value={formData.mobile} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+                <input required type="tel" maxLength={10} name="mobile" value={formData.mobile} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Alternate Number</label>
-                <input type="text" name="alternateMobile" value={formData.alternateMobile} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+                <input type="tel" maxLength={10} name="alternateMobile" value={formData.alternateMobile} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Email ID *</label>
@@ -363,7 +370,7 @@ export default function CustomerKYCPage() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-300 mb-1">Contact Number</label>
-                <input type="text" name="nomineeContact" value={formData.nomineeContact} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
+                <input type="tel" maxLength={10} name="nomineeContact" value={formData.nomineeContact} onChange={handleInputChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#49D2B5]" />
               </div>
             </div>
           </div>
