@@ -670,7 +670,7 @@ function SalesHistoryView({ userId, totalEarned = 0 }: { userId: string, totalEa
            Sales History
         </h3>
         <div className="flex gap-6">
-           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Total Earnings: ₹{(totalEarned).toLocaleString('en-IN')}</span>
+           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Total Earnings: ₹{(totalEarned / 100).toLocaleString('en-IN')}</span>
            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Sales: {sales.length}</span>
         </div>
       </div>
@@ -722,7 +722,7 @@ function SalesHistoryView({ userId, totalEarned = 0 }: { userId: string, totalEa
                      </span>
                    </td>
                    <td className="px-6 py-4 text-right">
-                     <p className="text-sm font-black text-emerald-400">₹{(sale.commission || 0).toLocaleString('en-IN')}</p>
+                     <p className="text-sm font-black text-emerald-400">₹{((sale.commission || 0) / 100).toLocaleString('en-IN')}</p>
                    </td>
                    <td className="px-6 py-4 text-right">
                      <p className="text-sm font-black text-white">₹{(sale.saleAmount / 100).toLocaleString('en-IN')}</p>
