@@ -74,8 +74,8 @@ export default function AdminKYC() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
            <KYCStat label="PENDING KYC" value={String(pendingUsers.length)} sub="Document review" icon="clock" color="text-[#fbbf24]" />
            <KYCStat label="BANK UPDATES" value={String(pendingBankUsers.length)} sub="Detail verification" icon="bolt" color="text-[#60A5FA]" />
-           <KYCStat label="APPROVED TODAY" value="142" sub="+12.4% vs yesterday" icon="check" color="text-[#34d399]" />
-           <KYCStat label="REJECTION RATE" value="4.2%" sub="Avg across system" icon="x" color="text-[#f87171]" />
+           <KYCStat label="APPROVED TODAY" value="0" sub="Live stat" icon="check" color="text-[#34d399]" />
+           <KYCStat label="REJECTION RATE" value="0%" sub="Avg across system" icon="x" color="text-[#f87171]" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -179,22 +179,21 @@ export default function AdminKYC() {
            </div>
 
            {/* Right Column: Analytics */}
-           <div className="lg:col-span-4 space-y-6">
-              <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
+           <div className="lg:col-span-4 space-y-6">               <div className="bg-[#131241] rounded-[2rem] p-8 text-white shadow-xl border border-white/[0.03]">
                  <h3 className="text-sm font-bold font-display uppercase tracking-widest mb-10">Verification Stats</h3>
                  <div className="flex flex-col items-center">
                     <div className="w-44 h-44 relative flex items-center justify-center">
                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                           <circle cx="50" cy="50" r="42" fill="none" stroke="white" strokeWidth="10" opacity="0.05" />
-                          <circle cx="50" cy="50" r="42" fill="none" stroke="#6029F1" strokeWidth="10" strokeDasharray="264" strokeDashoffset="44" strokeLinecap="round" />
+                          <circle cx="50" cy="50" r="42" fill="none" stroke="#6029F1" strokeWidth="10" strokeDasharray="264" strokeDashoffset="264" strokeLinecap="round" />
                        </svg>
                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-3xl font-bold font-display">82%</span>
+                          <span className="text-3xl font-bold font-display">0%</span>
                           <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">SYSTEM WIDE</span>
                        </div>
                     </div>
                     <div className="mt-10 space-y-4 w-full">
-                       <StatRow label="Approved" value="12,402" color="bg-[#34d399]" />
+                       <StatRow label="Approved" value="0" color="bg-[#34d399]" />
                        <StatRow label="Pending KYC" value={String(pendingUsers.length)} color="bg-[#fbbf24]" />
                        <StatRow label="Pending Bank" value={String(pendingBankUsers.length)} color="bg-[#60A5FA]" />
                     </div>
