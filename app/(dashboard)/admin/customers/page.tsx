@@ -76,11 +76,19 @@ export default function CustomerDatabase() {
     document.body.removeChild(link);
   };
 
-  const stats = useMemo(() => {
+   const stats = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const newThisMonth = customers.filter(c => {
+      const date = new Date(c.createdAt);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    }).length;
+
     return {
       total: total,
       active: customers.filter(c => c.status === 'active').length,
       cancelled: customers.filter(c => c.status === 'cancelled').length,
+      newThisMonth
     };
   }, [customers, total]);
 
@@ -92,7 +100,7 @@ export default function CustomerDatabase() {
            <KpiCard label="Total Customers" value={stats.total.toLocaleString()} sub="Lifetime base" icon="users" color="blue" />
            <KpiCard label="Active Policies" value={stats.active.toLocaleString()} sub="Currently live" icon="check-circle" color="emerald" />
            <KpiCard label="Cancelled" value={stats.cancelled.toLocaleString()} sub="Terminated" icon="x-circle" color="red" />
-           <KpiCard label="New This Month" value="124" sub="+12.5% vs last" icon="trending-up" color="purple" />
+           <KpiCard label="New This Month" value={stats.newThisMonth.toLocaleString()} sub="Added this month" icon="trending-up" color="purple" />
         </div>
 
         {/* Search & Filter Bar */}
@@ -158,7 +166,7 @@ export default function CustomerDatabase() {
                       </tr>
                     ) : (
                       customers.map((c) => (
-                        <tr key={c._id} className="hover:bg-white/[0.02] transition-all group">
+                        <tr key={c._id} onClick={() => window.location.href = `/admin/customers/${c._id}`} className="hover:bg-white/[0.02] transition-all group cursor-pointer">
                            <td className="px-8 py-6">
                               <div className="flex items-center gap-4">
                                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-white/10 flex items-center justify-center text-blue-400 font-black text-lg">
