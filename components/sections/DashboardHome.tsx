@@ -214,8 +214,6 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
 
   const formatCurrency = (amount: number) => {
     if (!amount || isNaN(amount)) return '₹0';
-    if (amount >= 1000000000) return `₹ ${(amount / 1000000000).toFixed(2)} Cr`;
-    if (amount >= 10000000) return `₹ ${(amount / 10000000).toFixed(2)} L`;
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
@@ -455,9 +453,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                    <CountUp 
                      end={stat.value} 
                      formatter={(val) => {
-                       if (val >= 10000000) return `₹ ${(val / 10000000).toFixed(2)} Cr`;
-                       if (val >= 100000) return `₹ ${(val / 100000).toFixed(2)} L`;
-                       return `₹ ${val.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+                       return `₹ ${Math.round(val).toLocaleString('en-IN')}`;
                      }} 
                    />
                  ) : (
