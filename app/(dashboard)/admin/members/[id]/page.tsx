@@ -471,7 +471,7 @@ export default function MemberDetails() {
         )}
 
         {activeTab === 'SALES' && (
-          <SalesHistoryView userId={member._id} />
+          <SalesHistoryView userId={member._id} totalEarned={member.totalEarned || 0} />
         )}
 
       </div>
@@ -648,7 +648,7 @@ function NetworkView({ userId }: { userId: string }) {
   );
 }
 
-function SalesHistoryView({ userId }: { userId: string }) {
+function SalesHistoryView({ userId, totalEarned = 0 }: { userId: string, totalEarned?: number }) {
   const [sales, setSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -669,7 +669,10 @@ function SalesHistoryView({ userId }: { userId: string }) {
            <div className="w-2 h-2 rounded-full bg-blue-500" />
            Sales History
         </h3>
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Sales: {sales.length}</span>
+        <div className="flex gap-6">
+           <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Total Earnings: ₹{(totalEarned).toLocaleString('en-IN')}</span>
+           <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Sales: {sales.length}</span>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -680,13 +683,14 @@ function SalesHistoryView({ userId }: { userId: string }) {
                <th className="px-6 py-4">Customer Details</th>
                <th className="px-6 py-4">Plan Name</th>
                <th className="px-6 py-4">Status</th>
+               <th className="px-6 py-4 text-right">Commission</th>
                <th className="px-6 py-4 text-right">Amount</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             {sales.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-20 text-white/40 font-black uppercase tracking-widest text-xs">
+                <td colSpan={6} className="text-center py-20 text-white/40 font-black uppercase tracking-widest text-xs">
                   No sales found for this user.
                 </td>
               </tr>
@@ -716,6 +720,9 @@ function SalesHistoryView({ userId }: { userId: string }) {
                      }`}>
                        {sale.status}
                      </span>
+                   </td>
+                   <td className="px-6 py-4 text-right">
+                     <p className="text-sm font-black text-emerald-400">₹{(sale.commission || 0).toLocaleString('en-IN')}</p>
                    </td>
                    <td className="px-6 py-4 text-right">
                      <p className="text-sm font-black text-white">₹{(sale.saleAmount / 100).toLocaleString('en-IN')}</p>

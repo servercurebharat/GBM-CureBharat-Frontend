@@ -79,6 +79,7 @@ export interface IUser {
   personalSalesCount: number;
   personalSalesThisMonth: number;
   teamSize: number;
+  totalEarned?: number;
   lastLoginIP?: string;
   lastLoginAt?: string;
   createdAt: string;
