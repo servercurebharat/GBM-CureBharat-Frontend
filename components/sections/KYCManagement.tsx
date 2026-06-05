@@ -317,7 +317,22 @@ export default function KYCManagement({ user, onUpdate }: { user: IUser; onUpdat
              <StepHeader num="07" label="Nominee Details" />
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <InputField label="Nominee Name" placeholder="Full Name" value={formData.nomineeName} onChange={(v: string) => setFormData({...formData, nomineeName: v})} disabled={isApproved} />
-               <InputField label="Relationship" placeholder="e.g. Spouse, Son" value={formData.nomineeRelation} onChange={(v: string) => setFormData({...formData, nomineeRelation: v})} disabled={isApproved} />
+               <div className="space-y-1.5">
+                 <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Relationship</label>
+                 <select value={formData.nomineeRelation} onChange={e => setFormData({...formData, nomineeRelation: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50 appearance-none">
+                   <option value="" disabled className="bg-[#131241]">Select Relation</option>
+                   <option value="Spouse" className="bg-[#131241]">Spouse</option>
+                   <option value="Son" className="bg-[#131241]">Son</option>
+                   <option value="Daughter" className="bg-[#131241]">Daughter</option>
+                   <option value="Father" className="bg-[#131241]">Father</option>
+                   <option value="Mother" className="bg-[#131241]">Mother</option>
+                   <option value="Father-in-law" className="bg-[#131241]">Father-in-law</option>
+                   <option value="Mother-in-law" className="bg-[#131241]">Mother-in-law</option>
+                   <option value="Brother" className="bg-[#131241]">Brother</option>
+                   <option value="Sister" className="bg-[#131241]">Sister</option>
+                   <option value="Other" className="bg-[#131241]">Other</option>
+                 </select>
+               </div>
                <div className="space-y-1.5">
                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest pl-1">Date of Birth</label>
                  <input type="date" value={formData.nomineeDOB} onChange={e => setFormData({...formData, nomineeDOB: e.target.value})} disabled={isApproved} className="w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-blue-500/40 transition-all disabled:opacity-50" />
