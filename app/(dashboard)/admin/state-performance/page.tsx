@@ -28,9 +28,7 @@ export default function AdminStatePerformancePage() {
   }, []);
 
   const formatCur = (val: number) => {
-    if (val >= 10000000) return `₹ ${(val / 10000000).toFixed(2)} Cr`;
-    if (val >= 100000) return `₹ ${(val / 100000).toFixed(2)} L`;
-    return `₹ ${val.toLocaleString('en-IN')}`;
+    return `₹ ${Math.round(val).toLocaleString('en-IN')}`;
   };
 
   const sortedData = useMemo(() => {
@@ -74,7 +72,7 @@ export default function AdminStatePerformancePage() {
                     className="w-full bg-[#1a195e] border border-white/10 rounded-xl px-6 py-3.5 text-sm font-bold text-white outline-none focus:ring-2 focus:ring-[#10b981] min-w-[200px] cursor-pointer appearance-none shadow-xl"
                     style={{ backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
                   >
-                    <option value="All States" className="bg-[#131241] text-white font-medium">🌍 All States Overview</option>
+                    <option value="All States" className="bg-[#131241] text-white font-medium">All States Overview</option>
                     {[...Array.from(new Set(data.map(d => d.state)))].sort().map(state => (
                       <option key={state as string} value={state as string} className="bg-[#131241] text-white font-medium">{state as string}</option>
                     ))}
@@ -222,11 +220,7 @@ function StateStat({ label, value, sub, icon, color }: any) {
                 {typeof value === 'string' && (value.includes('₹') || value.includes('Cr') || value.includes('L')) ? (
                   <CountUp 
                     end={numericValue} 
-                    formatter={(val) => {
-                      if (val >= 10000000) return `₹ ${(val / 10000000).toFixed(2)} Cr`;
-                      if (val >= 100000) return `₹ ${(val / 100000).toFixed(2)} L`;
-                      return `₹ ${val.toLocaleString('en-IN')}`;
-                    }} 
+                    formatter={(val) => `₹ ${Math.round(val).toLocaleString('en-IN')}`} 
                   />
                 ) : typeof value === 'number' ? (
                   <CountUp end={value} />
