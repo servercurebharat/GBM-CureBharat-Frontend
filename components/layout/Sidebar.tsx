@@ -57,7 +57,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     {
       label: 'Product Management', items: [
         { label: 'Product Catalog', href: '/admin/plans', icon: 'package' },
-        { label: 'Rank Structure', href: '/admin/ranks', icon: 'award' },
       ]
     },
     {
