@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { publicAPI } from '@/lib/api';
+import { publicAPI, adminAPI } from '@/lib/api';
 import { ISale } from '@/types';
 import toast from 'react-hot-toast';
-import { User, MapPin, Briefcase, FileText, Users, HeartPulse, CreditCard, Calendar, Download, FileSpreadsheet } from 'lucide-react';
+import { User, MapPin, Briefcase, FileText, Users, HeartPulse, CreditCard, Calendar, Download, FileSpreadsheet, Mail } from 'lucide-react';
 
 export default function CustomerProfilePage() {
   const params = useParams();
@@ -14,6 +14,24 @@ export default function CustomerProfilePage() {
   const [sale, setSale] = useState<ISale | null>(null);
   const [kycData, setKycData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [sendingEmail, setSendingEmail] = useState(false);
+
+  const handleSendKycEmail = async () => {
+    if (!sale) return;
+    setSendingEmail(true);
+    try {
+      const res = await adminAPI.sendKycLink(sale._id);
+      if (res.data.success) {
+        toast.success('KYC completion email sent successfully!');
+      } else {
+        toast.error(res.data.message || 'Failed to send email');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error sending KYC email');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   useEffect(() => {
     async function fetchCustomer() {
@@ -289,7 +307,20 @@ export default function CustomerProfilePage() {
                   <FileText size={32} />
                 </div>
                 <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">KYC Not Completed</h3>
-                <p className="text-sm text-white/50 max-w-sm">The customer has not completed their detailed profile form yet. Only basic sale details are available.</p>
+                <p className="text-sm text-white/50 max-w-sm mb-8">The customer has not completed their detailed profile form yet. Only basic sale details are available.</p>
+                
+                <button
+                  onClick={handleSendKycEmail}
+                  disabled={sendingEmail}
+                  className="flex items-center gap-2 bg-[#49D2B5]/10 text-[#49D2B5] hover:bg-[#49D2B5]/20 border border-[#49D2B5]/20 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50"
+                >
+                  {sendingEmail ? (
+                    <div className="w-4 h-4 border-2 border-[#49D2B5] border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <Mail size={16} />
+                  )}
+                  {sendingEmail ? 'Sending...' : 'Send KYC Link via Email'}
+                </button>
               </div>
             )}
           </div>

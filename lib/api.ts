@@ -221,6 +221,8 @@ export const adminAPI = {
     api.get<ApiResponse<any[]>>('/admin/state-performance'),
   sendAnnouncement: (data: { userIds?: string[], title: string, message: string, type: string, sendToAll?: boolean }) =>
     api.post<ApiResponse<any>>('/admin/announcements', data),
+  sendKycLink: (saleId: string) =>
+    api.post<ApiResponse<any>>(`/admin/sales/${saleId}/send-kyc-link`),
 };
 
 // TEAM
