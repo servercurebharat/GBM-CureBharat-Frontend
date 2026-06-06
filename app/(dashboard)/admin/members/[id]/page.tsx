@@ -248,7 +248,7 @@ export default function MemberDetails() {
                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                       <MiniStat label="Team Size" value={member.teamSize} icon="users" color="blue" />
                       <MiniStat label="Total Sales" value={member.personalSalesCount} icon="zap" color="indigo" />
-                      <MiniStat label="Recruits" value={member.personalSalesThisMonth || 0} icon="user-plus" color="emerald" sub="This Month" />
+                      <MiniStat label="Recruits" value={member.personalSalesThisMonth || 0} icon="user-plus" color="emerald" />
                       <MiniStat label="Rank" value={member.rank} icon="award" color="amber" />
                    </div>
                 </div>
