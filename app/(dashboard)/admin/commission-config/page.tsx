@@ -19,7 +19,7 @@ export default function CommissionConfigPage() {
     try {
       const res = await adminAPI.getCustomCommissions();
       if (res.data.success) {
-        setCustomUsers(res.data.data);
+        setCustomUsers(res.data.data || []);
       }
     } catch (error) {
       console.error(error);

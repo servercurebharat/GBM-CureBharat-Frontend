@@ -27,6 +27,7 @@ interface FormData {
   customerDOB:     string;
   customerPAN:     string;
   customerState:   string;
+  nomineeName:     string;
   nomineeRelation: string;
   planId:          string;
   isPolicyForOther: boolean;
