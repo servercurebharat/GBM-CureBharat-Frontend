@@ -113,8 +113,8 @@ export default function MemberDetails() {
                        {member.name.slice(0, 1)}
                     </div>
                     <div className="min-w-0 flex flex-col justify-center">
-                       <div className="flex items-center gap-4 mb-2">
-                          <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-none truncate">{member.name}</h1>
+                       <div className="flex flex-wrap items-center gap-4 mb-2">
+                          <h1 className="text-2xl sm:text-[28px] font-black text-white tracking-tight leading-none break-words whitespace-normal">{member.name}</h1>
                           <span className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shrink-0 ${
                              member.status === 'active' ? 'bg-[#064e3b] text-[#34d399]' : 'bg-rose-500/20 text-rose-400'
                           }`}>
@@ -200,8 +200,28 @@ export default function MemberDetails() {
                   >
                      RESET PWD
                   </button>
-                  <button className="px-4 py-2.5 bg-transparent border border-white/20 text-white hover:bg-white/10 rounded-xl transition-all">
-                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                  <button 
+                    disabled={updating}
+                    onClick={async () => {
+                      if (!confirm("Are you sure you want to permanently delete this member? This action cannot be undone.")) return;
+                      setUpdating(true);
+                      try {
+                        const res = await adminAPI.deleteUser(member._id);
+                        if (res.data.success) {
+                          toast.success('Member deleted successfully');
+                          router.push('/admin/members');
+                        } else {
+                          toast.error(res.data.message || 'Failed to delete member');
+                        }
+                      } catch (err) {
+                        toast.error('An error occurred while deleting');
+                      } finally {
+                        setUpdating(false);
+                      }
+                    }}
+                    className="px-6 py-2.5 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                  >
+                     DELETE USER
                   </button>
               </div>
            </div>

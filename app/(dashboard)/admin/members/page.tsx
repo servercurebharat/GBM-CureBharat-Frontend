@@ -203,7 +203,7 @@ function AdminMembersContent() {
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === '__recent') {
-                      setSortFilter('newest');
+                      setSortFilter('recent');
                       setStatusFilter('All Status');
                       setPage(1);
                     } else if (val === '__oldest') {
@@ -236,8 +236,8 @@ function AdminMembersContent() {
                      m.email || 'N/A',
                      m.referrerId ? (m.referrerId as any).name : 'Direct',
                      m.state || 'Maharashtra',
-                     m.role.toUpperCase(),
-                     m.status.toUpperCase()
+                     (m.role || '').toUpperCase(),
+                     (m.status || '').toUpperCase()
                    ])}
                    fileName="CureBharat_Members"
                    variant="ghost"

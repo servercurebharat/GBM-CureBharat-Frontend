@@ -190,7 +190,7 @@ export default function ChatbotWidget() {
             
             <div className="flex items-center gap-2.5 relative z-10">
               <Image
-                src="/logo.png"
+                src="/Curebharat logo 22.png"
                 alt="CureBharat Logo"
                 width={130}
                 height={36}

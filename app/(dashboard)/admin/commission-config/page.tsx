@@ -10,6 +10,22 @@ export default function CommissionConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [customMemberId, setCustomMemberId] = useState('');
+  const [customCommissionRate, setCustomCommissionRate] = useState('');
+  const [savingCustom, setSavingCustom] = useState(false);
+  const [customUsers, setCustomUsers] = useState<any[]>([]);
+
+  const fetchCustomUsers = async () => {
+    try {
+      const res = await adminAPI.getCustomCommissions();
+      if (res.data.success) {
+        setCustomUsers(res.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const fetchConfig = async () => {
     try {
       const res = await adminAPI.getCommissionConfig();
@@ -25,6 +41,7 @@ export default function CommissionConfigPage() {
 
   useEffect(() => {
     fetchConfig();
+    fetchCustomUsers();
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -44,6 +61,39 @@ export default function CommissionConfigPage() {
 
   const updateField = (key: string, value: string) => {
     setConfig((prev: any) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveCustom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingCustom(true);
+    try {
+      const res = await adminAPI.setCustomCommission({
+        memberId: customMemberId,
+        customCommissionRate: customCommissionRate
+      });
+      if (res.data.success) {
+        toast.success(res.data.message || 'Custom commission updated');
+        setCustomMemberId('');
+        setCustomCommissionRate('');
+        fetchCustomUsers();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update custom commission');
+    } finally {
+      setSavingCustom(false);
+    }
+  };
+
+  const handleResetCustom = async (memberId: string) => {
+    try {
+      const res = await adminAPI.setCustomCommission({ memberId, customCommissionRate: '' });
+      if (res.data.success) {
+        toast.success(`Custom commission reset for ${memberId}`);
+        fetchCustomUsers();
+      }
+    } catch (error: any) {
+      toast.error('Failed to reset custom commission');
+    }
   };
 
   if (loading) {
@@ -141,6 +191,83 @@ export default function CommissionConfigPage() {
                   description="Minimum wallet balance required to request a payout."
                 />
               </div>
+            </div>
+
+            {/* Individual Custom Commission */}
+            <div className="bg-[#131241] rounded-[2.5rem] p-10 shadow-2xl border border-white/[0.03] relative overflow-hidden group">
+               <div className="flex items-center justify-between mb-10">
+                <h3 className="text-xl font-black text-white flex items-center gap-4">
+                  <div className="w-2 h-8 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+                  Individual Custom Commission
+                </h3>
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-blue-500">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] pl-1">Member ID</label>
+                  <input
+                    type="text"
+                    value={customMemberId}
+                    onChange={(e) => setCustomMemberId(e.target.value)}
+                    placeholder="e.g. CBW998877"
+                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 text-sm font-black text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.02] transition-all"
+                  />
+                  <p className="text-[9px] font-bold text-white/20 pl-1 leading-relaxed">The distributor's member ID.</p>
+                </div>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] pl-1">Custom Commission % (Leave empty to reset)</label>
+                  <div className="relative group">
+                    <input
+                      type="number"
+                      value={customCommissionRate}
+                      onChange={(e) => setCustomCommissionRate(e.target.value)}
+                      placeholder="e.g. 50"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-8 py-5 pr-20 text-sm font-black text-white outline-none focus:border-blue-500/50 focus:bg-white/[0.02] transition-all tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black text-white/20 group-focus-within:text-blue-500 transition-colors tracking-widest pointer-events-none bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                      VAL
+                    </div>
+                  </div>
+                  <p className="text-[9px] font-bold text-white/20 pl-1 leading-relaxed">Overrides default role rate. Blank resets to default.</p>
+                </div>
+              </div>
+              <div className="mt-8">
+                <button
+                  type="button"
+                  onClick={handleSaveCustom}
+                  disabled={savingCustom || !customMemberId}
+                  className="px-8 py-4 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 rounded-[15px] text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-500/20 active:scale-95"
+                >
+                  {savingCustom ? 'Saving...' : 'Apply Custom Rate'}
+                </button>
+              </div>
+
+              {/* List of Custom Users */}
+              {customUsers.length > 0 && (
+                <div className="mt-10 border-t border-white/5 pt-8">
+                  <h4 className="text-sm font-black text-white mb-4 uppercase tracking-widest">Active Custom Commissions</h4>
+                  <div className="space-y-3">
+                    {customUsers.map((u: any) => (
+                      <div key={u._id} className="bg-white/5 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-bold text-white">{u.name} <span className="text-slate-400 text-xs">({u.memberId})</span></p>
+                          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mt-1">Role: {u.role} | State: {u.state}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-black text-[#10b981]">{u.customCommissionRate}%</p>
+                          <button type="button" onClick={() => handleResetCustom(u.memberId)} className="text-[9px] font-bold text-red-400 hover:text-red-300 uppercase tracking-widest mt-1 underline">Reset Default</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

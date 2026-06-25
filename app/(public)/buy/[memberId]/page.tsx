@@ -27,9 +27,16 @@ interface FormData {
   customerDOB:     string;
   customerPAN:     string;
   customerState:   string;
-  nomineeName:     string;
   nomineeRelation: string;
   planId:          string;
+  isPolicyForOther: boolean;
+  policyHolderName: string;
+  policyHolderDOB: string;
+  policyHolderGender: string;
+  policyHolderMobile: string;
+  policyHolderEmail: string;
+  policyHolderAddress: string;
+  policyHolderRelation: string;
 }
 
 const STATES = [
@@ -81,6 +88,14 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
     nomineeName:     '',
     nomineeRelation: 'Spouse',
     planId:          '',
+    isPolicyForOther: false,
+    policyHolderName: '',
+    policyHolderDOB: '',
+    policyHolderGender: 'Male',
+    policyHolderMobile: '',
+    policyHolderEmail: '',
+    policyHolderAddress: '',
+    policyHolderRelation: 'Child',
   });
 
   const selectedPlan = plans.find(p => p._id === formData.planId);
@@ -190,6 +205,12 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
     if (formData.enrollmentType === 'distributor') {
       if (!formData.customerEmail.includes('@'))    return toast.error('Email is required for Distributor enrollment'), false;
       if (!emailVerified)                           return toast.error('Please verify your email with OTP first'), false;
+      if (formData.isPolicyForOther) {
+        if (!formData.policyHolderName.trim())      return toast.error('Beneficiary name is required'), false;
+        if (!formData.policyHolderDOB)              return toast.error('Beneficiary Date of Birth is required'), false;
+        if (formData.policyHolderMobile.length !== 10) return toast.error('Beneficiary must have a valid 10-digit mobile number'), false;
+        if (!formData.policyHolderEmail.includes('@')) return toast.error('Beneficiary must have a valid email for KYC link'), false;
+      }
     }
     if (!formData.nomineeName.trim())               return toast.error('Nominee name is required'), false;
     return true;
@@ -237,6 +258,14 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
         customerState:   formData.customerState,
         nomineeName:     formData.nomineeName,
         nomineeRelation: formData.nomineeRelation,
+        isPolicyForOther: formData.isPolicyForOther,
+        policyHolderName: formData.policyHolderName,
+        policyHolderDOB: formData.policyHolderDOB,
+        policyHolderGender: formData.policyHolderGender,
+        policyHolderMobile: formData.policyHolderMobile,
+        policyHolderEmail: formData.policyHolderEmail,
+        policyHolderAddress: formData.policyHolderAddress,
+        policyHolderRelation: formData.policyHolderRelation,
         returnUrl:       `${window.location.origin}/api/payment-return?path=/buy/success`,
       });
       if (!res.data.success) throw new Error(res.data.message || 'Subscription creation failed');
@@ -285,7 +314,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
       <div className="relative z-10 max-w-2xl mx-auto px-5 py-12">
         {/* Header */}
         <div className="flex flex-col items-center mb-10 text-center">
-          <img src="/logo.png" alt="CureBharat" className="h-14 object-contain mb-5" />
+          <img src="/Curebharat logo 22.png" alt="CureBharat" className="h-14 object-contain mb-5" />
           <h1 className="text-3xl font-black text-white tracking-tight mb-2">Enrollment Portal</h1>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-[#6029F1] animate-pulse" />
@@ -343,9 +372,23 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 </div>
               </div>
 
+              {/* Toggle for Policy Holder (only if Distributor) */}
+              {formData.enrollmentType === 'distributor' && (
+                <div className="flex items-center justify-between bg-[#6029F1]/5 border border-[#6029F1]/20 rounded-2xl p-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-emerald-300">Buy policy for someone else?</h3>
+                    <p className="text-[10px] text-slate-400 mt-1">You get the HCC Account, but the policy is issued to your family member.</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={formData.isPolicyForOther} onChange={e => setFormData(p => ({ ...p, isPolicyForOther: e.target.checked }))} />
+                    <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6029F1]"></div>
+                  </label>
+                </div>
+              )}
+
               {/* Basic fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Input label="Full Name *" value={formData.customerName} onChange={v => setFormData(p => ({ ...p, customerName: v }))} placeholder="As on Aadhaar" />
+                <Input label={formData.isPolicyForOther ? "Distributor Name *" : "Full Name *"} value={formData.customerName} onChange={v => setFormData(p => ({ ...p, customerName: v }))} placeholder="As on Aadhaar" />
 
                 {/* Mobile with live check */}
                 <div className="space-y-2">
@@ -453,6 +496,27 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 />
                 <p className="text-[10px] text-slate-500 font-bold mt-1 ml-1">Required for Policy & Tax Benefits</p>
               </div>
+
+              {/* Policy Holder / Beneficiary Details (If toggled) */}
+              {formData.enrollmentType === 'distributor' && formData.isPolicyForOther && (
+                <div className="pt-5 border-t border-emerald-500/20 bg-emerald-500/5 -mx-7 px-7 py-5">
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-4">Policy Holder (Beneficiary) Details</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <Input label="Beneficiary Name *" value={formData.policyHolderName} onChange={v => setFormData(p => ({ ...p, policyHolderName: v }))} placeholder="Full name of beneficiary" />
+                    <Input label="Date of Birth *" value={formData.policyHolderDOB} onChange={v => setFormData(p => ({ ...p, policyHolderDOB: formatDOB(v) }))} placeholder="DD/MM/YYYY" />
+                    <Select label="Gender *" value={formData.policyHolderGender} onChange={v => setFormData(p => ({ ...p, policyHolderGender: v }))} options={['Male', 'Female', 'Other']} />
+                    <Select label="Relation to Distributor *" value={formData.policyHolderRelation} onChange={v => setFormData(p => ({ ...p, policyHolderRelation: v }))} options={['Spouse', 'Child', 'Parent', 'Sibling', 'Other']} />
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Phone Number *</p>
+                      <input type="text" maxLength={10} value={formData.policyHolderMobile} onChange={e => setFormData(p => ({ ...p, policyHolderMobile: e.target.value.replace(/\\D/g, '').slice(0, 10) }))} placeholder="10-digit number" className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-[#6029F1]/50 transition-all placeholder:opacity-10" />
+                    </div>
+                    <Input label="Email *" value={formData.policyHolderEmail} onChange={v => setFormData(p => ({ ...p, policyHolderEmail: v }))} placeholder="For KYC link" />
+                  </div>
+                  <div className="mb-5">
+                    <Input label="Address (Optional)" value={formData.policyHolderAddress} onChange={v => setFormData(p => ({ ...p, policyHolderAddress: v }))} placeholder="Full address" />
+                  </div>
+                </div>
+              )}
 
               {/* Nominee */}
               <div className="pt-5 border-t border-white/5">

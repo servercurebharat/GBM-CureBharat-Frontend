@@ -199,6 +199,8 @@ export const adminAPI = {
     api.put<ApiResponse<any>>(`/admin/users/${id}/bank-verify`, { status }),
   updateUserStatus: (id: string, status: string) =>
     api.put<ApiResponse<any>>(`/admin/users/${id}/status`, { status }),
+  deleteUser: (id: string) =>
+    api.delete<ApiResponse<any>>(`/admin/users/${id}`),
   resetUserPassword: (id: string) =>
     api.put<ApiResponse<any>>(`/admin/users/${id}/reset-password`),
   getCommissionConfig: () =>
@@ -223,6 +225,10 @@ export const adminAPI = {
     api.post<ApiResponse<any>>('/admin/announcements', data),
   sendKycLink: (saleId: string) =>
     api.post<ApiResponse<any>>(`/admin/sales/${saleId}/send-kyc-link`),
+  getCustomCommissions: () =>
+    api.get<ApiResponse<any[]>>('/admin/custom-commission'),
+  setCustomCommission: (data: { memberId: string, customCommissionRate?: string }) =>
+    api.post<ApiResponse<any>>('/admin/custom-commission', data),
 };
 
 // TEAM

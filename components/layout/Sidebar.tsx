@@ -218,7 +218,7 @@ export default function Sidebar({ role, user, isOpen, setIsOpen }: { role: Role;
         <div className="h-[90px] px-5 flex items-center justify-center relative border-b border-white/5 flex-shrink-0">
           {/* Logo — raw image, no container */}
           <Image
-            src="/logo.png"
+            src="/Curebharat logo 22.png"
             alt="CureBharat Logo"
             width={180}
             height={50}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { dashboardAPI } from '@/lib/api';
 import { IUser, IPlan } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -39,6 +39,20 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   const [selectedState, setSelectedState] = useState('all');
   const [leaderRole, setLeaderRole] = useState<string>('');
   const [activeDropdown, setActiveDropdown] = useState<'period' | 'state' | null>(null);
+  const periodRef = useRef<HTMLDivElement>(null);
+  const stateRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (activeDropdown === 'period' && periodRef.current && !periodRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null);
+      } else if (activeDropdown === 'state' && stateRef.current && !stateRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeDropdown]);
 
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
@@ -274,7 +288,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3 w-full md:w-auto md:ml-auto">
            {/* Period Filter */}
-           <div className="relative">
+           <div ref={periodRef} className="relative">
               <div 
                 onClick={() => setActiveDropdown(activeDropdown === 'period' ? null : 'period')}
                 className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-all"
@@ -300,7 +314,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            </div>
 
            {/* State Filter */}
-           <div className="relative">
+           <div ref={stateRef} className="relative">
               <div 
                 onClick={() => setActiveDropdown(activeDropdown === 'state' ? null : 'state')}
                 className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-all"
@@ -331,13 +345,15 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
            >
               <svg className={loading ? 'animate-spin' : ''} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
            </button>
-           <button 
-             onClick={() => setIsModalOpen(true)}
-             className="px-8 py-3 cb-gradient text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-xl shadow-cb-teal/20"
-           >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
-              Enroll Member
-           </button>
+           {user?.role === 'admin' && (
+             <button 
+               onClick={() => setIsModalOpen(true)}
+               className="px-8 py-3 cb-gradient text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2 shadow-xl shadow-cb-teal/20"
+             >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
+                Enroll Member
+             </button>
+           )}
            <ExportDropdown 
               title="Top Performance Leaderboard"
               headers={['Rank', 'Name', 'Member ID', 'State', 'Directs', 'Team Sales', 'Income']}
@@ -368,7 +384,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
       />
 
       {/* KYC Alert Banner */}
-      {user.kycStatus !== 'approved' && (
+      {user.role !== 'admin' && user.kycStatus && user.kycStatus !== 'approved' && (
         <div className={`
           ${user.kycStatus === 'not_submitted' ? 'bg-amber-500/10 border border-amber-500/20' : ''}
           ${user.kycStatus === 'pending' ? 'bg-emerald-500/10 border border-emerald-500/20' : ''}
@@ -509,17 +525,19 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                          Sales Link
                       </button>
-                      <button
-                         onClick={() => setReferralType('recruiter')}
-                         className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
-                            referralType === 'recruiter'
-                               ? 'bg-[#49D2B5] text-[#0d0f14] shadow-md shadow-[#49D2B5]/10'
-                               : 'text-white/40 hover:text-white'
-                         }`}
-                      >
-                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                         Recruiter Link
-                      </button>
+                      {user.role === 'admin' && (
+                        <button
+                           onClick={() => setReferralType('recruiter')}
+                           className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                              referralType === 'recruiter'
+                                 ? 'bg-[#49D2B5] text-[#0d0f14] shadow-md shadow-[#49D2B5]/10'
+                                 : 'text-white/40 hover:text-white'
+                           }`}
+                        >
+                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                           Recruiter Link
+                        </button>
+                      )}
                    </div>
                 </div>
 

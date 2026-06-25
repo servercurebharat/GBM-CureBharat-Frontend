@@ -113,6 +113,14 @@ function SuccessContent() {
           nomineeRelation: saved.nomineeRelation || '',
           enrollmentType:  saved.enrollmentType  || 'customer',
           sourceType:      'public_link',
+          isPolicyForOther: saved.isPolicyForOther || false,
+          policyHolderName: saved.policyHolderName || '',
+          policyHolderDOB: saved.policyHolderDOB || '',
+          policyHolderGender: saved.policyHolderGender || '',
+          policyHolderMobile: saved.policyHolderMobile || '',
+          policyHolderEmail: saved.policyHolderEmail || '',
+          policyHolderAddress: saved.policyHolderAddress || '',
+          policyHolderRelation: saved.policyHolderRelation || '',
         });
 
         if (res.data.success) {

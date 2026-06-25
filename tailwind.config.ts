@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        display: ['var(--font-inter)', 'sans-serif'],
+        sans: ['var(--font-dm-sans)', 'sans-serif'],
+        display: ['var(--font-syne)', 'sans-serif'],
       },
       colors: {
         bg: '#FFFFFF', // Clean white background
@@ -36,19 +36,9 @@ const config: Config = {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
-        'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        'scale-in': {
-          '0%': { opacity: '0', transform: 'scale(0.95)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
       },
       animation: {
         shimmer: 'shimmer 2s infinite',
-        'fade-in': 'fade-in 0.5s ease-out forwards',
-        'scale-in': 'scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
