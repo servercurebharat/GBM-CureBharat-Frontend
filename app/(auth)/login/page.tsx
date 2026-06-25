@@ -134,7 +134,7 @@ export default function LoginPage() {
             <div className="absolute top-0 left-8 right-8 h-[2px] rounded-b-full"
               style={{ background: 'linear-gradient(90deg, transparent, #49D2B5, #6366f1, transparent)' }} />
 
-            <Image src="/curebharat-logo-22.png" alt="CureBharat" width={64} height={64} className="object-contain" />
+            <img src="/curebharat-logo-22.png" alt="CureBharat" className="w-16 h-16 object-contain" />
 
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4"
@@ -278,7 +278,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center">
-          <Image src="/curebharat-logo-22.png" alt="CureBharat" width={220} height={60} className="object-contain" priority />
+          <img src="/curebharat-logo-22.png" alt="CureBharat" className="w-[220px] h-[60px] object-contain" />
         </div>
 
         {/* Hero Content */}
@@ -336,7 +336,7 @@ export default function LoginPage() {
 
           {/* Mobile Logo */}
           <div className="flex items-center mb-8 lg:hidden anim-up">
-            <Image src="/curebharat-logo-22.png" alt="CureBharat" width={180} height={50} className="object-contain" priority />
+            <img src="/curebharat-logo-22.png" alt="CureBharat" className="w-[180px] h-[50px] object-contain" />
           </div>
 
           {/* ── GLASSMORPHISM CARD ── */}
