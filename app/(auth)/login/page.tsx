@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import Image from 'next/image';
 
 import { HeartPulse, Banknote, BrainCircuit, Activity, Lock, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { LOGO_BASE64 } from '@/lib/logoData';
 
 export default function LoginPage() {
   const [mobile, setMobile] = useState('');
@@ -134,7 +135,7 @@ export default function LoginPage() {
             <div className="absolute top-0 left-8 right-8 h-[2px] rounded-b-full"
               style={{ background: 'linear-gradient(90deg, transparent, #49D2B5, #6366f1, transparent)' }} />
 
-            <img src="/curebharat-logo-22.png" alt="CureBharat" className="w-16 h-16 object-contain" />
+            <img src={LOGO_BASE64} alt="CureBharat" className="w-16 h-16 object-contain" />
 
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4"
@@ -278,7 +279,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center">
-          <img src="/curebharat-logo-22.png" alt="CureBharat" className="w-[220px] h-[60px] object-contain" />
+          <img src={LOGO_BASE64} alt="CureBharat" className="w-[220px] h-[60px] object-contain" />
         </div>
 
         {/* Hero Content */}
@@ -336,7 +337,7 @@ export default function LoginPage() {
 
           {/* Mobile Logo */}
           <div className="flex items-center mb-8 lg:hidden anim-up">
-            <img src="/curebharat-logo-22.png" alt="CureBharat" className="w-[180px] h-[50px] object-contain" />
+            <img src={LOGO_BASE64} alt="CureBharat" className="w-[180px] h-[50px] object-contain" />
           </div>
 
           {/* ── GLASSMORPHISM CARD ── */}
