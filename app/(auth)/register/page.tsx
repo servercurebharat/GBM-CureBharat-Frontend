@@ -186,7 +186,7 @@ function RegisterForm() {
       <div className="w-full max-w-[550px] relative z-10 my-10">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <Image src="/Curebharat logo 22.png" alt="CureBharat" width={220} height={60} className="object-contain" priority />
+          <Image src="/curebharat-logo-22.png" alt="CureBharat" width={220} height={60} className="object-contain" priority />
         </div>
 
         {/* Glassmorphism card container */}

@@ -315,7 +315,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
       <div className="relative z-10 max-w-2xl mx-auto px-5 py-12">
         {/* Header */}
         <div className="flex flex-col items-center mb-10 text-center">
-          <img src="/Curebharat logo 22.png" alt="CureBharat" className="h-14 object-contain mb-5" />
+          <img src="/curebharat-logo-22.png" alt="CureBharat" className="h-14 object-contain mb-5" />
           <h1 className="text-3xl font-black text-white tracking-tight mb-2">Enrollment Portal</h1>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-[#6029F1] animate-pulse" />
