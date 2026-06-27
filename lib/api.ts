@@ -233,6 +233,10 @@ export const adminAPI = {
     api.put<ApiResponse<any>>(`/admin/users/${id}/profile`, data, {
       headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
     }),
+  updateCustomerProfile: (id: string, data: any | FormData) =>
+    api.put<ApiResponse<any>>(`/admin/customers/${id}/profile`, data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    }),
 };
 
 // TEAM

@@ -16,6 +16,17 @@ export default function CustomerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'EDIT'>('OVERVIEW');
+  const [editSaving, setEditSaving] = useState(false);
+  const [saleForm, setSaleForm] = useState<any>({});
+  const [kycForm, setKycForm] = useState<any>({});
+  const [uploadFiles, setUploadFiles] = useState<{[key: string]: File | null}>({
+    aadhaarFront: null,
+    aadhaarBack: null,
+    panCard: null,
+    selfie: null
+  });
+
   const handleSendKycEmail = async () => {
     if (!sale) return;
     setSendingEmail(true);
@@ -38,8 +49,12 @@ export default function CustomerProfilePage() {
       try {
         const res = await publicAPI.getKycSale(params.id as string);
         if (res.data.success) {
-          setSale(res.data.data.sale);
-          setKycData(res.data.data.kycData);
+          const s = res.data.data.sale;
+          const k = res.data.data.kycData;
+          setSale(s);
+          setKycData(k);
+          setSaleForm(s || {});
+          setKycForm(k || {});
         }
       } catch (err: any) {
         toast.error('Failed to load customer profile');
@@ -50,6 +65,53 @@ export default function CustomerProfilePage() {
     }
     fetchCustomer();
   }, [params.id]);
+
+  const handleAdminEditSave = async () => {
+    if (!sale) return;
+    setEditSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('saleData', JSON.stringify(saleForm));
+      formData.append('kycData', JSON.stringify(kycForm));
+
+      Object.keys(uploadFiles).forEach(key => {
+        if (uploadFiles[key]) {
+          formData.append(key, uploadFiles[key] as Blob);
+        }
+      });
+
+      const res = await adminAPI.updateCustomerProfile(sale._id, formData);
+      if (res.data.success) {
+        setSale(res.data.data.sale);
+        setKycData(res.data.data.kycData);
+        setUploadFiles({ aadhaarFront: null, aadhaarBack: null, panCard: null, selfie: null });
+        toast.success('Customer profile updated successfully!');
+      } else {
+        toast.error(res.data.message || 'Failed to update profile');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'An error occurred');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleAddFamilyMember = () => {
+    const newMember = { name: '', relation: '', dob: '', gender: 'Male' };
+    setKycForm({ ...kycForm, familyDetails: [...(kycForm.familyDetails || []), newMember] });
+  };
+
+  const handleUpdateFamilyMember = (index: number, field: string, value: string) => {
+    const updated = [...(kycForm.familyDetails || [])];
+    updated[index] = { ...updated[index], [field]: value };
+    setKycForm({ ...kycForm, familyDetails: updated });
+  };
+
+  const handleRemoveFamilyMember = (index: number) => {
+    const updated = [...(kycForm.familyDetails || [])];
+    updated.splice(index, 1);
+    setKycForm({ ...kycForm, familyDetails: updated });
+  };
 
   const exportPDF = () => {
     window.print();
@@ -143,6 +205,23 @@ export default function CustomerProfilePage() {
            </div>
         </div>
 
+        <div className="flex gap-2 overflow-x-auto pb-2 no-print">
+          {['OVERVIEW', 'EDIT'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as any)}
+              className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all whitespace-nowrap ${
+                activeTab === tab
+                  ? 'bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+                  : 'bg-[#131241] text-white/50 hover:bg-white/5 border border-white/5'
+              }`}
+            >
+              {tab === 'EDIT' ? '✏️ EDIT' : tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'OVERVIEW' && (
         <div id="print-area" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Basic Info */}
           <div className="lg:col-span-1 space-y-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -325,6 +404,235 @@ export default function CustomerProfilePage() {
             )}
           </div>
         </div>
+        )}
+
+        {activeTab === 'EDIT' && (
+          <div className="bg-[#131241] rounded-[32px] p-6 sm:p-10 border border-white/5 shadow-2xl relative overflow-hidden animate-slide-up">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+            <div className="relative z-10 space-y-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-white uppercase tracking-tight">Edit Customer Profile</h2>
+                  <p className="text-sm font-bold text-emerald-400 uppercase tracking-widest mt-1">Admin Override</p>
+                </div>
+                <button 
+                  onClick={handleAdminEditSave}
+                  disabled={editSaving}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50"
+                >
+                  {editSaving ? 'Saving...' : 'Save All Changes'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Personal Info */}
+                <div className="space-y-4">
+                  <h4 className="text-blue-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Basic Info</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Full Name</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.customerName || ''} onChange={e => setSaleForm({...saleForm, customerName: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Email</label>
+                      <input type="email" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.customerEmail || ''} onChange={e => setSaleForm({...saleForm, customerEmail: e.target.value})} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Mobile</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.customerMobile || ''} onChange={e => setSaleForm({...saleForm, customerMobile: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">State / Territory</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.customerState || ''} onChange={e => setSaleForm({...saleForm, customerState: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Gender</label>
+                        <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.gender || ''} onChange={e => setKycForm({...kycForm, gender: e.target.value})}>
+                          <option value="">Select</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">DOB</label>
+                        <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.customerDOB || ''} onChange={e => setSaleForm({...saleForm, customerDOB: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Occupation</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.occupation || ''} onChange={e => setKycForm({...kycForm, occupation: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Marital Status</label>
+                        <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.maritalStatus || ''} onChange={e => setKycForm({...kycForm, maritalStatus: e.target.value})}>
+                          <option value="">Select</option>
+                          <option value="Single">Single</option>
+                          <option value="Married">Married</option>
+                          <option value="Divorced">Divorced</option>
+                          <option value="Widowed">Widowed</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address & Nominee */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h4 className="text-blue-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Address</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Address Line 1</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.addressLine1 || ''} onChange={e => setKycForm({...kycForm, addressLine1: e.target.value})} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">City</label>
+                          <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.city || ''} onChange={e => setKycForm({...kycForm, city: e.target.value})} />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">State</label>
+                          <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.state || ''} onChange={e => setKycForm({...kycForm, state: e.target.value})} />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">PIN Code</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.pincode || ''} onChange={e => setKycForm({...kycForm, pincode: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-blue-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Nominee Details</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Name</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.nomineeName || ''} onChange={e => setSaleForm({...saleForm, nomineeName: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Relation</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.nomineeRelation || ''} onChange={e => setSaleForm({...saleForm, nomineeRelation: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">DOB</label>
+                        <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.nomineeDOB || ''} onChange={e => setKycForm({...kycForm, nomineeDOB: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Contact</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.nomineeContact || ''} onChange={e => setKycForm({...kycForm, nomineeContact: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Health & Wellness Information */}
+              <div className="space-y-4">
+                <h4 className="text-blue-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Health & Wellness Information</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Existing Medical Conditions (If any)</label>
+                    <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" placeholder="E.g. Diabetes, Asthma" value={kycForm.existingMedicalConditions || ''} onChange={e => setKycForm({...kycForm, existingMedicalConditions: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Current Medications (If any)</label>
+                    <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.currentMedications || ''} onChange={e => setKycForm({...kycForm, currentMedications: e.target.value})} />
+                  </div>
+                  <div className="md:w-1/2">
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Lifestyle</label>
+                    <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={kycForm.lifestyle || ''} onChange={e => setKycForm({...kycForm, lifestyle: e.target.value})}>
+                      <option value="">Select</option>
+                      <option value="Sedentary">Sedentary</option>
+                      <option value="Moderate">Moderate</option>
+                      <option value="Active">Active</option>
+                      <option value="Highly Active">Highly Active</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Family Details */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                  <h4 className="text-blue-400 text-sm font-bold uppercase tracking-widest">Family Details</h4>
+                  <button onClick={handleAddFamilyMember} className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all">
+                    + Add Member
+                  </button>
+                </div>
+                
+                {kycForm.familyDetails && kycForm.familyDetails.length > 0 ? (
+                  <div className="space-y-4">
+                    {kycForm.familyDetails.map((member: any, index: number) => (
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-black/20 p-4 rounded-xl border border-white/5 relative group">
+                        <button onClick={() => handleRemoveFamilyMember(index)} className="absolute -top-2 -right-2 bg-rose-500 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          ×
+                        </button>
+                        <div className="md:col-span-2">
+                          <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Name</label>
+                          <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 outline-none" value={member.name} onChange={e => handleUpdateFamilyMember(index, 'name', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Relation</label>
+                          <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 outline-none" value={member.relation} onChange={e => handleUpdateFamilyMember(index, 'relation', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">DOB</label>
+                          <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 outline-none" value={member.dob} onChange={e => handleUpdateFamilyMember(index, 'dob', e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Gender</label>
+                          <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-blue-500 outline-none" value={member.gender} onChange={e => handleUpdateFamilyMember(index, 'gender', e.target.value)}>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-white/30 italic text-center p-4">No family members added.</div>
+                )}
+              </div>
+
+              {/* KYC Documents */}
+              <div className="space-y-4">
+                <h4 className="text-blue-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">KYC Documents</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">PAN Number</label>
+                    <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none" value={saleForm.customerPAN || ''} onChange={e => setSaleForm({...saleForm, customerPAN: e.target.value})} />
+                  </div>
+                  <div></div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Aadhaar Front</label>
+                    <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-blue-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30" onChange={e => setUploadFiles({...uploadFiles, aadhaarFront: e.target.files?.[0] || null})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Aadhaar Back</label>
+                    <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-blue-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30" onChange={e => setUploadFiles({...uploadFiles, aadhaarBack: e.target.files?.[0] || null})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload PAN Card</label>
+                    <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-blue-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30" onChange={e => setUploadFiles({...uploadFiles, panCard: e.target.files?.[0] || null})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Selfie</label>
+                    <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-blue-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30" onChange={e => setUploadFiles({...uploadFiles, selfie: e.target.files?.[0] || null})} />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
     </DashboardLayout>
   );

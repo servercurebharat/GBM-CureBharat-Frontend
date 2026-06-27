@@ -610,9 +610,15 @@ export default function MemberDetails() {
                     <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Email</label>
                     <input type="email" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Mobile</label>
-                    <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.mobile || ''} onChange={e => setEditForm({...editForm, mobile: e.target.value})} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Mobile</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.mobile || ''} onChange={e => setEditForm({...editForm, mobile: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">State / Territory</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.state || ''} onChange={e => setEditForm({...editForm, state: e.target.value})} />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
