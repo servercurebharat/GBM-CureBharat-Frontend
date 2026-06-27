@@ -15,8 +15,18 @@ export default function MemberDetails() {
   const [member, setMember] = useState<IUser | null>(null);
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'KYC' | 'NETWORK' | 'SALES'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'KYC' | 'NETWORK' | 'SALES' | 'EDIT'>('OVERVIEW');
   const [updating, setUpdating] = useState(false);
+  const [editForm, setEditForm] = useState<any>({});
+  const [editSaving, setEditSaving] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState<{[key: string]: File | null}>({
+    aadhaarFront: null,
+    aadhaarBack: null,
+    panCard: null,
+    bankProof: null,
+    selfie: null,
+    profileImage: null
+  });
 
   useEffect(() => {
     async function fetchMember() {
@@ -33,6 +43,53 @@ export default function MemberDetails() {
     }
     fetchMember();
   }, [id]);
+
+  // Sync editForm when member loads
+  useEffect(() => {
+    if (member) {
+      setEditForm({
+        name: member.name || '',
+        email: member.email || '',
+        mobile: member.mobile || '',
+        gender: member.gender || '',
+        dob: member.dob ? new Date(member.dob).toISOString().split('T')[0] : '',
+        state: member.state || '',
+        occupation: (member as any).occupation || '',
+        maritalStatus: (member as any).maritalStatus || '',
+        alternateMobile: (member as any).alternateMobile || '',
+        address: {
+          addressLine1: member.address?.addressLine1 || '',
+          addressLine2: member.address?.addressLine2 || '',
+          city: member.address?.city || '',
+          state: member.address?.state || '',
+          zipCode: member.address?.zipCode || '',
+        },
+        bankDetails: {
+          accountHolderName: member.bankDetails?.accountHolderName || '',
+          accountNumber: member.bankDetails?.accountNumber || '',
+          bankName: member.bankDetails?.bankName || '',
+          ifscCode: member.bankDetails?.ifscCode || '',
+          branchName: member.bankDetails?.branchName || '',
+        },
+        kycDocuments: {
+          aadhaarNumber: member.kycDocuments?.aadhaarNumber || '',
+          panNumber: member.kycDocuments?.panNumber || '',
+          aadhaarFrontUrl: member.kycDocuments?.aadhaarFrontUrl || '',
+          aadhaarBackUrl: member.kycDocuments?.aadhaarBackUrl || '',
+          panUrl: member.kycDocuments?.panUrl || '',
+          selfieUrl: member.kycDocuments?.selfieUrl || '',
+          bankProofUrl: member.kycDocuments?.bankProofUrl || '',
+        },
+        nomineeDetails: {
+          name: member.nomineeDetails?.name || '',
+          relation: member.nomineeDetails?.relation || '',
+          mobile: member.nomineeDetails?.mobile || '',
+          dob: member.nomineeDetails?.dob ? new Date(member.nomineeDetails.dob).toISOString().split('T')[0] : '',
+          gender: member.nomineeDetails?.gender || '',
+        },
+      });
+    }
+  }, [member]);
 
   useEffect(() => {
     plansAPI.getAll().then(res => {
@@ -69,6 +126,46 @@ export default function MemberDetails() {
       console.error('KYC update failed', err);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleAdminEditSave = async () => {
+    if (!member) return;
+    setEditSaving(true);
+    try {
+      const formData = new FormData();
+      
+      // Append text fields
+      Object.keys(editForm).forEach(key => {
+        if (typeof editForm[key] === 'object' && editForm[key] !== null) {
+          formData.append(key, JSON.stringify(editForm[key]));
+        } else {
+          formData.append(key, editForm[key]);
+        }
+      });
+      
+      // Append files
+      Object.keys(uploadFiles).forEach(key => {
+        if (uploadFiles[key]) {
+          formData.append(key, uploadFiles[key] as Blob);
+        }
+      });
+
+      const res = await adminAPI.updateMemberProfile(member._id, formData);
+      if (res.data.success) {
+        setMember(res.data.data as any);
+        // Clear files after successful upload
+        setUploadFiles({
+          aadhaarFront: null, aadhaarBack: null, panCard: null, bankProof: null, selfie: null, profileImage: null
+        });
+        toast.success('Profile updated successfully!');
+      } else {
+        toast.error(res.data.message || 'Failed to update profile');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'An error occurred');
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -228,16 +325,18 @@ export default function MemberDetails() {
 
            {/* Tabs Row */}
            <div className="flex w-full overflow-x-auto custom-scrollbar relative z-10 bg-black/20">
-              {(['OVERVIEW', 'KYC', 'NETWORK', 'SALES'] as const).map(tab => (
+              {(['OVERVIEW', 'KYC', 'NETWORK', 'SALES', 'EDIT'] as const).map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 min-w-[120px] py-4 sm:py-5 text-[12px] font-black uppercase tracking-widest transition-all ${
-                    activeTab === tab ? 'text-white bg-white/5 border-t-2 border-t-transparent' : 'text-white/40 border-t-2 border-t-transparent hover:text-white hover:bg-white/5'
+                    activeTab === tab
+                      ? tab === 'EDIT' ? 'text-amber-400 bg-amber-400/5 border-t-2 border-t-transparent' : 'text-white bg-white/5 border-t-2 border-t-transparent'
+                      : tab === 'EDIT' ? 'text-amber-400/40 border-t-2 border-t-transparent hover:text-amber-400 hover:bg-amber-400/5' : 'text-white/40 border-t-2 border-t-transparent hover:text-white hover:bg-white/5'
                   }`}
-                  style={activeTab === tab ? { boxShadow: 'inset 0 2px 0 0 white' } : {}}
+                  style={activeTab === tab ? { boxShadow: tab === 'EDIT' ? 'inset 0 2px 0 0 #fbbf24' : 'inset 0 2px 0 0 white' } : {}}
                 >
-                  {tab}
+                  {tab === 'EDIT' ? '✏️ EDIT' : tab}
                 </button>
               ))}
            </div>
@@ -492,6 +591,185 @@ export default function MemberDetails() {
 
         {activeTab === 'SALES' && (
           <SalesHistoryView userId={member._id} totalEarned={member.totalEarned || 0} />
+        )}
+
+        {activeTab === 'EDIT' && (
+          <div className="bg-[#131241] rounded-[32px] p-6 sm:p-10 border border-white/5 shadow-2xl relative overflow-hidden animate-slide-up">
+            <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.4em] mb-8">Edit Member Profile</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Personal Info */}
+              <div className="space-y-4">
+                <h4 className="text-emerald-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Personal Info</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Full Name</label>
+                    <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.name || ''} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Email</label>
+                    <input type="email" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Mobile</label>
+                    <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.mobile || ''} onChange={e => setEditForm({...editForm, mobile: e.target.value})} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Gender</label>
+                      <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.gender || ''} onChange={e => setEditForm({...editForm, gender: e.target.value})}>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">DOB</label>
+                      <input type="date" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.dob || ''} onChange={e => setEditForm({...editForm, dob: e.target.value})} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Occupation</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.occupation || ''} onChange={e => setEditForm({...editForm, occupation: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Marital Status</label>
+                      <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.maritalStatus || ''} onChange={e => setEditForm({...editForm, maritalStatus: e.target.value})}>
+                        <option value="">Select</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address & Nominee */}
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <h4 className="text-emerald-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Address</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Address Line 1</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.address?.addressLine1 || ''} onChange={e => setEditForm({...editForm, address: {...editForm.address, addressLine1: e.target.value}})} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">City</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.address?.city || ''} onChange={e => setEditForm({...editForm, address: {...editForm.address, city: e.target.value}})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">State</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.address?.state || ''} onChange={e => setEditForm({...editForm, address: {...editForm.address, state: e.target.value}})} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">PIN Code</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.address?.zipCode || ''} onChange={e => setEditForm({...editForm, address: {...editForm.address, zipCode: e.target.value}})} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-emerald-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Nominee Details</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Name</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.nomineeDetails?.name || ''} onChange={e => setEditForm({...editForm, nomineeDetails: {...editForm.nomineeDetails, name: e.target.value}})} />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Relation</label>
+                      <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.nomineeDetails?.relation || ''} onChange={e => setEditForm({...editForm, nomineeDetails: {...editForm.nomineeDetails, relation: e.target.value}})} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bank & KYC */}
+              <div className="space-y-6 md:col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="text-emerald-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">Bank Details</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Bank Name</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.bankDetails?.bankName || ''} onChange={e => setEditForm({...editForm, bankDetails: {...editForm.bankDetails, bankName: e.target.value}})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">A/C Holder Name</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.bankDetails?.accountHolderName || ''} onChange={e => setEditForm({...editForm, bankDetails: {...editForm.bankDetails, accountHolderName: e.target.value}})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Account Number</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.bankDetails?.accountNumber || ''} onChange={e => setEditForm({...editForm, bankDetails: {...editForm.bankDetails, accountNumber: e.target.value}})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">IFSC Code</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.bankDetails?.ifscCode || ''} onChange={e => setEditForm({...editForm, bankDetails: {...editForm.bankDetails, ifscCode: e.target.value}})} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="text-emerald-400 text-sm font-bold uppercase tracking-widest border-b border-white/10 pb-2">KYC Documents</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Aadhaar Number</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.kycDocuments?.aadhaarNumber || ''} onChange={e => setEditForm({...editForm, kycDocuments: {...editForm.kycDocuments, aadhaarNumber: e.target.value}})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">PAN Number</label>
+                        <input type="text" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 outline-none" value={editForm.kycDocuments?.panNumber || ''} onChange={e => setEditForm({...editForm, kycDocuments: {...editForm.kycDocuments, panNumber: e.target.value}})} />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Aadhaar Front</label>
+                        <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-emerald-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" onChange={e => setUploadFiles({...uploadFiles, aadhaarFront: e.target.files?.[0] || null})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Aadhaar Back</label>
+                        <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-emerald-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" onChange={e => setUploadFiles({...uploadFiles, aadhaarBack: e.target.files?.[0] || null})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload PAN Card</label>
+                        <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-emerald-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" onChange={e => setUploadFiles({...uploadFiles, panCard: e.target.files?.[0] || null})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Bank Proof</label>
+                        <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-emerald-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" onChange={e => setUploadFiles({...uploadFiles, bankProof: e.target.files?.[0] || null})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Selfie</label>
+                        <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-emerald-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" onChange={e => setUploadFiles({...uploadFiles, selfie: e.target.files?.[0] || null})} />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Upload Profile Photo</label>
+                        <input type="file" accept="image/*" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white focus:border-emerald-500 outline-none text-[11px] file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" onChange={e => setUploadFiles({...uploadFiles, profileImage: e.target.files?.[0] || null})} />
+                      </div>
+
+                      <div className="col-span-2">
+                        <p className="text-[10px] text-amber-500/80 italic mt-2">* Note: Admin can freely edit bank/KYC details without requiring OTP. Values will be instantly saved and marked as verified.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end gap-4 border-t border-white/10 pt-6">
+              <button 
+                disabled={editSaving}
+                onClick={handleAdminEditSave}
+                className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-[12px] font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+              >
+                {editSaving ? 'Saving...' : 'Save All Changes'}
+              </button>
+            </div>
+          </div>
         )}
 
       </div>

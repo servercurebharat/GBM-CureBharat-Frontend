@@ -229,6 +229,10 @@ export const adminAPI = {
     api.get<ApiResponse<any[]>>('/admin/custom-commission'),
   setCustomCommission: (data: { memberId: string, customCommissionRate?: string }) =>
     api.post<ApiResponse<any>>('/admin/custom-commission', data),
+  updateMemberProfile: (id: string, data: any | FormData) =>
+    api.put<ApiResponse<any>>(`/admin/users/${id}/profile`, data, {
+      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    }),
 };
 
 // TEAM
