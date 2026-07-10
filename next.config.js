@@ -9,7 +9,7 @@ const nextConfig = {
         source: '/api/:path*',
         destination: process.env.NODE_ENV === 'development' 
           ? 'http://localhost:5000/api/:path*' 
-          : 'https://mlm-backend-phi.vercel.app/api/:path*',
+          : 'https://gbm-cure-bharat-backend.vercel.app/api/:path*',
       },
     ];
   },
