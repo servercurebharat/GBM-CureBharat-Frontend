@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { salesAPI } from '@/lib/api';
+import { salesAPI, adminAPI } from '@/lib/api';
+import toast from 'react-hot-toast';
 import { ISale } from '@/types';
 
 export default function CustomerDatabase() {
@@ -40,40 +41,24 @@ export default function CustomerDatabase() {
     return () => clearTimeout(timer);
   }, [search, filter]);
 
-  const handleExport = () => {
-    if (!customers || customers.length === 0) return;
-    
-    const headers = ['Customer Name', 'Mobile', 'Email', 'State', 'DOB', 'PAN No', 'Policy ID', 'Plan', 'Sold By (ID)', 'Status', 'Join Date', 'Nominee Name', 'Nominee Relation'];
-    const rows = customers.map(c => [
-      `"${c.customerName || ''}"`,
-      c.customerMobile,
-      c.customerEmail || '',
-      c.customerState || '',
-      c.customerDOB || '',
-      c.customerPAN || '',
-      c.policyId,
-      `"${(c.plan as any)?.name || 'Health Plan'}"`,
-      (c.seller as any)?.memberId || '',
-      c.status,
-      new Date(c.createdAt).toLocaleDateString(),
-      `"${c.nomineeName || ''}"`,
-      c.nomineeRelation || ''
-    ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `CureBharat_Customers_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExport = async () => {
+    const exportToast = toast.loading('Generating Excel sheet...');
+    try {
+      const res = await adminAPI.exportCustomers();
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', `CureBharat_Customers_Livlong_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Downloaded successfully!', { id: exportToast });
+    } catch (err) {
+      console.error('Failed to export customers', err);
+      toast.error('Failed to export customer data', { id: exportToast });
+    }
   };
 
    const stats = useMemo(() => {
@@ -130,7 +115,7 @@ export default function CustomerDatabase() {
                 onClick={handleExport}
                 className="bg-blue-600 px-8 py-4 rounded-2xl text-[10px] font-black text-white uppercase tracking-[0.2em] hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20"
               >
-                Export CSV
+                Export Excel
               </button>
            </div>
         </div>

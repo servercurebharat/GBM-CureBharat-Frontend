@@ -237,6 +237,8 @@ export const adminAPI = {
     api.put<ApiResponse<any>>(`/admin/customers/${id}/profile`, data, {
       headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined
     }),
+  exportCustomers: () =>
+    api.get('/admin/customers/export', { responseType: 'blob' }),
 };
 
 // TEAM
