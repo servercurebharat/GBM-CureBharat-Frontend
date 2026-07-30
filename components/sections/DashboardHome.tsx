@@ -59,6 +59,14 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   const [selectedRecruitRole, setSelectedRecruitRole] = useState<string>('');
   const [referralType, setReferralType] = useState<'sales' | 'recruiter'>('sales');
 
+  const getEncodedLink = () => {
+    if (typeof window === 'undefined') return '';
+    const type = referralType === 'sales' ? 'customer' : 'distributor';
+    const data = JSON.stringify({ m: user.memberId, p: selectedPlanId || '', t: type });
+    const encoded = btoa(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return `${window.location.origin}/buy/ref_${encoded}`;
+  };
+
   const searchParams = useSearchParams();
 
   const STATES = [
@@ -525,19 +533,17 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                          Sales Link
                       </button>
-                      {user.role === 'admin' && (
-                        <button
-                           onClick={() => setReferralType('recruiter')}
-                           className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
-                              referralType === 'recruiter'
-                                 ? 'bg-[#49D2B5] text-[#0d0f14] shadow-md shadow-[#49D2B5]/10'
-                                 : 'text-white/40 hover:text-white'
-                           }`}
-                        >
-                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                           Recruiter Link
-                        </button>
-                      )}
+                      <button
+                         onClick={() => setReferralType('recruiter')}
+                         className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-2 ${
+                            referralType === 'recruiter'
+                               ? 'bg-[#49D2B5] text-[#0d0f14] shadow-md shadow-[#49D2B5]/10'
+                               : 'text-white/40 hover:text-white'
+                         }`}
+                      >
+                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                         Distributor Link
+                      </button>
                    </div>
                 </div>
 
@@ -565,14 +571,14 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                    {referralType === 'recruiter' && (
                       <div className="w-full lg:w-auto relative lg:min-w-[260px] lg:flex-shrink-0">
                          <select
-                            value={selectedRecruitRole}
-                            onChange={(e) => setSelectedRecruitRole(e.target.value)}
+                            value={selectedPlanId}
+                            onChange={(e) => setSelectedPlanId(e.target.value)}
                             className="w-full bg-black/40 border border-white/5 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:border-[#49D2B5]/40 transition-all shadow-inner pr-10"
                          >
-                            <option value="" className="bg-[#131241]">Generic Recruiter Link</option>
-                            {getRecruitRoles().map(r => (
-                               <option key={r.id} value={r.id} className="bg-[#131241]">
-                                  Recruit {r.label}
+                            <option value="" className="bg-[#131241]">Global Distributor Link (All Plans)</option>
+                            {plans.map(p => (
+                               <option key={p._id} value={p._id} className="bg-[#131241]">
+                                  {p.name} (₹{(p.price / 100).toLocaleString()})
                                </option>
                             ))}
                          </select>
@@ -584,47 +590,28 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
 
                    <div className="flex-1 w-full flex flex-col sm:flex-row items-center gap-3 min-w-0">
                       <div className="flex-1 w-full px-6 py-4 bg-black/40 rounded-xl border border-white/5 flex items-center overflow-hidden min-w-0">
-                         <code className="text-[#49D2B5] font-bold text-xs truncate flex-1 min-w-0">
-                            {referralType === 'sales'
-                               ? (selectedPlanId 
-                                    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/buy/${user.memberId}?planId=${selectedPlanId}`
-                                    : `${typeof window !== 'undefined' ? window.location.origin : ''}/buy/${user.memberId}`)
-                               : (selectedRecruitRole
-                                    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.memberId}&role=${selectedRecruitRole}`
-                                    : `${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user.memberId}`)
-                            }
-                         </code>
-                         <button
-                            onClick={async () => {
-                              const activeLink = referralType === 'sales'
-                                 ? (selectedPlanId
-                                      ? `${window.location.origin}/buy/${user.memberId}?planId=${selectedPlanId}`
-                                      : `${window.location.origin}/buy/${user.memberId}`)
-                                 : (selectedRecruitRole
-                                      ? `${window.location.origin}/register?ref=${user.memberId}&role=${selectedRecruitRole}`
-                                      : `${window.location.origin}/register?ref=${user.memberId}`);
-                              try {
-                                 await navigator.clipboard.writeText(activeLink);
-                                 toast.success('Referral link copied!');
-                              } catch {
-                                 toast.error('Failed to copy');
-                              }
-                            }}
-                            className="ml-4 flex-shrink-0 text-slate-500 hover:text-[#49D2B5] transition-colors"
-                            title="Copy link"
-                         >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                         </button>
-                      </div>
-                      <button
-                         onClick={() => {
-                            const activeLink = referralType === 'sales'
-                               ? (selectedPlanId
-                                    ? `${window.location.origin}/buy/${user.memberId}?planId=${selectedPlanId}`
-                                    : `${window.location.origin}/buy/${user.memberId}`)
-                               : (selectedRecruitRole
-                                    ? `${window.location.origin}/register?ref=${user.memberId}&role=${selectedRecruitRole}`
-                                    : `${window.location.origin}/register?ref=${user.memberId}`);
+                           <code className="text-[#49D2B5] font-bold text-xs truncate flex-1 min-w-0">
+                              {getEncodedLink()}
+                           </code>
+                           <button
+                              onClick={async () => {
+                                const activeLink = getEncodedLink();
+                                try {
+                                   await navigator.clipboard.writeText(activeLink);
+                                   toast.success('Referral link copied!');
+                                } catch {
+                                   toast.error('Failed to copy');
+                                }
+                              }}
+                              className="ml-4 flex-shrink-0 text-slate-500 hover:text-[#49D2B5] transition-colors"
+                              title="Copy link"
+                           >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                           </button>
+                        </div>
+                        <button
+                           onClick={() => {
+                              const activeLink = getEncodedLink();
                             const shareText = referralType === 'sales'
                                ? `🌟 Preventative healthcare plans & 10,000+ network hospitals with CureBharat Wellness!\n\nBuy wellness plan now 👇\n${activeLink}`
                                : `🌟 Join CureBharat Wellness as a Partner! Build your own downline network and unlock real-time overrides and commissions.\n\nRegister now under me 👇\n${activeLink}`;

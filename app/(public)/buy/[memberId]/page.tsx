@@ -58,7 +58,22 @@ const formatDOB = (val: string) => {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function PublicBuyPage({ params }: { params: { memberId: string } }) {
-  const memberId = params.memberId;
+  let memberId = params.memberId;
+  let decodedPlanId: string | null = null;
+  let decodedType: string | null = null;
+
+  if (memberId.startsWith('ref_')) {
+    try {
+      let b64 = memberId.replace('ref_', '').replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      const decoded = JSON.parse(atob(b64));
+      memberId = decoded.m;
+      decodedPlanId = decoded.p || null;
+      decodedType = decoded.t || null;
+    } catch (e) {
+      console.error("Invalid ref token");
+    }
+  }
 
   const [loading,    setLoading]    = useState(true);
   const [seller,     setSeller]     = useState<any>(null);
@@ -112,10 +127,15 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
           setSeller(res.data.data.seller);
           const activePlans = res.data.data.plans;
           setPlans(activePlans);
-          const pId = new URLSearchParams(window.location.search).get('planId');
-          if (pId && activePlans.some((p: IPlan) => p._id === pId)) {
-            setFormData(prev => ({ ...prev, planId: pId }));
-          }
+          const searchParams = new URLSearchParams(window.location.search);
+          const pId = decodedPlanId || searchParams.get('planId');
+          const typeParam = decodedType || searchParams.get('type');
+          
+          setFormData(prev => ({ 
+            ...prev, 
+            planId: (pId && activePlans.some((p: IPlan) => p._id === pId)) ? pId : prev.planId,
+            enrollmentType: typeParam === 'distributor' ? 'distributor' : 'customer'
+          }));
         }
       } catch (err: any) {
         toast.error(err.response?.data?.message || 'Invalid referral link');
@@ -342,36 +362,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                 <p className="text-sm text-slate-400">Please provide your legal details for the policy</p>
               </div>
 
-              {/* Enrollment Type Radio */}
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enrollment Type</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {([
-                    { val: 'customer',    label: '🛡️ Customer Only',    sub: 'Policy only, no login account' },
-                    { val: 'distributor', label: '🚀 Distributor',       sub: 'Join network, get HCC account' },
-                  ] as const).map(({ val, label, sub }) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, enrollmentType: val }));
-                        setOtpState('idle');
-                        setOtpInput('');
-                      }}
-                      className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                        formData.enrollmentType === val
-                          ? val === 'distributor'
-                            ? 'bg-blue-500/10 border-blue-500 text-blue-300'
-                            : 'bg-[#6029F1]/10 border-[#6029F1] text-emerald-300'
-                          : 'bg-white/[0.02] border-white/5 hover:border-white/10 text-slate-300'
-                      }`}
-                    >
-                      <p className="font-black text-sm mb-0.5">{label}</p>
-                      <p className="text-[10px] opacity-60 font-medium">{sub}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Enrollment Type Radio (Hidden, determined by URL parameter) */}
 
               {/* Toggle for Policy Holder (only if Distributor) */}
               {formData.enrollmentType === 'distributor' && (
