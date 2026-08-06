@@ -95,7 +95,8 @@ export interface IPlan {
   isCommissionable: boolean;
   gstPercent: number;
   description: string;
-  brochureUrl?: string;
+  brochureUrl?: string; // Legacy fallback
+  brochures?: { language: string; url: string }[];
   isActive: boolean;
 }
 

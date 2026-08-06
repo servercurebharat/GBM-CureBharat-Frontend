@@ -26,6 +26,32 @@ export default function ProductCatalog({ user }: { user: IUser }) {
     fetchPlans();
   }, []);
 
+  const handleShare = async (e: React.MouseEvent, url: string, planName: string, lang?: string) => {
+    e.stopPropagation();
+    try {
+      toast.loading(`Preparing ${lang || ''} brochure...`, { id: 'share-brochure' });
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const extension = url.split('.').pop()?.split('?')[0] || 'pdf';
+      const file = new File([blob], `${planName}-Brochure${lang ? `-${lang}` : ''}.${extension}`, { type: blob.type });
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `${planName} Brochure ${lang ? `(${lang})` : ''}`,
+          files: [file]
+        });
+        toast.success('Shared successfully!', { id: 'share-brochure' });
+      } else {
+        navigator.clipboard.writeText(url);
+        toast.success('Brochure link copied to clipboard!', { id: 'share-brochure' });
+      }
+    } catch (error) {
+      console.error(error);
+      navigator.clipboard.writeText(url);
+      toast.success('Brochure link copied!', { id: 'share-brochure' });
+    }
+  };
+
   const generateLink = (planId: string) => {
     const baseUrl = window.location.origin;
     const link = `${baseUrl}/buy/${user.memberId}?planId=${planId}`;
@@ -112,7 +138,31 @@ export default function ProductCatalog({ user }: { user: IUser }) {
                 </div>
 
                 <div className="space-y-2">
-                  {plan.brochureUrl && (
+                  {plan.brochures && plan.brochures.length > 0 ? (
+                    <div className="flex flex-col gap-2 w-full">
+                       <p className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Select Brochure Language</p>
+                       <div className="grid grid-cols-2 gap-2">
+                         {plan.brochures.map((brochure, idx) => (
+                           <div key={idx} className="flex flex-col gap-1">
+                             <a 
+                               href={brochure.url}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="text-center bg-[#49D2B5]/10 hover:bg-[#49D2B5]/20 text-[#49D2B5] rounded-xl py-3 text-[10px] font-black uppercase tracking-widest border border-[#49D2B5]/20 transition-all"
+                             >
+                               {brochure.language}
+                             </a>
+                             <button 
+                               onClick={(e) => handleShare(e, brochure.url, plan.name, brochure.language)}
+                               className="bg-white/5 hover:bg-white/10 text-white rounded-xl py-2 flex items-center justify-center text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
+                             >
+                               Share
+                             </button>
+                           </div>
+                         ))}
+                       </div>
+                    </div>
+                  ) : plan.brochureUrl && (
                     <div className="flex gap-2 w-full">
                       <a 
                         href={plan.brochureUrl}
@@ -123,31 +173,7 @@ export default function ProductCatalog({ user }: { user: IUser }) {
                         Brochure
                       </a>
                       <button 
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          try {
-                            toast.loading('Preparing brochure...', { id: 'share-brochure' });
-                            const response = await fetch(plan.brochureUrl!);
-                            const blob = await response.blob();
-                            const extension = plan.brochureUrl!.split('.').pop()?.split('?')[0] || 'pdf';
-                            const file = new File([blob], `${plan.name}-Brochure.${extension}`, { type: blob.type });
-                            
-                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                              await navigator.share({
-                                title: plan.name + ' Brochure',
-                                files: [file]
-                              });
-                              toast.success('Shared successfully!', { id: 'share-brochure' });
-                            } else {
-                              navigator.clipboard.writeText(plan.brochureUrl!);
-                              toast.success('Brochure link copied to clipboard!', { id: 'share-brochure' });
-                            }
-                          } catch (error) {
-                            console.error(error);
-                            navigator.clipboard.writeText(plan.brochureUrl!);
-                            toast.success('Brochure link copied!', { id: 'share-brochure' });
-                          }
-                        }}
+                        onClick={(e) => handleShare(e, plan.brochureUrl!, plan.name)}
                         className="flex-[0.5] bg-white/5 hover:bg-white/10 text-white rounded-xl py-4 flex items-center justify-center text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all"
                       >
                         Share
