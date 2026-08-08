@@ -25,7 +25,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+      if (
+        typeof window !== 'undefined' && 
+        !window.location.pathname.startsWith('/login') && 
+        !window.location.pathname.startsWith('/register') &&
+        !window.location.pathname.startsWith('/buy') &&
+        !window.location.pathname.startsWith('/otp-verify')
+      ) {
         window.location.href = '/login';
       }
     }
