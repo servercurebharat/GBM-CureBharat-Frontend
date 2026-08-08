@@ -9,9 +9,21 @@ import { ISale } from '@/types';
 export default function CustomerDatabase() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [month, setMonth] = useState('all');
   const [customers, setCustomers] = useState<ISale[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
+
+  const monthOptions = useMemo(() => {
+    return Array.from({ length: 12 }).map((_, i) => {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      return {
+        value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+        label: d.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+      };
+    });
+  }, []);
 
   useEffect(() => {
     async function fetchCustomers() {
@@ -21,7 +33,8 @@ export default function CustomerDatabase() {
           page: 1, 
           limit: 100,
           search, 
-          status: filter === 'all' ? undefined : filter 
+          status: filter === 'all' ? undefined : filter,
+          month: month === 'all' ? undefined : month
         });
         if (res.data.success) {
           setCustomers(res.data.data || []);
@@ -39,7 +52,7 @@ export default function CustomerDatabase() {
     }, 300);
     
     return () => clearTimeout(timer);
-  }, [search, filter]);
+  }, [search, filter, month]);
 
   const handleExport = async () => {
     const exportToast = toast.loading('Generating Excel sheet...');
@@ -83,7 +96,7 @@ export default function CustomerDatabase() {
         {/* KPI Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
            <KpiCard label="Total Customers" value={stats.total.toLocaleString()} sub="Lifetime base" icon="users" color="blue" />
-           <KpiCard label="Active Policies" value={stats.active.toLocaleString()} sub="Currently live" icon="check-circle" color="emerald" />
+           <KpiCard label="Active Plans" value={stats.active.toLocaleString()} sub="Currently live" icon="check-circle" color="emerald" />
            <KpiCard label="Cancelled" value={stats.cancelled.toLocaleString()} sub="Terminated" icon="x-circle" color="red" />
            <KpiCard label="New This Month" value={stats.newThisMonth.toLocaleString()} sub="Added this month" icon="trending-up" color="purple" />
         </div>
@@ -94,7 +107,7 @@ export default function CustomerDatabase() {
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               <input 
                 type="text" 
-                placeholder="Search by Name, Mobile or Policy ID..."
+                placeholder="Search by Name, Mobile or Plan ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
@@ -103,13 +116,23 @@ export default function CustomerDatabase() {
            
            <div className="flex gap-4 w-full lg:w-auto">
               <select 
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                className="w-full lg:w-48 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none cursor-pointer hover:bg-white/10 transition-all uppercase tracking-widest appearance-none"
+              >
+                <option value="all" className="bg-[#131241] text-white">All Time</option>
+                {monthOptions.map(opt => (
+                  <option key={opt.value} value={opt.value} className="bg-[#131241] text-white">{opt.label}</option>
+                ))}
+              </select>
+              <select 
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="flex-1 lg:w-48 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none cursor-pointer hover:bg-white/10 transition-all uppercase tracking-widest appearance-none"
+                className="w-full lg:w-48 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white outline-none cursor-pointer hover:bg-white/10 transition-all uppercase tracking-widest appearance-none"
               >
                 <option value="all" className="bg-[#131241] text-white">All Status</option>
-                <option value="active" className="bg-[#131241]">Active</option>
-                <option value="cancelled" className="bg-[#131241]">Cancelled</option>
+                <option value="active" className="bg-[#131241] text-white">Active</option>
+                <option value="cancelled" className="bg-[#131241] text-white">Cancelled</option>
               </select>
               <button 
                 onClick={handleExport}
@@ -127,7 +150,7 @@ export default function CustomerDatabase() {
                  <thead>
                     <tr className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] border-b border-white/5">
                        <th className="px-8 py-6">CUSTOMER DETAILS</th>
-                       <th className="px-4 py-6">POLICY / PLAN</th>
+                       <th className="px-4 py-6">PLAN DETAIL</th>
                        <th className="px-4 py-6">SOLD BY</th>
                        <th className="px-4 py-6 text-center">STATUS</th>
                        <th className="px-8 py-6 text-right">ENROLLMENT</th>

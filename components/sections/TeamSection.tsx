@@ -70,8 +70,8 @@ export default function TeamSection({ user }: { user: IUser }) {
       m.memberId,
       m.state,
       m.role.toUpperCase(),
-      (m.teamSalesValue || 0) / 100,
-      ((m.teamSalesValue || 0) * 0.02) / 100
+      Math.round((m.teamSalesValue || 0) / 100),
+      Math.round(((m.teamSalesValue || 0) * 0.02) / 100)
     ]);
 
     exportToCSV(headers, rows, 'CureBharat_Team_Network');

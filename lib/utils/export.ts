@@ -1,29 +1,34 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import * as XLSX from 'xlsx';
+
 /**
- * Utility to export an array of arrays (rows) to CSV and trigger a browser download.
+ * Utility to export an array of arrays (rows) to a true Excel (.xlsx) file with auto-sized columns.
+ * We keep the name exportToCSV to avoid changing references throughout the app.
  */
 export const exportToCSV = (headers: string[], rows: any[][], fileName: string) => {
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => 
-      row.map(val => {
-        const stringVal = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
-        return `"${stringVal}"`;
-      }).join(',')
-    )
-  ].join('\n');
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `${fileName}_${new Date().toISOString().split('T')[0]}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const worksheetData = [headers, ...rows];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+  
+  // Auto-size columns based on maximum content length in each column
+  const colWidths = headers.map((header, colIndex) => {
+    let maxLength = header.length;
+    rows.forEach(row => {
+      const cellValue = String(row[colIndex] === null || row[colIndex] === undefined ? '' : row[colIndex]);
+      if (cellValue.length > maxLength) {
+        maxLength = cellValue.length;
+      }
+    });
+    // Add some padding
+    return { wch: maxLength + 2 };
+  });
+  
+  ws['!cols'] = colWidths;
+  
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 /**

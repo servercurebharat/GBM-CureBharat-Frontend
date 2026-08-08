@@ -121,7 +121,8 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
   useEffect(() => {
     plansAPI.getAll().then(res => {
       if (res.data.success) {
-        setPlans((res.data.data || []).filter((p: IPlan) => p.isActive));
+        const activePlans = (res.data.data || []).filter((p: IPlan) => p.isActive);
+        setPlans(activePlans);
       }
     }).catch(err => console.error('Error fetching plans:', err));
   }, []);
@@ -371,8 +372,8 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                 l.memberId,
                 l.state,
                 l.directCount,
-                l.teamSalesValue,
-                l.totalIncome
+                Math.round(l.teamSalesValue / 100),
+                Math.round(l.totalIncome / 100)
               ])}
               fileName={`Leaders_${new Date().toISOString().split('T')[0]}`}
            />
@@ -555,7 +556,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                             onChange={(e) => setSelectedPlanId(e.target.value)}
                             className="w-full bg-black/40 border border-white/5 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:border-[#49D2B5]/40 transition-all shadow-inner pr-10"
                          >
-                            <option value="" className="bg-[#131241]">Global Sale Link (All Plans)</option>
+                            <option value="" disabled className="bg-[#131241]">Select Plan to Generate Link</option>
                             {plans.map(p => (
                                <option key={p._id} value={p._id} className="bg-[#131241]">
                                   {p.name} (₹{(p.price / 100).toLocaleString()})
@@ -575,7 +576,7 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                             onChange={(e) => setSelectedPlanId(e.target.value)}
                             className="w-full bg-black/40 border border-white/5 rounded-xl px-5 py-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:border-[#49D2B5]/40 transition-all shadow-inner pr-10"
                          >
-                            <option value="" className="bg-[#131241]">Global Distributor Link (All Plans)</option>
+                            <option value="" disabled className="bg-[#131241]">Select Plan to Generate Link</option>
                             {plans.map(p => (
                                <option key={p._id} value={p._id} className="bg-[#131241]">
                                   {p.name} (₹{(p.price / 100).toLocaleString()})
@@ -591,10 +592,14 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                    <div className="flex-1 w-full flex flex-col sm:flex-row items-center gap-3 min-w-0">
                       <div className="flex-1 w-full px-6 py-4 bg-black/40 rounded-xl border border-white/5 flex items-center overflow-hidden min-w-0">
                            <code className="text-[#49D2B5] font-bold text-xs truncate flex-1 min-w-0">
-                              {getEncodedLink()}
+                              {selectedPlanId ? getEncodedLink() : 'Please select a plan to generate link'}
                            </code>
                            <button
                               onClick={async () => {
+                                if (!selectedPlanId) {
+                                  toast.error('Please select a plan first');
+                                  return;
+                                }
                                 const activeLink = getEncodedLink();
                                 try {
                                    await navigator.clipboard.writeText(activeLink);
@@ -611,6 +616,10 @@ export default function DashboardHome({ user }: DashboardHomeProps) {
                         </div>
                         <button
                            onClick={() => {
+                              if (!selectedPlanId) {
+                                toast.error('Please select a plan first');
+                                return;
+                              }
                               const activeLink = getEncodedLink();
                             const shareText = referralType === 'sales'
                                ? `🌟 Preventative healthcare plans & 10,000+ network hospitals with CureBharat Wellness!\n\nBuy wellness plan now 👇\n${activeLink}`

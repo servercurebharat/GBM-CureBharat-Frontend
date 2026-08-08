@@ -184,7 +184,6 @@ const NAV_CONFIG: Record<Role, NavSection[]> = {
     {
       label: 'Documents', items: [
         { label: 'My KYC Status', href: '/hcc/kyc', icon: 'shield' },
-        { label: 'Policy Certificates', href: '/hcc/certificates', icon: 'award' },
       ]
     },
     {

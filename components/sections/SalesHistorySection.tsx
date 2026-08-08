@@ -11,13 +11,23 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [month, setMonth] = useState('all');
   const limit = 10;
+
+  const monthOptions = Array.from({ length: 12 }).map((_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    return {
+      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      label: d.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+    };
+  });
 
   useEffect(() => {
     const fetchSales = async () => {
       setLoading(true);
       try {
-        const res = await salesAPI.getAll({ page, limit });
+        const res = await salesAPI.getAll({ page, limit, month });
         if (res.data.success) {
           setSales(res.data.data);
           setTotal(res.data.pagination.total);
@@ -29,19 +39,19 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
       }
     };
     fetchSales();
-  }, [page]);
+  }, [page, month]);
 
   const handleExport = () => {
     if (!sales || sales.length === 0) return;
     
-    const headers = ['Policy ID', 'Date', 'Customer Name', 'Mobile', 'Plan', 'Amount', 'Status'];
+    const headers = ['Plan ID', 'Date', 'Customer Name', 'Mobile', 'Plan', 'Amount', 'Status'];
     const rows = sales.map(s => [
       s.policyId,
       new Date(s.createdAt).toLocaleDateString(),
       s.customerName,
       s.customerMobile,
       (s.plan as any)?.name || 'Health Plan',
-      s.saleAmount / 100,
+      Math.round(s.saleAmount / 100),
       s.status.toUpperCase()
     ]);
 
@@ -57,9 +67,9 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: 'Total Personal Sales', value: user.personalSalesCount.toString() },
-          { label: 'Active Policies', value: total.toString() },
-          { label: 'Monthly Growth', value: '+12.5%', isTrend: true },
-          { label: 'Customer Satisfaction', value: '98%', isTrend: true },
+          { label: 'Active Plans', value: total.toString() },
+          { label: 'Monthly Growth', value: '0.0%', isTrend: false },
+          { label: 'Customer Satisfaction', value: '0%', isTrend: false },
         ].map((stat, i) => (
           <div key={i} className="bg-[#131241] border border-white/5 p-6 rounded-[24px] shadow-xl">
              <p className="text-[10px] text-[#B5B8BD] font-bold uppercase tracking-widest mb-4">{stat.label}</p>
@@ -79,11 +89,21 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
               <p className="text-[9px] text-[#B5B8BD] font-bold uppercase tracking-widest mt-1 opacity-50">Authorized Sales History</p>
            </div>
            <div className="flex gap-4">
+              <select
+                value={month}
+                onChange={(e) => { setMonth(e.target.value); setPage(1); }}
+                className="bg-[#131241] border border-white/10 text-white text-[11px] font-bold uppercase tracking-widest rounded-xl px-4 py-2 outline-none cursor-pointer hover:bg-white/5 transition-all"
+              >
+                <option className="bg-[#131241] text-white" value="all">All Time</option>
+                {monthOptions.map(opt => (
+                  <option className="bg-[#131241] text-white" key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
               <button 
                 onClick={handleExport}
                 className="px-6 py-2.5 rounded-xl border border-white/10 text-[10px] font-black text-white uppercase tracking-widest hover:bg-white/5 transition-all"
               >
-                Export CSV
+                Export
               </button>
            </div>
         </div>
@@ -92,7 +112,7 @@ export default function SalesHistorySection({ user }: { user: IUser }) {
            <table className="w-full text-left border-collapse">
               <thead>
                  <tr className="border-b border-white/5 text-[10px] font-bold text-[#B5B8BD] uppercase tracking-[0.2em]">
-                    <th className="px-8 py-5">Policy ID / Date</th>
+                    <th className="px-8 py-5">Plan ID / Date</th>
                     <th className="px-8 py-5">Customer Details</th>
                     <th className="px-8 py-5">Plan Detail</th>
                     <th className="px-8 py-5 text-right">Premium Paid</th>

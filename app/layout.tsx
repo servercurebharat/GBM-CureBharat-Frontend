@@ -15,9 +15,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'CureBharat GBM Platform',
   description: 'Premium wellness insurance GBM management system',
-  icons: {
-    icon: '/favicon.ico',
-  },
 };
 
 export default function RootLayout({

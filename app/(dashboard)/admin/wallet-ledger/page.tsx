@@ -22,12 +22,22 @@ function LedgerContent() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [type, setType] = useState('All');
+  const [month, setMonth] = useState('all');
+
+  const monthOptions = Array.from({ length: 12 }).map((_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    return {
+      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      label: d.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+    };
+  });
 
   const fetchLedger = async () => {
     setLoading(true);
     try {
       const [ledgerRes, summaryRes] = await Promise.all([
-        adminAPI.getGlobalLedger({ page, limit: 15, type: type === 'All' ? undefined : type }),
+        adminAPI.getGlobalLedger({ page, limit: 15, type: type === 'All' ? undefined : type, month }),
         adminAPI.getAllProvisional()
       ]);
       
@@ -47,7 +57,7 @@ function LedgerContent() {
 
   useEffect(() => {
     fetchLedger();
-  }, [page, type]);
+  }, [page, type, month]);
 
   const formatCurrency = (paise: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -71,6 +81,20 @@ function LedgerContent() {
            </div>
            
            <div className="relative z-10 flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-3 bg-black/20 p-2 rounded-2xl border border-white/5">
+                 <span className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-2">MONTH</span>
+                 <select 
+                   value={month}
+                   onChange={(e) => { setMonth(e.target.value); setPage(1); }}
+                   className="bg-white/5 border-none rounded-xl px-4 py-2 text-xs font-bold text-white outline-none hover:bg-white/10 transition-all cursor-pointer"
+                 >
+                    <option className="bg-[#131241]" value="all">All Time</option>
+                    {monthOptions.map(opt => (
+                      <option key={opt.value} className="bg-[#131241]" value={opt.value}>{opt.label}</option>
+                    ))}
+                 </select>
+              </div>
+
               <div className="flex items-center gap-3 bg-black/20 p-2 rounded-2xl border border-white/5">
                  <span className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-2">FILTER</span>
                  <select 

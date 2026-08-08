@@ -44,7 +44,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
       entry.description,
       entry.type.toUpperCase(),
       new Date(entry.date).toLocaleDateString(),
-      entry.amount / 100,
+      Math.round(entry.amount / 100),
       entry.status.toUpperCase()
     ]);
 
@@ -125,10 +125,7 @@ export default function FinanceHubSection({ user }: { user: IUser }) {
            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-3xl -mr-12 -mt-12" />
            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Total Sales</p>
            <h4 className="text-2xl font-black text-white mb-2">{formatCurrency(data?.totalSalesValue || 0)}</h4>
-           <div className="flex items-center gap-1.5 text-emerald-400 text-[10px] font-black">
-              <span>+12.4%</span>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-           </div>
+
         </div>
 
         {/* Total Commission */}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login', '/register', '/otp-verify'];
+const PUBLIC_ROUTES = ['/login', '/register', '/otp-verify', '/buy'];
 
 const ROLE_ROUTES: Record<string, string> = {
   admin: '/admin',
@@ -17,8 +17,8 @@ export function middleware(request: NextRequest) {
 
   // 1. Allow public routes
   if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
-    if (token && userRole) {
-      // If already logged in, redirect to respective dashboard
+    // Only redirect away from login/register if already logged in
+    if (token && userRole && (pathname.startsWith('/login') || pathname.startsWith('/register'))) {
       const target = ROLE_ROUTES[userRole] || '/login';
       return NextResponse.redirect(new URL(target, request.url));
     }

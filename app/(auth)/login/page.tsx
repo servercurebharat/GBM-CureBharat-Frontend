@@ -318,17 +318,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 pt-8 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-          {stats.map((s, i) => (
-            <div key={i} className="anim-up" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
-              <p className="text-2xl xl:text-3xl font-black text-white">{s.value}</p>
-              <p className="text-[9px] font-bold uppercase tracking-widest mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {s.label}
-              </p>
-            </div>
-          ))}
-        </div>
+
       </div>
 
       {/* ── RIGHT FORM PANEL ── */}

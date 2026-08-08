@@ -111,7 +111,7 @@ export const usersAPI = {
 export const salesAPI = {
   create: (data: CreateSaleData) =>
     api.post<ApiResponse<ISale>>('/sales', data),
-  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string; search?: string; status?: string; sellerId?: string }) =>
+  getAll: (params?: { page?: number; limit?: number; cycleMonth?: string; search?: string; status?: string; sellerId?: string; month?: string }) =>
     api.get<PaginatedResponse<ISale>>('/sales', { params }),
   getFTDAnalytics: (date: string) =>
     api.get<ApiResponse<any>>('/sales/analytics/ftd', { params: { date } }),
@@ -211,7 +211,7 @@ export const adminAPI = {
     api.post<ApiResponse<any>>('/wallet/payout-cycle', { cycleMonth }),
   getAllProvisional: () =>
     api.get<ApiResponse<{ wallets: any[]; summary: any }>>('/wallet/all-provisional'),
-  getGlobalLedger: (params?: { page?: number; limit?: number; type?: string }) =>
+  getGlobalLedger: (params?: { page?: number; limit?: number; type?: string; month?: string }) =>
     api.get<PaginatedResponse<any>>('/wallet/global-ledger', { params }),
   getTree: () =>
     api.get<ApiResponse<any>>('/admin/tree'),

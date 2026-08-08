@@ -359,7 +359,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
             <div className="space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div>
                 <h2 className="text-xl font-bold text-white mb-1">Your Information</h2>
-                <p className="text-sm text-slate-400">Please provide your legal details for the policy</p>
+                <p className="text-sm text-slate-400">Please provide your legal details for the plan</p>
               </div>
 
               {/* Enrollment Type Radio (Hidden, determined by URL parameter) */}
@@ -368,8 +368,8 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
               {formData.enrollmentType === 'distributor' && (
                 <div className="flex items-center justify-between bg-[#6029F1]/5 border border-[#6029F1]/20 rounded-2xl p-4">
                   <div>
-                    <h3 className="text-sm font-bold text-emerald-300">Buy policy for someone else?</h3>
-                    <p className="text-[10px] text-slate-400 mt-1">You get the HCC Account, but the policy is issued to your family member.</p>
+                    <h3 className="text-sm font-bold text-emerald-300">Buy plan for someone else?</h3>
+                    <p className="text-[10px] text-slate-400 mt-1">You get the HCC Account, but the plan is issued to your family member.</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" checked={formData.isPolicyForOther} onChange={e => setFormData(p => ({ ...p, isPolicyForOther: e.target.checked }))} />
@@ -486,13 +486,13 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
                   onChange={(v: string) => setFormData(p => ({ ...p, customerPAN: v.toUpperCase().slice(0, 10) }))}
                   placeholder="ABCDE1234F"
                 />
-                <p className="text-[10px] text-slate-500 font-bold mt-1 ml-1">Required for Policy & Tax Benefits</p>
+                <p className="text-[10px] text-slate-500 font-bold mt-1 ml-1">Required for Plan & Tax Benefits</p>
               </div>
 
               {/* Policy Holder / Beneficiary Details (If toggled) */}
               {formData.enrollmentType === 'distributor' && formData.isPolicyForOther && (
                 <div className="pt-5 border-t border-emerald-500/20 bg-emerald-500/5 -mx-7 px-7 py-5">
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-4">Policy Holder (Beneficiary) Details</p>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-4">Plan Holder (Beneficiary) Details</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                     <Input label="Beneficiary Name *" value={formData.policyHolderName} onChange={v => setFormData(p => ({ ...p, policyHolderName: v }))} placeholder="Full name of beneficiary" />
                     <Input label="Date of Birth *" value={formData.policyHolderDOB} onChange={v => setFormData(p => ({ ...p, policyHolderDOB: formatDOB(v) }))} placeholder="DD/MM/YYYY" />
@@ -656,7 +656,7 @@ export default function PublicBuyPage({ params }: { params: { memberId: string }
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 flex gap-3 items-center">
                 <span className="text-xl flex-shrink-0">🛡️</span>
                 <p className="text-[9px] font-medium text-blue-200/60 uppercase leading-relaxed">
-                  Your payment is secured by Cashfree. Policy ID generated instantly after successful transaction.
+                  Your payment is secured by Cashfree. Plan ID generated instantly after successful transaction.
                 </p>
               </div>
 
