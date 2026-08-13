@@ -112,10 +112,17 @@ export default function NewSaleSection({ user }: { user: IUser }) {
 
       const { authLink, subscriptionId, subsSessionId } = res.data.data;
 
-      if (authLink) {
+      if (subsSessionId) {
+        if (typeof window.Cashfree === 'undefined') throw new Error('Payment SDK not loaded. Please refresh.');
+        const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox';
+        const cashfree = window.Cashfree({ mode });
+        
+        // Cashfree v3 SDK expects the session ID under the key 'paymentSessionId', even for subscriptions.
+        cashfree.checkout({ paymentSessionId: subsSessionId, redirectTarget: '_self' });
+      } else if (authLink) {
         window.location.href = authLink;
       } else {
-        throw new Error('No checkout link returned from server');
+        throw new Error('No checkout session returned');
       }
 
     } catch (error: any) {
