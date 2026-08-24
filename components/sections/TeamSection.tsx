@@ -168,7 +168,7 @@ export default function TeamSection({ user }: { user: IUser }) {
                        </td>
                        <td className="px-8 py-4 text-[10px] text-slate-500">{child.state}</td>
                        <td className="px-8 py-4 text-right text-[10px] font-black text-white/60">{formatCurrency(child.teamSalesValue || 0)}</td>
-                       <td className="px-8 py-4 text-right text-[10px] font-black text-blue-400/60">{formatCurrency((child.teamSalesValue || 0) * 0.02)}</td>
+                       <td className="px-8 py-4 text-right text-[10px] font-black text-blue-400/60">{formatCurrency(child.overrideValue || 0)}</td>
                        <td className="px-8 py-4 text-center">
                            <button 
                                 onClick={() => toggleNodeExpand(child)}
@@ -431,7 +431,7 @@ export default function TeamSection({ user }: { user: IUser }) {
                               <span className="text-xs font-black text-white">{formatCurrency(m.teamSalesValue || 0)}</span>
                            </td>
                            <td className="px-8 py-8 text-right">
-                              <span className="text-xs font-black text-blue-400">{formatCurrency((m.teamSalesValue || 0) * 0.02)}</span>
+                              <span className="text-xs font-black text-blue-400">{formatCurrency(m.overrideValue || 0)}</span>
                            </td>
                            <td className="px-8 py-8 text-center">
                               {m.role !== 'hcc' && (

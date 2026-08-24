@@ -117,8 +117,8 @@ export default function NewSaleSection({ user }: { user: IUser }) {
         const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'PROD' ? 'production' : 'sandbox';
         const cashfree = window.Cashfree({ mode });
         
-        // Cashfree v3 SDK expects the session ID under the key 'paymentSessionId', even for subscriptions.
-        cashfree.checkout({ paymentSessionId: subsSessionId, redirectTarget: '_self' });
+        // Cashfree v3 SDK expects the session ID under the key 'subscriptionSessionId' for subscriptions
+        cashfree.checkout({ subscriptionSessionId: subsSessionId, redirectTarget: '_self' });
       } else if (authLink) {
         window.location.href = authLink;
       } else {
