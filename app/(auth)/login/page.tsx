@@ -562,7 +562,7 @@ export default function LoginPage() {
                       />
                     </div>
                     <p className="text-[10px] font-medium text-slate-400 mt-3 text-center uppercase tracking-wider">
-                      Sent to registered email: <span className="font-bold text-white">{maskedEmail}</span>
+                      We sent a secure 6-digit code to <span className="font-bold text-white lowercase">{maskedEmail}</span> and your registered WhatsApp number.
                     </p>
                   </div>
                 )}
